@@ -28,8 +28,11 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.config.ConfigService
 
 /**
- * Feature-flagged endpoints used solely to isolate end-to-end (Cypress) tests from one another by opening a database
- * transaction at the start of a spec file and rolling it back at the end (see {@link TestTransactionService}).
+ * Feature-flagged endpoints used solely to isolate end-to-end (Cypress) tests from one another via a rolled-back
+ * database transaction (see {@link TestTransactionService}). There are two reset-first levels: {@code beginPage} opens a
+ * fresh transaction for a whole spec file (resetting any left open by a previous spec), and {@code beginTest} resets to
+ * a per-test savepoint on top of it. Cleanup happens on the next {@code begin*} call, so there is no separate rollback
+ * endpoint.
  *
  * <p>Every action returns HTTP {@code 403} unless {@code otp.testing.endpoints.enabled} is explicitly set to
  * {@code true}, so these endpoints are never usable in production.</p>
@@ -38,29 +41,29 @@ import de.dkfz.tbi.otp.config.ConfigService
 class TestingController {
 
     static allowedMethods = [
-            begin   : "POST",
-            rollback: "POST",
+            beginPage: "POST",
+            beginTest: "POST",
     ]
 
     ConfigService configService
     TestTransactionService testTransactionService
 
-    /** Open a fresh, uncommitted database transaction; everything written until {@link #rollback} is undoable. */
-    def begin() {
+    /** Page (spec) level: reset any transaction left open by a previous spec and open a fresh, uncommitted one. */
+    def beginPage() {
         if (denyWhenDisabled()) {
             return
         }
-        testTransactionService.begin()
-        render([status: "ok", action: "begin"] as JSON)
+        testTransactionService.beginPage()
+        render([status: "ok", action: "beginPage"] as JSON)
     }
 
-    /** Roll the transaction opened by {@link #begin} back, resetting the database to its pre-spec state. */
-    def rollback() {
+    /** Test level: reset to a per-test savepoint on top of the page transaction, so each test starts from the page seed. */
+    def beginTest() {
         if (denyWhenDisabled()) {
             return
         }
-        testTransactionService.rollback()
-        render([status: "ok", action: "rollback"] as JSON)
+        testTransactionService.beginTest()
+        render([status: "ok", action: "beginTest"] as JSON)
     }
 
     private boolean denyWhenDisabled() {

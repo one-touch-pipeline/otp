@@ -24,21 +24,12 @@
 
 require('./commands');
 
-// Database isolation at the PAGE (spec-file) level.
+// Database isolation at the PAGE (spec-file) level, reset-first.
 //
-// Because Cypress loads this support file per spec, these root-level hooks run once at the start and once at the end of
-// each spec file. That opens a server-side database transaction wrapping the whole file (including its own
-// before/beforeEach/after hooks and every test) and rolls it back afterwards, so specs cannot pollute each other's
-// database state. Deliberately NOT beforeEach/afterEach: many specs are ordered create -> edit -> delete chains whose
-// later tests rely on state created by earlier tests in the same file.
+// Because Cypress loads this support file per spec, this root-level `before` runs once at the start of each spec file
+// and opens a server-side database transaction wrapping the whole file (its own before/beforeEach/after hooks and every
+// test). Everything the spec writes stays uncommitted, so specs cannot pollute each other's database state.
 //
-// Requires the feature-flagged endpoints (otp.testing.endpoints.enabled=true); when disabled the commands no-op, so the
-// suite still runs without isolation. Filesystem side effects (uploads/downloads) are not covered and keep their
-// existing per-spec cleanups.
 before(() => {
-  cy.beginTestTransaction();
-});
-
-after(() => {
-  cy.rollbackTestTransaction();
+  cy.beginPage();
 });

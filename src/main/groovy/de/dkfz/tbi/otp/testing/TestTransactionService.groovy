@@ -30,19 +30,25 @@ package de.dkfz.tbi.otp.testing
  * development environment. Callers must still guard on that flag (as {@code TestingController} does) before invoking
  * these methods.</p>
  *
- * <p>It must NOT be transactional: {@link #begin()} / {@link #rollback()} operate on the raw pinned JDBC connection
+ * <p>It must NOT be transactional: {@link #beginPage()} / {@link #beginTest()} operate on the raw pinned JDBC connection
  * directly, outside GORM's transaction handling.</p>
  */
 class TestTransactionService {
 
-    /** Open a fresh, uncommitted test transaction that all subsequent HTTP requests will run within. */
-    void begin() {
-        pinningDataSource.begin()
+    /**
+     * Page (spec) level: reset any transaction left open by a previous spec and open a fresh, uncommitted transaction
+     * that all subsequent HTTP requests will run within, until the next {@link #beginPage()}.
+     */
+    void beginPage() {
+        pinningDataSource.beginPage()
     }
 
-    /** Discard everything written since {@link #begin()}, resetting the database to its pre-spec state. */
-    void rollback() {
-        pinningDataSource.rollback()
+    /**
+     * Test level: on top of the page transaction, reset to a single savepoint so each test starts from the same
+     * page-seed state. Requires an active page transaction (see {@link #beginPage()}).
+     */
+    void beginTest() {
+        pinningDataSource.beginTest()
     }
 
     private PinningDataSource getPinningDataSource() {

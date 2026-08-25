@@ -31,7 +31,7 @@ import static javax.servlet.http.HttpServletResponse.SC_OK
 
 class TestingControllerSpec extends Specification implements ControllerUnitTest<TestingController> {
 
-    void "begin, when the feature flag is disabled, returns 403 and does not touch the transaction"() {
+    void "beginPage, when the feature flag is disabled, returns 403 and does not touch the transaction"() {
         given:
         controller.configService = Mock(ConfigService) {
             1 * isTestingEndpointsEnabled() >> false
@@ -40,14 +40,14 @@ class TestingControllerSpec extends Specification implements ControllerUnitTest<
         controller.request.method = 'POST'
 
         when:
-        controller.begin()
+        controller.beginPage()
 
         then:
         controller.response.status == SC_FORBIDDEN
-        0 * controller.testTransactionService.begin()
+        0 * controller.testTransactionService.beginPage()
     }
 
-    void "rollback, when the feature flag is disabled, returns 403 and does not touch the transaction"() {
+    void "beginTest, when the feature flag is disabled, returns 403 and does not touch the transaction"() {
         given:
         controller.configService = Mock(ConfigService) {
             1 * isTestingEndpointsEnabled() >> false
@@ -56,14 +56,14 @@ class TestingControllerSpec extends Specification implements ControllerUnitTest<
         controller.request.method = 'POST'
 
         when:
-        controller.rollback()
+        controller.beginTest()
 
         then:
         controller.response.status == SC_FORBIDDEN
-        0 * controller.testTransactionService.rollback()
+        0 * controller.testTransactionService.beginTest()
     }
 
-    void "begin, when the feature flag is enabled, opens the transaction and returns ok"() {
+    void "beginPage, when the feature flag is enabled, opens the page transaction and returns ok"() {
         given:
         controller.configService = Mock(ConfigService) {
             1 * isTestingEndpointsEnabled() >> true
@@ -72,15 +72,15 @@ class TestingControllerSpec extends Specification implements ControllerUnitTest<
         controller.request.method = 'POST'
 
         when:
-        controller.begin()
+        controller.beginPage()
 
         then:
-        1 * controller.testTransactionService.begin()
+        1 * controller.testTransactionService.beginPage()
         controller.response.status == SC_OK
         controller.response.json.status == "ok"
     }
 
-    void "rollback, when the feature flag is enabled, rolls the transaction back and returns ok"() {
+    void "beginTest, when the feature flag is enabled, resets the test savepoint and returns ok"() {
         given:
         controller.configService = Mock(ConfigService) {
             1 * isTestingEndpointsEnabled() >> true
@@ -89,10 +89,10 @@ class TestingControllerSpec extends Specification implements ControllerUnitTest<
         controller.request.method = 'POST'
 
         when:
-        controller.rollback()
+        controller.beginTest()
 
         then:
-        1 * controller.testTransactionService.rollback()
+        1 * controller.testTransactionService.beginTest()
         controller.response.status == SC_OK
         controller.response.json.status == "ok"
     }

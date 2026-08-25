@@ -35,22 +35,30 @@ import java.sql.*
  * in production it is never installed and therefore adds no overhead whatsoever.
  *
  * <p>It wraps the data source that GORM's connection source hands to Hibernate, so that GORM/Hibernate AND any direct
- * {@code new Sql(dataSource)} usage all go through it. While a test transaction is active (opened via {@link #begin()}),
+ * {@code new Sql(dataSource)} usage all go through it. While a test transaction is active (opened via {@link #beginPage()}),
  * every {@link #getConnection()} call returns a proxy over one single, shared, pinned physical connection whose
  * {@code commit()}, {@code close()}, {@code setAutoCommit(true)} and (no-arg) {@code rollback()} calls are suppressed.
- * As a result all database work runs inside one long-lived, uncommitted transaction, undone completely with a single
- * {@link #rollback()} — this is what gives each Cypress spec file a clean database without a full restore.</p>
+ * As a result all database work runs inside one long-lived, uncommitted transaction that is discarded completely rather
+ * than committed — this is what gives each Cypress spec a clean database without a full restore.</p>
  *
  * <p>The proxy does NOT serialize access itself: a single OTP request can touch the database from several threads at
  * once (e.g. {@code parallelStream()} in validators), and serializing borrows here would deadlock (the request thread
  * would hold the lock while waiting for its own worker threads). Instead we rely on the JDBC driver, which already
  * serializes individual statements on one physical connection. Everything ends up in the one outer transaction and is
- * discarded together on rollback, so interleaving between those threads is harmless for test isolation. Cypress runs
- * requests serially, so cross-request contention does not arise.</p>
+ * discarded together, so interleaving between those threads is harmless for test isolation. Cypress runs requests
+ * serially, so cross-request contention does not arise.</p>
  *
- * <p>{@link #begin()} / {@link #rollback()} form a stack: the first {@code begin()} opens the outer transaction
- * (depth 1), each further {@code begin()} opens a nested savepoint (depth 2, 3, …), and {@code rollback()} unwinds the
- * innermost layer first — a nested savepoint while any are open, otherwise the whole transaction.</p>
+ * <p>There are exactly two, reset-first nesting levels, matching the two Cypress boundaries:</p>
+ * <ul>
+ *   <li>{@link #beginPage()} (page / spec level) discards any transaction left open by a previous spec and opens a
+ *   fresh outer transaction. It is self-healing: a spec that crashed without cleaning up is reconciled here.</li>
+ *   <li>{@link #beginTest()} (test level) keeps a single savepoint on top of the page transaction and rolls back to it
+ *   on every call, so each test starts from the same page-seed state.</li>
+ * </ul>
+ *
+ * <p>Both operations reset before they open, so there is no separate "rollback"/"close" entry point: the next
+ * {@code begin*} call performs the cleanup. The last spec's transaction is simply discarded (never committed) when the
+ * connection is finally released or reset.</p>
  */
 @Slf4j
 class PinningDataSource extends DelegatingDataSource {
@@ -61,17 +69,17 @@ class PinningDataSource extends DelegatingDataSource {
      */
     static volatile PinningDataSource activeInstance
 
-    /** Guards {@link #begin()} / {@link #rollback()} so the pinned connection is only ever set up or torn down once at a time. */
+    /** Guards {@link #beginPage()} / {@link #beginTest()} so the pinned connection is only ever set up or reset once at a time. */
     private final Object lock = new Object()
 
-    /** The real, pooled connection held open (uncommitted) for the duration of a test transaction, or null when inactive. */
+    /** The real, pooled connection held open (uncommitted) for the duration of a spec's page transaction, or null when inactive. */
     private volatile Connection pinnedConnection
 
     /**
-     * The stack of nested savepoints opened by repeated {@link #begin()} calls on top of the outer transaction. Empty
-     * means only the outer transaction (depth 1) is open. Access is always guarded by {@link #lock}.
+     * The single test-level savepoint on top of the page transaction, or null when no test layer has been opened yet
+     * (or after {@link #beginPage()} reset the transaction). Access is always guarded by {@link #lock}.
      */
-    private final Deque<Savepoint> savepointStack = new ArrayDeque<>()
+    private Savepoint testSavepoint
 
     PinningDataSource(DataSource targetDataSource) {
         super(targetDataSource)
@@ -87,58 +95,70 @@ class PinningDataSource extends DelegatingDataSource {
     }
 
     /**
-     * Borrow a single real connection straight from the underlying pool (bypassing any lazy/transaction-aware proxies)
-     * and hold it open with auto-commit disabled. From now until {@link #rollback()} all application connections are
-     * routed through this one pinned connection.
+     * Page level (level 1), reset-first: discard any transaction left open by a previous spec (for example one that
+     * crashed without cleaning up), then borrow a single real connection straight from the underlying pool (bypassing
+     * any lazy/transaction-aware proxies) and hold it open with auto-commit disabled. From now until the next
+     * {@link #beginPage()} all application connections are routed through this one pinned connection.
      */
-    void begin() {
+    void beginPage() {
+        synchronized (lock) {
+            discardActiveTransaction()
+            Connection connection = underlyingDataSource().connection
+            connection.autoCommit = false
+            pinnedConnection = connection
+            testSavepoint = null
+            log.info("Opened pinned page test transaction.")
+        }
+    }
+
+    /**
+     * Test level (level 2), reset-first: on top of the page transaction, keep one savepoint and roll back to it so each
+     * test starts from the same page-seed state. The first call creates the savepoint; every later call rolls back to
+     * it (PostgreSQL keeps a savepoint after ROLLBACK TO SAVEPOINT, so it is reused, not recreated).
+     */
+    void beginTest() {
         synchronized (lock) {
             if (pinnedConnection == null) {
-                Connection connection = underlyingDataSource().connection
-                connection.autoCommit = false
-                pinnedConnection = connection
-                log.info("Opened pinned test transaction (nesting depth 1).")
+                throw new TestTransactionException("beginTest() called without an active page transaction; call beginPage() first.")
+            }
+            if (testSavepoint == null) {
+                testSavepoint = pinnedConnection.setSavepoint()
+                log.info("Opened test savepoint on the pinned page transaction.")
             } else {
-                // Already inside the outer transaction: open a nested layer via a savepoint. The testing endpoints are
-                // excepted from the DB-touching interceptors, so no application per-request work is interleaving here.
-                savepointStack.push(pinnedConnection.setSavepoint())
-                log.info("Opened nested test savepoint (nesting depth ${savepointStack.size() + 1}).")
+                pinnedConnection.rollback(testSavepoint)
+                log.info("Rolled back to the test savepoint (reset for the next test).")
             }
         }
     }
 
     /**
-     * Roll back the innermost layer: a nested savepoint if any are open, otherwise the whole transaction (releasing the
-     * pinned connection back to the pool).
+     * Roll back and release the pinned connection if one is open. Best-effort: the connection is discarded regardless,
+     * so a failure in any cleanup step must not prevent {@link #beginPage()} from opening a fresh transaction.
      */
-    void rollback() {
-        synchronized (lock) {
-            if (pinnedConnection == null) {
-                throw new TestTransactionException("rollback() called without an active test transaction (unbalanced begin/rollback).")
-            }
-            if (!savepointStack.isEmpty()) {
-                Savepoint savepoint = savepointStack.pop()
-                pinnedConnection.rollback(savepoint)
-                try {
-                    pinnedConnection.releaseSavepoint(savepoint)
-                } catch (SQLException e) {
-                    log.debug("Could not release savepoint after rolling back to it.", e)
-                }
-                log.info("Rolled back nested test savepoint (nesting depth now ${savepointStack.size() + 1}).")
-                return
-            }
-            Connection connection = pinnedConnection
-            pinnedConnection = null
+    private void discardActiveTransaction() {
+        Connection connection = pinnedConnection
+        if (connection == null) {
+            return
+        }
+        pinnedConnection = null
+        testSavepoint = null
+        try {
+            connection.rollback()
+        } catch (SQLException e) {
+            // Reset-first cleanup: this connection is being discarded and its uncommitted work dies with it, so a failed
+            // rollback must not block opening a fresh page transaction. Log and carry on.
+            log.warn("Could not roll back the previous pinned test transaction while resetting; discarding it anyway.", e)
+        } finally {
             try {
-                connection.rollback()
-            } finally {
-                try {
-                    connection.autoCommit = true
-                } catch (SQLException e) {
-                    log.warn("Could not restore auto-commit on the pinned connection.", e)
-                }
+                connection.autoCommit = true
+            } catch (SQLException e) {
+                // Cosmetic on a connection we are about to close(); log rather than mask the reset.
+                log.warn("Could not restore auto-commit on the discarded pinned connection.", e)
+            }
+            try {
                 connection.close()
-                log.info("Rolled back and released pinned test transaction.")
+            } catch (SQLException e) {
+                log.warn("Could not close the discarded pinned connection.", e)
             }
         }
     }
@@ -173,7 +193,7 @@ class PinningDataSource extends DelegatingDataSource {
     /**
      * Intercepts calls on a borrowed connection to keep the outer test transaction open and undivertable: the
      * application can neither commit it, close it, roll it back, nor re-enable auto-commit. Only the testing endpoints
-     * (via {@link PinningDataSource#rollback()}) may end it.
+     * (via {@link PinningDataSource#beginPage()} / {@link PinningDataSource#beginTest()}) may end or reset it.
      */
     @CompileStatic
     private static class PinnedConnectionInvocationHandler implements InvocationHandler {
