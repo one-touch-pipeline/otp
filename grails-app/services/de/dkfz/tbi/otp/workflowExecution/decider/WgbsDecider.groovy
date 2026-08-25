@@ -42,6 +42,11 @@ class WgbsDecider extends AbstractAlignmentDecider {
     }
 
     @Override
+    final boolean allowsUnalignedCram() {
+        return false
+    }
+
+    @Override
     final String getWorkflowName() {
         return WgbsWorkflow.WORKFLOW
     }

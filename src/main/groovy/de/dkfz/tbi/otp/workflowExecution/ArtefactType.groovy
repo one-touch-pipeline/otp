@@ -26,6 +26,7 @@ enum ArtefactType {
     FASTQC,
     BAM,
     ALIGNED_CRAM,
+    UNALIGNED_CRAM,
     SNV,
     INDEL,
     SOPHIA,

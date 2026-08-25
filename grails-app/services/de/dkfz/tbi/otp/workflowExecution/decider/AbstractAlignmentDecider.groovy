@@ -63,6 +63,8 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
 
     abstract boolean requiresFastqcResults()
 
+    abstract boolean allowsUnalignedCram()
+
     abstract String getWorkflowName()
 
     abstract String getInputFastqRole()
@@ -85,6 +87,9 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
         Set<ArtefactType> types = [ArtefactType.FASTQ] as Set
         if (requiresFastqcResults()) {
             types.add(ArtefactType.FASTQC)
+        }
+        if (allowsUnalignedCram()) {
+            types.add(ArtefactType.UNALIGNED_CRAM)
         }
         return types
     }
@@ -225,11 +230,11 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
                 case DeciderCreateWorkflowAction.CREATE_MISSING_AND_NEWER:
                     if (existingBamFileData.version == version.workflowVersion) {
                         deciderResult.warnings << ("skip ${group}, since existing BAM file with the same seqTracks and version found, " +
-                            "and action is CREATE_MISSING_AND_NEWER").toString()
+                                "and action is CREATE_MISSING_AND_NEWER").toString()
                         return deciderResult
                     }
                     deciderResult.warnings << ("recreate ${group}, since existing BAM file with the same seqTracks has other version, " +
-                        "and action is CREATE_MISSING_AND_NEWER").toString()
+                            "and action is CREATE_MISSING_AND_NEWER").toString()
                     break
                 default: // case DeciderCreateWorkflowAction.CREATE_MISSING: (default)
                     deciderResult.warnings << "skip ${group}, since existing BAM file with the same seqTracks found and action is CREATE_MISSING".toString()

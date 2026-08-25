@@ -68,6 +68,11 @@ class CellRangerDecider extends AbstractAlignmentDecider {
     }
 
     @Override
+    boolean allowsUnalignedCram() {
+        return false
+    }
+
+    @Override
     String getWorkflowName() {
         return CellRangerWorkflow.WORKFLOW
     }
@@ -95,8 +100,8 @@ class CellRangerDecider extends AbstractAlignmentDecider {
 
     @Override
     AlignmentAdditionalData fetchAdditionalData(AlignmentArtefactDataList inputArtefactDataList,
-                                               AlignmentArtefactDataList additionalArtefactDataList,
-                                               Workflow workflow) {
+                                                AlignmentArtefactDataList additionalArtefactDataList,
+                                                Workflow workflow) {
         AlignmentAdditionalData additionalData = super.fetchAdditionalData(inputArtefactDataList, additionalArtefactDataList, workflow)
         ToolName toolName = toolNameService.findToolNameByNameAndType('CELL_RANGER', ToolName.Type.SINGLE_CELL)
         additionalData.referenceGenomeIndexMap = alignmentArtefactService.fetchReferenceGenomeIndexes(referenceGenomeService.list(), toolName)
@@ -116,9 +121,9 @@ class CellRangerDecider extends AbstractAlignmentDecider {
 
         CellRangerMergingWorkPackage workPackage = workPackages?.find {
             it.referenceGenomeIndex == referenceGenomeIndex &&
-            it.enforcedCells == null &&
-            it.expectedCells == null &&
-            it.programVersion == version.workflowVersion
+                    it.enforcedCells == null &&
+                    it.expectedCells == null &&
+                    it.programVersion == version.workflowVersion
         }
 
         if (workPackage) {
@@ -136,8 +141,7 @@ class CellRangerDecider extends AbstractAlignmentDecider {
             if (nonMatchingProperties) {
                 throw new DeciderMergingWorkPackageValidationException(nonMatchingProperties, group, workPackage, true)
             }
-        }
-        else {
+        } else {
             workPackage = new CellRangerMergingWorkPackage([
                     sample               : group.sample,
                     seqType              : group.seqType,
@@ -160,5 +164,4 @@ class CellRangerDecider extends AbstractAlignmentDecider {
         properties["workDirectoryName"] = cellRangerWorkFileService.buildWorkDirectoryName(properties.workPackage as CellRangerMergingWorkPackage, identifier)
         return new SingleCellBamFile(properties).save(flush: false, deepValidate: false)
     }
-
 }

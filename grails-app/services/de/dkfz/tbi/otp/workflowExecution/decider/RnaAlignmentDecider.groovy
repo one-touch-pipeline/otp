@@ -43,6 +43,11 @@ class RnaAlignmentDecider extends AbstractAlignmentDecider {
     }
 
     @Override
+    final boolean allowsUnalignedCram() {
+        return false
+    }
+
+    @Override
     final String getWorkflowName() {
         return RnaAlignmentWorkflow.WORKFLOW
     }

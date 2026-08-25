@@ -157,6 +157,11 @@ class CellRangerDeciderSpec extends AbstractAlignmentDeciderSpec implements Cell
         decider.requiresFastqcResults() == false
     }
 
+    void "allowsUnalignedCram"() {
+        expect:
+        !decider.allowsUnalignedCram()
+    }
+
     void "getWorkflowName"() {
         expect:
         decider.workflowName == CellRangerWorkflow.WORKFLOW

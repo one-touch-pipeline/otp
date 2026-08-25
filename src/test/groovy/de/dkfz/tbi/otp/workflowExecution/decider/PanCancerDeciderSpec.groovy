@@ -41,6 +41,11 @@ class PanCancerDeciderSpec extends AbstractAlignmentDeciderSpec implements IsRod
         decider.requiresFastqcResults() == true
     }
 
+    void "allowsUnalignedCram"() {
+        expect:
+        !decider.allowsUnalignedCram()
+    }
+
     void "getWorkflowName"() {
         expect:
         decider.workflowName == PanCancerWorkflow.WORKFLOW

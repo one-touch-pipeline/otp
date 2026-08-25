@@ -39,6 +39,11 @@ class WgbsDeciderSpec extends AbstractAlignmentDeciderSpec implements IsRoddy {
         !decider.requiresFastqcResults()
     }
 
+    void "allowsUnalignedCram"() {
+        expect:
+        !decider.allowsUnalignedCram()
+    }
+
     void "getWorkflowName"() {
         expect:
         decider.workflowName == WgbsWorkflow.WORKFLOW

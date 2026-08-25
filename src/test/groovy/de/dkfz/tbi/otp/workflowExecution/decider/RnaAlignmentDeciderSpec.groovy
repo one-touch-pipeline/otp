@@ -54,6 +54,11 @@ class RnaAlignmentDeciderSpec extends AbstractAlignmentDeciderSpec implements Is
         !decider.requiresFastqcResults()
     }
 
+    void "allowsUnalignedCram"() {
+        expect:
+        !decider.allowsUnalignedCram()
+    }
+
     void "getWorkflowName"() {
         expect:
         decider.workflowName == RnaAlignmentWorkflow.WORKFLOW
