@@ -393,6 +393,7 @@ class NotificationHandlerServiceSpec extends Specification implements DataTest {
         1 * mailHelperService.saveMail('subject', 'body', [])
 
         then:
+        1 * notificationStatus.setFinishedWorkflowCount(1)
         1 * notificationStatus.setFinalSend(true)
         1 * notificationStatus.save([flush: true])
     }
@@ -444,15 +445,16 @@ class NotificationHandlerServiceSpec extends Specification implements DataTest {
         1 * notificationMessageService.createStatusSubject(ticket, finalStatus) >> 'subject'
         1 * notificationMessageService.createStatusBody(ticket, []) >> 'body'
         1 * mailHelperService.saveMail('subject', 'body', [])
+        1 * notificationStatus.setFinishedWorkflowCount(finishedCount)
         finalSendCount * notificationStatus.setFinalSend(true)
-        finalSendCount * notificationStatus.save([flush: true])
+        1 * notificationStatus.save([flush: true])
 
         where:
-        notificationState          || finalStatus | finalSendCount
-        NotificationState.CHECKING || false       | 0
-        NotificationState.READY    || false       | 0
-        NotificationState.CREATED  || true        | 1
-        NotificationState.SKIPPED  || true        | 1
+        notificationState          || finalStatus | finalSendCount | finishedCount
+        NotificationState.CHECKING || false       | 0              | 0
+        NotificationState.READY    || false       | 0              | 0
+        NotificationState.CREATED  || true        | 1              | 1
+        NotificationState.SKIPPED  || true        | 1              | 1
     }
 
     void "all-workflows body skips depending notifications without a notification provider"() {

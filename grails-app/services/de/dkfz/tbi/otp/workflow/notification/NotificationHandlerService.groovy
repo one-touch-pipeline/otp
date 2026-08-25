@@ -38,11 +38,6 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 @Transactional
 class NotificationHandlerService {
 
-    private static final Set<NotificationState> FINAL_NOTIFICATION_STATES = [
-            NotificationState.CREATED,
-            NotificationState.SKIPPED,
-    ] as Set
-
     MailHelperService mailHelperService
     NotificationMessageService notificationMessageService
     UserProjectRoleService userProjectRoleService
@@ -102,18 +97,20 @@ class NotificationHandlerService {
         notifications.each { Notification notification ->
             workflowRuns.addAll(notification.workflowRuns ?: [] as Set<WorkflowRun>)
         }
-        boolean finalStatus = notifications.every { Notification notification ->
-            notification.notificationState in FINAL_NOTIFICATION_STATES
-        }
+        int finishedCount = NotificationService.finishedNotificationCount(notificationStatus)
+        boolean finalStatus = finishedCount == notifications.size()
         mailHelperService.saveMail(
                 notificationMessageService.createStatusSubject(ticket, finalStatus),
                 notificationMessageService.createStatusBody(ticket, workflowRuns),
                 [],
         )
+
+        // persisted even when not final, so the scheduler can detect drift and know a status mail is still due
+        notificationStatus.finishedWorkflowCount = finishedCount
         if (finalStatus) {
             notificationStatus.finalSend = true
-            notificationStatus.save(flush: true)
         }
+        notificationStatus.save(flush: true)
     }
 
     void createNotificationForTicketAndAllWorkflow(Notification notification) {

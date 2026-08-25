@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.FastqImportInstanceService
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.workflow.bamImport.BamImportService
+import de.dkfz.tbi.otp.workflow.notification.NotificationService
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowSystemService
@@ -45,6 +46,7 @@ class BootStrap {
     WorkflowSystemService workflowSystemService
     FastqImportInstanceService fastqImportInstanceService
     BamImportService bamImportService
+    NotificationService notificationService
     FileSystemService fileSystemService
     RemoteShellHelper remoteShellHelper
     WorkflowStepService workflowStepService
@@ -61,6 +63,7 @@ class BootStrap {
 
         fastqImportInstanceService.changeProcessToWait()
         bamImportService.changeProcessToWait()
+        notificationService.changeProcessToWait()
         workflowStepService.initializeCurrentWorkflowStepBeanNames()
 
         if (configService.isJobSystemEnabled()) {

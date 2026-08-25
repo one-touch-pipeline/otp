@@ -26,6 +26,8 @@ import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.notification.CreateNotification
+import de.dkfz.tbi.otp.notification.Notification
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.exceptions.OtpAssertRuntimeException
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -55,6 +57,8 @@ class WorkflowDeletionService {
             it.delete(flush: true)
         }
 
+        deleteNotificationReferences(workflowRun)
+
         WorkflowRun workflowRunToDelete = WorkflowRun.get(workflowRun.id)
         if (workflowRunToDelete) {
             detachRestartSuccessor(workflowRunToDelete)
@@ -78,6 +82,30 @@ class WorkflowDeletionService {
         if (successor) {
             successor.restartedFrom = null
             successor.save(flush: true)
+        }
+    }
+
+    /**
+     * Removes the workflow run from the notification join tables, since neither {@link Notification} nor
+     * {@link CreateNotification} owns the run and the foreign keys would otherwise block its deletion.
+     */
+    void deleteNotificationReferences(WorkflowRun workflowRun) {
+        List<Notification> notifications = Notification.executeQuery(
+                "select distinct n from Notification n join n.workflowRuns wr where wr = :workflowRun",
+                [workflowRun: workflowRun],
+        ) as List<Notification>
+        notifications.each { Notification notification ->
+            notification.removeFromWorkflowRuns(workflowRun)
+            notification.save(flush: true)
+        }
+
+        List<CreateNotification> createNotifications = CreateNotification.executeQuery(
+                "select distinct cn from CreateNotification cn join cn.workflowRuns wr where wr = :workflowRun",
+                [workflowRun: workflowRun],
+        ) as List<CreateNotification>
+        createNotifications.each { CreateNotification createNotification ->
+            createNotification.removeFromWorkflowRuns(workflowRun)
+            createNotification.save(flush: true)
         }
     }
 

@@ -25,9 +25,12 @@ import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.domainFactory.notification.NotificationDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.notification.CreateNotification
+import de.dkfz.tbi.otp.notification.Notification
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
@@ -36,7 +39,7 @@ import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
 
 @Rollback
 @Integration
-class WorkflowDeletionServiceIntegrationSpec extends Specification implements WorkflowSystemDomainFactory {
+class WorkflowDeletionServiceIntegrationSpec extends Specification implements WorkflowSystemDomainFactory, NotificationDomainFactory {
 
     WorkflowDeletionService workflowDeletionService
 
@@ -81,6 +84,28 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Wo
         then:
         !WorkflowRun.get(restartedFromRun.id)
         WorkflowRun.get(restartedRun.id).restartedFrom == null
+    }
+
+    void "deleteWorkflowRun, should drop the run from notifications referencing it, keeping the other runs"() {
+        given:
+        WorkflowRun runToDelete = createWorkflowRun()
+        WorkflowRun otherRun = createWorkflowRun()
+        Notification notification = createNotification()
+                .addToWorkflowRuns(runToDelete)
+                .addToWorkflowRuns(otherRun)
+                .save(flush: true)
+        CreateNotification createNotification = createCreateNotification()
+        createNotification.addToWorkflowRuns(runToDelete)
+        createNotification.addToWorkflowRuns(otherRun)
+        createNotification.save(flush: true)
+
+        when:
+        workflowDeletionService.deleteWorkflowRun(runToDelete)
+
+        then:
+        WorkflowRun.get(runToDelete.id) == null
+        notification.refresh().workflowRuns == [otherRun] as Set
+        createNotification.refresh().workflowRuns == [otherRun] as Set
     }
 
     void "test deleteWorkflowArtefact"() {

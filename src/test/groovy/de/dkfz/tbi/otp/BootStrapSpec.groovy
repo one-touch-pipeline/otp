@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.config.PropertiesValidationService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.FastqImportInstanceService
 import de.dkfz.tbi.otp.workflow.bamImport.BamImportService
+import de.dkfz.tbi.otp.workflow.notification.NotificationService
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowSystemService
@@ -47,6 +48,7 @@ class BootStrapSpec extends Specification {
         bootStrap.propertiesValidationService = Mock(PropertiesValidationService)
         bootStrap.fastqImportInstanceService = Mock(FastqImportInstanceService)
         bootStrap.bamImportService = Mock(BamImportService)
+        bootStrap.notificationService = Mock(NotificationService)
         bootStrap.configService = Mock(ConfigService)
         bootStrap.schedulerService = Mock(SchedulerService)
         bootStrap.workflowStepService = Mock(WorkflowStepService)
@@ -61,6 +63,7 @@ class BootStrapSpec extends Specification {
         1 * bootStrap.propertiesValidationService.validateStartUpProperties()
         1 * bootStrap.fastqImportInstanceService.changeProcessToWait()
         1 * bootStrap.bamImportService.changeProcessToWait()
+        1 * bootStrap.notificationService.changeProcessToWait()
         1 * bootStrap.workflowStepService.initializeCurrentWorkflowStepBeanNames()
         1 * bootStrap.configService.isJobSystemEnabled() >> jobSystemEnabled
         jobSystemCount * bootStrap.schedulerService.startup()
@@ -81,6 +84,7 @@ class BootStrapSpec extends Specification {
         bootStrap.propertiesValidationService = Mock(PropertiesValidationService)
         bootStrap.fastqImportInstanceService = Mock(FastqImportInstanceService)
         bootStrap.bamImportService = Mock(BamImportService)
+        bootStrap.notificationService = Mock(NotificationService)
         bootStrap.configService = Mock(ConfigService)
         bootStrap.schedulerService = Mock(SchedulerService)
         bootStrap.workflowStepService = Mock(WorkflowStepService)
@@ -95,6 +99,7 @@ class BootStrapSpec extends Specification {
         1 * bootStrap.propertiesValidationService.validateStartUpProperties()
         1 * bootStrap.fastqImportInstanceService.changeProcessToWait()
         1 * bootStrap.bamImportService.changeProcessToWait()
+        1 * bootStrap.notificationService.changeProcessToWait()
         1 * bootStrap.workflowStepService.initializeCurrentWorkflowStepBeanNames()
         1 * bootStrap.configService.isJobSystemEnabled() >> 1
         1 * bootStrap.schedulerService.startup()

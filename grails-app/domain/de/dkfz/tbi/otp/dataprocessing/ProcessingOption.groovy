@@ -503,6 +503,15 @@ class ProcessingOption implements Entity {
                 Necessity.OPTIONAL, "50", TypeValidators.POSITIVE_NUMBER
         ),
 
+        NOTIFICATION_CREATE_MAX_PARALLEL(
+                "the number of CreateNotification objects that may be processed (in state PROCESSING) at the same time",
+                Necessity.OPTIONAL, "10", TypeValidators.POSITIVE_NUMBER
+        ),
+        NOTIFICATION_DELETE_OLD_DELAY(
+                "delay in days after which finished notification and notification status objects are deleted",
+                Necessity.OPTIONAL, "30", TypeValidators.POSITIVE_NUMBER
+        ),
+
         // systemConfiguration
         TIME_ZONE(
                 "Local time zone",
