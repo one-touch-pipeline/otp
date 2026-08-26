@@ -285,7 +285,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
             allSpecies.addAll(group.sample.mixedInSpecies)
         }
 
-        ReferenceGenome referenceGenome = additionalData.referenceGenomeMap[projectSeqTypeGroup].get(allSpecies)
+        ReferenceGenome referenceGenome = additionalData.referenceGenomeMap[projectSeqTypeGroup]?.get(allSpecies)
         if (!referenceGenome) {
             deciderResult.warnings <<
                     "skip ${group}, since no reference genome is configured for ${projectSeqTypeGroup} and species: '${allSpecies}'".toString()

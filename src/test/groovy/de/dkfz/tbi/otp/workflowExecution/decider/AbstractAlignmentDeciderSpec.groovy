@@ -1365,7 +1365,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         additionalDataList = new AlignmentArtefactDataList([], [], [])
 
         // additional data
-        Map<ProjectSeqTypeGroup, Map<Set<SpeciesWithStrain>, ReferenceGenome>> referenceGenomeMap = [
+        Map<ProjectSeqTypeGroup, Map<Set<SpeciesWithStrain>, ReferenceGenome>> referenceGenomeMap = values.noReferenceGenome ? [:] : [
                 (projectSeqTypeGroup): [
                         (referenceGenome.speciesWithStrain): referenceGenome,
                 ],
