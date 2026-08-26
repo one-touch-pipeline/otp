@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 
+import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.alignment.AlignmentWorkFileServiceFactoryService
@@ -64,6 +65,9 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
 
     @Autowired
     WorkflowStateChangeService workflowStateChangeService
+
+    @Autowired
+    CommentService commentService
 
     abstract boolean requiresFastqcResults()
 
@@ -311,7 +315,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
         workPackage.seqTracks = seqTracks as Set
         workPackage.save(flush: false, deepValidate: false)
 
-        cancelConflictingRuns(workPackage, additionalData)
+        cancelConflictingRuns(workPackage, additionalData, deciderResult)
 
         List<String> displayName = [
                 "project: ${projectSeqTypeGroup.project.name}",
@@ -439,8 +443,8 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
      * The conflicting runs are taken from the prefetched {@link AlignmentAdditionalData#activeRunsPerWorkPackage}, so
      * that no query is executed inside the per-group processing loop.
      */
-    private void cancelConflictingRuns(MergingWorkPackage workPackage, AlignmentAdditionalData additionalData) {
-        List<WorkflowRun> activeRuns = additionalData.activeRunsPerWorkPackage[workPackage] ?: []
+    private void cancelConflictingRuns(MergingWorkPackage workPackage, AlignmentAdditionalData additionalData, DeciderResult deciderResult) {
+        List<WorkflowRun> activeRuns = additionalData.activeRunsPerWorkPackage?.get(workPackage) ?: []
         activeRuns.each { WorkflowRun activeRun ->
             if (activeRun.state in WorkflowRun.UNFINISHED_STATES) {
                 try {
@@ -451,6 +455,12 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
             }
 
             workflowStateChangeService.changeStateToFinalFailed(activeRun)
+
+            String cancelReason = "Superseded by newer workflow run"
+            String commentText = activeRun.comment ? "${activeRun.comment.comment}\n${cancelReason}" : cancelReason
+            commentService.saveCommentAsOtp(activeRun, commentText)
+
+            deciderResult.infos << "Cancelled conflicting run ${activeRun} for MergingWorkPackage ${workPackage}".toString()
         }
     }
 }

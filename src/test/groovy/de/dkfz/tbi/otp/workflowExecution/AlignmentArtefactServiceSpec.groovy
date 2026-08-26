@@ -96,6 +96,8 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
                 WorkflowVersionSelector,
                 CellRangerMergingWorkPackage,
                 SingleCellBamFile,
+                ExternalMergingWorkPackage,
+                ExternallyProcessedBamFile,
                 ToolName,
         ]
     }
@@ -737,6 +739,39 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         then:
         result.size() == 1
         result[workPackage] == [activeRun]
+     }
+
+    void "fetchActiveAlignmentRunsPerWorkPackage, ignores externally processed BAM files and external work packages (otp-3020)"() {
+        given:
+        setupData()
+
+        ExternalMergingWorkPackage externalMwp = new ExternalMergingWorkPackage([
+                sample         : seqTrack1.sample,
+                seqType        : seqTrack1.seqType,
+                referenceGenome: bamFile1.referenceGenome,
+                pipeline       : findOrCreatePipeline(Pipeline.Name.EXTERNALLY_PROCESSED, Pipeline.Type.ALIGNMENT),
+        ]).save(flush: true)
+
+        WorkflowRun externalRun = createWorkflowRun()
+        new ExternallyProcessedBamFile([
+                workPackage      : externalMwp,
+                fileName         : "test.bam",
+                importedFrom     : "/path/to/test.bam",
+                fileSize         : 100,
+                workflowArtefact : createWorkflowArtefact([
+                        producedBy  : externalRun,
+                        state       : WorkflowArtefact.State.PLANNED_OR_RUNNING,
+                        artefactType: ArtefactType.BAM,
+                ]),
+        ]).save(flush: true)
+
+        SeqTrack seqTrack = createSeqTrack([sample: externalMwp.sample, seqType: externalMwp.seqType])
+
+        when:
+        Map<MergingWorkPackage, List<WorkflowRun>> result = alignmentArtefactService.fetchActiveAlignmentRunsPerWorkPackage([seqTrack])
+
+        then: 'the query successfully filters out the external work packages'
+        result.isEmpty()
     }
 
     private SeqTrack createSeqTrackWithTwoFastqFileAndSpecies(Map parameters) {

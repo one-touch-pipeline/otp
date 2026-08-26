@@ -26,6 +26,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
@@ -916,6 +917,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         createServicesForCreateWorkflowRunsAndOutputArtefacts(workflowVersion, seqTrack1)
         decider.workflowService = Mock(WorkflowService)
         decider.workflowStateChangeService = Mock(WorkflowStateChangeService)
+        decider.commentService = Mock(CommentService)
 
         when:
         DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(projectSeqTypeGroup, alignmentDeciderGroup,
@@ -924,9 +926,11 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         then: 'the conflicting run is killed (stopping its jobs) and set to the non-restartable final failed state'
         1 * decider.workflowService.killWorkflowRun(activeRun)
         1 * decider.workflowStateChangeService.changeStateToFinalFailed(activeRun)
+        1 * decider.commentService.saveCommentAsOtp(activeRun, "Superseded by newer workflow run")
 
         and: 'a new run is still created'
         deciderResult.newArtefacts.size() == 1
+        deciderResult.infos.any { it.contains("Cancelled conflicting run") }
     }
 
     void "createWorkflowRunsAndOutputArtefacts, when a conflicting run is not in a killable state, then it is only set to final failed"() {
@@ -951,6 +955,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         createServicesForCreateWorkflowRunsAndOutputArtefacts(workflowVersion, seqTrack1)
         decider.workflowService = Mock(WorkflowService)
         decider.workflowStateChangeService = Mock(WorkflowStateChangeService)
+        decider.commentService = Mock(CommentService)
 
         when:
         DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(projectSeqTypeGroup, alignmentDeciderGroup,
@@ -959,9 +964,11 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         then: 'it is not killed (nothing to kill), but still set to final failed'
         0 * decider.workflowService.killWorkflowRun(_)
         1 * decider.workflowStateChangeService.changeStateToFinalFailed(failedRun)
+        1 * decider.commentService.saveCommentAsOtp(failedRun, "Superseded by newer workflow run")
 
         and:
         deciderResult.newArtefacts.size() == 1
+        deciderResult.infos.any { it.contains("Cancelled conflicting run") }
     }
 
     @Unroll
