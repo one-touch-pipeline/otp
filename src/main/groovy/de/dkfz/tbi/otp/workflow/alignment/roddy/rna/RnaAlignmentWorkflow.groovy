@@ -27,12 +27,10 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
 import de.dkfz.tbi.otp.infrastructure.alignment.RoddyBamFileNames
 import de.dkfz.tbi.otp.workflow.alignment.*
-import de.dkfz.tbi.otp.workflow.alignment.roddy.RoddyAlignmentCheckQcJob
-import de.dkfz.tbi.otp.workflow.alignment.roddy.RoddyAlignmentConditionalFailJob
-import de.dkfz.tbi.otp.workflow.alignment.roddy.RoddyAlignmentFinishJob
-import de.dkfz.tbi.otp.workflow.alignment.roddy.RoddyAlignmentPrepareJob
+import de.dkfz.tbi.otp.workflow.alignment.roddy.*
 import de.dkfz.tbi.otp.workflow.jobs.*
-import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.Artefact
+import de.dkfz.tbi.otp.workflowExecution.LinearWorkflow
 
 @Component
 @Slf4j
@@ -47,6 +45,7 @@ class RnaAlignmentWorkflow extends AlignmentWorkflow implements LinearWorkflow {
         return [
                 SkipForEmptyRawSequenceFileJob,
                 AlignmentFragmentJob,
+                AlignmentLinkCleanUpJob,
 //                RnaAlignmentCheckFragmentKeysJob,
                 // will be uncommented after default fragments have been adapted
                 // Keep the order, since it is important

@@ -26,7 +26,9 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
 import de.dkfz.tbi.otp.infrastructure.alignment.RoddyBamFileNames
-import de.dkfz.tbi.otp.workflow.alignment.*
+import de.dkfz.tbi.otp.workflow.alignment.AlignmentFragmentJob
+import de.dkfz.tbi.otp.workflow.alignment.AlignmentLinkCleanUpJob
+import de.dkfz.tbi.otp.workflow.alignment.AlignmentWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.roddy.RoddyAlignmentCheckQcJob
 import de.dkfz.tbi.otp.workflow.alignment.roddy.RoddyAlignmentConditionalFailJob
 import de.dkfz.tbi.otp.workflow.alignment.roddy.RoddyAlignmentFinishJob
@@ -49,6 +51,7 @@ class PanCancerWorkflow extends AlignmentWorkflow implements LinearWorkflow {
         return [
                 SkipForEmptyRawSequenceFileJob,
                 AlignmentFragmentJob,
+                AlignmentLinkCleanUpJob,
 //                RoddyAlignmentCheckFragmentKeysJob,
                 // will be uncommented after default fragments have been adapted
                 // Keep the order, since it is important

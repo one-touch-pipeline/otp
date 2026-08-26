@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.infrastructure.alignment.RoddyBamFileNames
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.alignment.AlignmentFragmentJob
+import de.dkfz.tbi.otp.workflow.alignment.AlignmentLinkCleanUpJob
 import de.dkfz.tbi.otp.workflow.alignment.roddy.*
 import de.dkfz.tbi.otp.workflow.jobs.*
 
@@ -59,6 +60,7 @@ class PanCancerWorkflowSpec extends Specification implements RoddyPanCancerFacto
         panCancerWorkflow.jobList == [
                 SkipForEmptyRawSequenceFileJob,
                 AlignmentFragmentJob,
+                AlignmentLinkCleanUpJob,
 //                RoddyAlignmentCheckFragmentKeysJob,
                 RoddyAlignmentConditionalFailJob,
                 AttachUuidJob,

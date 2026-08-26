@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerWorkFileService
 import de.dkfz.tbi.otp.workflow.alignment.AlignmentFragmentJob
+import de.dkfz.tbi.otp.workflow.alignment.AlignmentLinkCleanUpJob
 import de.dkfz.tbi.otp.workflow.alignment.AlignmentWorkflow
 import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.Artefact
@@ -51,6 +52,7 @@ class CellRangerWorkflow extends AlignmentWorkflow implements LinearWorkflow {
         return [
                 SkipForEmptyRawSequenceFileJob,
                 AlignmentFragmentJob,
+                AlignmentLinkCleanUpJob,
                 CellRangerCheckFragmentKeysJob,
                 CellRangerConditionalFailJob,
                 AttachUuidJob,

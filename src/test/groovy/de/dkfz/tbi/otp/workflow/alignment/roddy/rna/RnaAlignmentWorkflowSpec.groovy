@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.alignment.RoddyBamFileNames
 import de.dkfz.tbi.otp.ngsdata.FastqFile
 import de.dkfz.tbi.otp.workflow.alignment.AlignmentFragmentJob
+import de.dkfz.tbi.otp.workflow.alignment.AlignmentLinkCleanUpJob
 import de.dkfz.tbi.otp.workflow.alignment.roddy.*
 import de.dkfz.tbi.otp.workflow.jobs.*
 
@@ -57,6 +58,7 @@ class RnaAlignmentWorkflowSpec extends Specification implements RoddyRnaFactory,
         rnaAlignmentWorkflow.jobList == [
                 SkipForEmptyRawSequenceFileJob,
                 AlignmentFragmentJob,
+                AlignmentLinkCleanUpJob,
 //                RnaAlignmentCheckFragmentKeysJob,
                 RoddyAlignmentConditionalFailJob,
                 AttachUuidJob,

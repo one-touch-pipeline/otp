@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.alignment.AlignmentFragmentJob
+import de.dkfz.tbi.otp.workflow.alignment.AlignmentLinkCleanUpJob
 import de.dkfz.tbi.otp.workflow.jobs.*
 
 class CellRangerWorkflowSpec extends Specification implements CellRangerFactory, DataTest {
@@ -61,6 +62,7 @@ class CellRangerWorkflowSpec extends Specification implements CellRangerFactory,
         cellRangerWorkflow.jobList == [
                 SkipForEmptyRawSequenceFileJob,
                 AlignmentFragmentJob,
+                AlignmentLinkCleanUpJob,
                 CellRangerCheckFragmentKeysJob,
                 CellRangerConditionalFailJob,
                 AttachUuidJob,
