@@ -142,7 +142,7 @@ class NotificationMessageService {
                 ]),
         ]
 
-        addSection(sections, 'notification.template.workflow.runData', allRunsContent.notificationTexts)
+        addSection(sections, 'notification.template.workflow.processedData', allRunsContent.notificationTexts)
         addFailureSection(sections, 'notification.template.workflow.skipped', problemRuns, problemContent,
                 WorkflowRun.State.SKIPPED_MISSING_PRECONDITION)
         addFailureSection(sections, 'notification.template.workflow.finalFailure', problemRuns, problemContent,

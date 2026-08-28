@@ -85,6 +85,8 @@ lib/
 response.json
 ## tmp folder
 /tmp/
+## load postgres dump
+ /restore.list
 
 ### Node ###
 node_modules/

@@ -45,7 +45,7 @@ class NotificationMessageServiceSpec extends Specification implements DataTest {
 
     private static final String INTRO = "initialized 'Workflow' workflows of project 'Project' are finished"
 
-    private static final String RUN_DATA_HEADER = 'run data:'
+    private static final String PROCESSED_DATA_HEADER = 'Processed data:'
 
     private static final String SKIPPED_HEADER = 'The following workflows were skipped:'
 
@@ -128,7 +128,7 @@ class NotificationMessageServiceSpec extends Specification implements DataTest {
                 },
         )
         String expectedContent = createExpectedContent([
-                RUN_DATA_HEADER + '\n- data',
+                PROCESSED_DATA_HEADER + '\n- data',
                 CONFIGURATION_SECTION,
         ])
 
@@ -175,7 +175,7 @@ class NotificationMessageServiceSpec extends Specification implements DataTest {
 
         expect:
         service.createWorkflowContent(notification, provider) == createExpectedContent([
-                RUN_DATA_HEADER + '\n- data1\n- data2',
+                PROCESSED_DATA_HEADER + '\n- data1\n- data2',
                 SKIPPED_HEADER + '\n- skipped sample:\n  missing input',
                 FAILURE_HEADER + '\n- failed sample:\n  data is invalid',
                 GUI_URLS_HEADER + '\n- url1\n- url2',
@@ -204,7 +204,7 @@ class NotificationMessageServiceSpec extends Specification implements DataTest {
 
         expect:
         service.createWorkflowContent(notification, provider) == createExpectedContent([
-                RUN_DATA_HEADER + '\n- data10\n- data2\n- data9',
+                PROCESSED_DATA_HEADER + '\n- data10\n- data2\n- data9',
                 SKIPPED_HEADER + '\n- sample a:\n  reason a\n- sample b:\n  reason b',
                 FAILURE_HEADER + '\n- same sample:\n  a reason\n- same sample:\n  z reason',
                 GUI_URLS_HEADER + '\n- url10\n- url2',
@@ -223,7 +223,7 @@ class NotificationMessageServiceSpec extends Specification implements DataTest {
 
         expect:
         service.createWorkflowContent(notification, provider) == createExpectedContent([
-                RUN_DATA_HEADER + '\n- data\n  line2',
+                PROCESSED_DATA_HEADER + '\n- data\n  line2',
                 GUI_URLS_HEADER + '\n- url\n  line2',
                 FILE_PATTERNS_HEADER + '\n- pattern\n  line2',
                 CONFIGURATIONS_HEADER + '\n- config\n  line2',
@@ -243,7 +243,7 @@ class NotificationMessageServiceSpec extends Specification implements DataTest {
 
         expect:
         service.createWorkflowContent(notification, provider) == createExpectedContent([
-                RUN_DATA_HEADER + '\n- data',
+                PROCESSED_DATA_HEADER + '\n- data',
                 GUI_URLS_HEADER + '\n- url',
                 FILE_PATTERNS_HEADER + '\n- pattern',
                 CONFIGURATION_SECTION,
