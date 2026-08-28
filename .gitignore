@@ -34,7 +34,7 @@ logs/*
 *.kate-swp
 ## Stale NFS handles
 .nfs*
-.claude
+.claude/*
 .claude-code.yml
 .CLAUDE.md
 
@@ -100,8 +100,10 @@ cypressReport.txt
 .vscode
 
 ### AI tools ###
-.claude
+.claude/*
 .claude-code.yml
 CLAUDE.md
 .github
 .worklogs
+# team-shared Claude instructions (negation must stay after the bare CLAUDE.md rule above)
+!.claude/CLAUDE.md
