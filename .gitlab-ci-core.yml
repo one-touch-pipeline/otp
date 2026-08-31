@@ -41,6 +41,7 @@ variables:
   GET_SOURCES_ATTEMPTS: "3"
   RESTORE_CACHE_ATTEMPTS: "3"
   ENABLE_CYPRESS: "true"  #indicate, if cypress should run or not
+  ENABLE_WORKFLOW_TEST: "true"  #indicate, if mocked workflow tests should run or not
   CACHE_COUNTER: "5" # a counter to change cache names
   CI_DEBUG_TRACE: "false"
   CI_DEBUG_SERVICES: "false"
@@ -237,6 +238,11 @@ integration tests:
 
 workflow tests:
   extends: .abstract_test_template
+  rules:
+    - if: $ENABLE_WORKFLOW_TEST == "false"
+      when: never
+    - !reference [ .shared, rules-default ]
+    - !reference [ .shared, rules-test ]
   services:
     - name:  registry.gitlab.com/one-touch-pipeline/otp/otp-mocked-cluster:2026-08-18
       alias: openssh-server
