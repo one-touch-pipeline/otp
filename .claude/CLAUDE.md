@@ -37,8 +37,19 @@ for day-to-day coding — kept lean on purpose.
   system, which then aligns the data and runs downstream analysis (variant calling,
   QC, CellRanger). Data can also enter as a directly-imported pre-aligned BAM, which
   skips the alignment step.
-- Workflow config is merged from two sources: the imported metadata and project-level
-  settings (`ConfigPerProjectAndSeqType`).
+- Workflow state is tracked via `WorkflowRun` / `WorkflowStep` / `WorkflowArtefact`.
+- A new `WorkflowRun` is never submitted directly — `AllDecider` runs a fixed ordered
+  chain of pipeline deciders (`FastqcDecider` → `PanCancerDecider` → `WgbsDecider` →
+  `RnaAlignmentDecider` → `CellRangerDecider` → `SnvDecider` → `IndelDecider` →
+  `SophiaDecider` → `AceseqDecider`) that inspect newly-produced `WorkflowArtefact`s
+  and decide whether to create the next `WorkflowRun`.
+- At the file system level, data are stored with `WorkFolder` in a UUID-based system
+  and symlinked by the conventional "view-by-pid" directory (refer to
+  `WorkFileService` / `LinkFileService` pairs).
+- Workflow config is resolved via `ExternalWorkflowConfigFragment` (typed JSON "fragments")
+  selected by `ExternalWorkflowConfigSelector` (matched on workflow/version/project/
+  seqType/referenceGenome/libraryPrepKit, ranked by priority) and merged
+  highest-priority-wins onto the `WorkflowRun`.
 
 ## Commands
 
@@ -70,11 +81,17 @@ for day-to-day coding — kept lean on purpose.
   GStrings, collection methods).
 - Follow existing patterns in the file you edit — but first question whether the
   pattern fits the new case; existing code may be over-engineered for a simpler one.
+- `@Deprecated` code is slated for retirement: avoid using or extending deprecated
+  classes and methods. Always search for the modern replacement or implementation
+  first; if no alternative exists and using deprecated code is unavoidable, raise a
+  concern for it.
 - CodeNarc must pass. Spock for all tests.
 - Services (`grails-app/services/`, `src/main/`, `src/init/`) get `@CompileStatic`
   applied globally. GORM dynamic finders (`findAllByX`, `findByX`) do not compile
   statically — use explicit criteria/`where` queries or navigate domain
-  associations instead. `@CompileDynamic` on services is disallowed by CodeNarc.
+  associations where possible. In cases where dynamic finders are much simpler
+  and more readable, annotate the method with `@CompileDynamic` (`@CompileDynamic`
+  is only disallowed at the class level by CodeNarc).
 
 ## Testing expectations
 
