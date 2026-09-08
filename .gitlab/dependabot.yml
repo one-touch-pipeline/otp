@@ -84,3 +84,7 @@ updates:
     commit-message:
       prefix: "Update: "
     rebase-strategy: none
+    ignore:
+      # cypress 16.0 removed used methods, needs update via issue: https://one-touch-pipeline.myjetbrains.com/youtrack/issue/otp-3076
+      - dependency-name: "cypress"
+        update-types: [ "version-update:semver-major" ]
