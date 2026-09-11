@@ -31,7 +31,7 @@ describe('Check Aceseq pages', () => {
         cy.loginAs(role);
         cy.intercept('/aceseq/dataTableResults*').as('loadDataTable');
         cy.fixture('downloadChecks/aceseq.json').then((config) => {
-          cy.visit(`/aceseq/results?project=${config.project}`);
+          cy.visitProjectPage('/aceseq/results', config.project);
         });
         cy.wait('@loadDataTable').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);

@@ -26,7 +26,7 @@ describe('Check sampleOverview page', () => {
   context('when user is an operator', () => {
     beforeEach(() => {
       cy.loginAs('operator');
-      cy.visit('/sampleOverview/index?project=ExampleProject');
+      cy.visitProjectPage('/sampleOverview/index', 'ExampleProject');
     });
 
     it('should visit the index page and change projects', () => {
@@ -98,7 +98,7 @@ describe('Check sampleOverview page', () => {
   context('when user is normal user', () => {
     beforeEach(() => {
       cy.loginAs('user');
-      cy.visit('/sampleOverview/index?project=ExampleProject');
+      cy.visitProjectPage('/sampleOverview/index', 'ExampleProject');
     });
 
     it('should not be able to select a project user is not part of', () => {
@@ -112,7 +112,7 @@ describe('Check sampleOverview page', () => {
       // Intercept the data table request
       cy.intercept('POST', '**/dataTableSourceLaneOverview**').as('loadDataTable');
 
-      cy.visit('/sampleOverview/index?project=ExampleProject');
+      cy.visitProjectPage('/sampleOverview/index', 'ExampleProject');
 
       cy.wait('@loadDataTable').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);

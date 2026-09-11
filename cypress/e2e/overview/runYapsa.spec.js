@@ -27,12 +27,21 @@ describe('Check run yapsa page', () => {
 
   userRoles.forEach((userRole) => {
     context(`when user is a ${userRole}`, () => {
+      // Only the operator has access to the project of the fixture, which is the only one holding
+      // runYapsa results. A normal user can therefore only open the page for one of their own
+      // projects, where there is nothing to download.
+      const isOperator = userRole === 'operator';
+
       beforeEach(() => {
         cy.loginAs(userRole);
         cy.intercept('/runYapsa/dataTableResults*').as('loadDataTable');
-        cy.fixture('downloadChecks/runYapsa.json').then((config) => {
-          cy.visit(`/runYapsa/results?project=${config.project}`);
-        });
+        if (isOperator) {
+          cy.fixture('downloadChecks/runYapsa.json').then((config) => {
+            cy.visitProjectPage('/runYapsa/results', config.project);
+          });
+        } else {
+          cy.visit('/runYapsa/results');
+        }
         cy.wait('@loadDataTable').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
         });
@@ -43,12 +52,14 @@ describe('Check run yapsa page', () => {
         cy.get('table tbody tr').contains('Loading...').should('not.exist');
       });
 
-      it('should download csv, when button is clicked', () => {
-        cy.get('table tbody tr').contains('Loading...').should('not.exist');
-        cy.get('div#resultsTable_wrapper button').contains('Download').click();
+      if (isOperator) {
+        it('should download csv, when button is clicked', () => {
+          cy.get('table tbody tr').contains('Loading...').should('not.exist');
+          cy.get('div#resultsTable_wrapper button').contains('Download').click();
 
-        cy.checkDownloadByContentOfFixture('runYapsa.json');
-      });
+          cy.checkDownloadByContentOfFixture('runYapsa.json');
+        });
+      }
     });
   });
 });

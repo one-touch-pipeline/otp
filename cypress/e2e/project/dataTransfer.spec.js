@@ -114,6 +114,7 @@ describe('Check dataTransfer page', () => {
       cy.contains('#dtaAccordion .card', peerInstitution).as('dtaCard');
       cy.get('@dtaCard').find('.btn-link').click();
 
+      cy.watchDownloadRequest('/dataTransfer/downloadDataTransferDocument*');
       cy.get('@dtaCard').find('.transfer-listing > li').first()
         .find('[id^="transferDocuments-"] a').first()
         .click();

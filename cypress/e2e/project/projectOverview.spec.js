@@ -99,7 +99,7 @@ const loadPageAndWaitForTables = (fixtureFileName) => {
     cy.intercept('POST', `/projectOverview/${config.tableUrl}*`)
       .as('dataTable');
 
-    cy.visit(`/projectOverview/index?project=${config.project}`);
+    cy.visitProjectPage('/projectOverview/index', config.project);
 
     cy.wait('@index')
       .then((interception) => {

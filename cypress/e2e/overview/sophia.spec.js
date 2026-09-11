@@ -31,7 +31,7 @@ describe('Check sophia pages', () => {
         cy.loginAs(role);
         cy.intercept('/sophia/dataTableResults*').as('loadDataTable');
         cy.fixture('downloadChecks/sophia.json').then((config) => {
-          cy.visit(`/sophia/results?project=${config.project}`);
+          cy.visitProjectPage('/sophia/results', config.project);
         });
         cy.wait('@loadDataTable').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);

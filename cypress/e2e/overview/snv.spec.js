@@ -31,7 +31,7 @@ describe('Check snv pages', () => {
         cy.loginAs(role);
         cy.intercept('/snv/dataTableResults*').as('loadDataTable');
         cy.fixture('downloadChecks/snv.json').then((config) => {
-          cy.visit(`/snv/results?project=${config.project}`);
+          cy.visitProjectPage('/snv/results', config.project);
         });
         cy.wait('@loadDataTable').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);

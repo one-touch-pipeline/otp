@@ -213,7 +213,7 @@ const assertAutoImportReset = () => {
     .find('.wordBreak')
     .should('contain.text', 'false');
 
-  cy.visit(`/projectConfig/index?project=${project}`);
+  cy.visitProjectPage('/projectConfig/index', project);
   cy.get('td').contains('Sample Parser')
     .siblings()
     .last()
@@ -260,7 +260,7 @@ describe('Check autoImport endpoint', { retries: 0 }, () => {
     cy.loginAs('operator');
     cy.intercept('POST', '**/sampleOverview/dataTableSourceLaneOverview**').as('loadSampleOverview');
 
-    cy.visit(`/sampleOverview/index?project=${project}`);
+    cy.visitProjectPage('/sampleOverview/index', project);
 
     cy.wait('@loadSampleOverview').then((interception) => {
       const rows = interception.response.body.aaData;

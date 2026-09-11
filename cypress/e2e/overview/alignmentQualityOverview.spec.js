@@ -115,7 +115,7 @@ const loadAlignmentPage = (project, seqType) => {
 
   cy.clearDownloadsFolder();
   cy.intercept('POST', '/alignmentQualityOverview/dataTableSource*').as('dataTable');
-  cy.visit(`/alignmentQualityOverview/index?project=${project}`);
+  cy.visitProjectPage('/alignmentQualityOverview/index', project);
   cy.get('#seqType')
     .select(seqType, { force: true });
   cy.wait('@dataTable').then((interception) => {

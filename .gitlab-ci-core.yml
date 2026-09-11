@@ -27,8 +27,9 @@ image: registry.gitlab.com/one-touch-pipeline/otp/otp-ci-java-17:2026-07-24
 ## having multiple commands in one variable does not work
 ## putting the expiry time to a variable does not work
 variables:
-  GRADLE_OPTS: '-Xmx1g -Dorg.gradle.daemon=true'
-  GRAILS_OPTS: '-Xmx4g'
+  GRADLE_OPTS: '-Xmx128m -Xms64m -Dorg.gradle.daemon=true'
+  GRAILS_OPTS: '-Xmx4g -Xms100m'
+  JAVA_OPTS: '-Xmx4g -Xms100m'
   ARTIFACTS_BASE_DIRECTORY: 'artifacts'
   GRADLE_USER_HOME: $CI_PROJECT_DIR/cache/gradle # overrides GRADLE_USER_HOME default for caching
   NPM_CACHE: $CI_PROJECT_DIR/cache/npm
@@ -45,6 +46,8 @@ variables:
   CACHE_COUNTER: "5" # a counter to change cache names
   CI_DEBUG_TRACE: "false"
   CI_DEBUG_SERVICES: "false"
+  FF_NETWORK_PER_BUILD: "true"
+  MEASURE_DIND_IO: "false"  #indicate, if the io performance of the docker daemon should be measured before the tests
 
 
 #----------------------------

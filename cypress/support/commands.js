@@ -183,9 +183,47 @@ Cypress.Commands.add('checkPage', (url) => {
 });
 
 /**
+ * Reset before every test, so a test that announces a download without checking it cannot make the
+ * next test wait for a request that never comes.
+ */
+const DOWNLOAD_REQUEST_ALIAS = 'otpDownloadRequest';
+let downloadRequestIsWatched = false;
+
+beforeEach(() => {
+  downloadRequestIsWatched = false;
+});
+
+/**
+ * Announces a download that is fetched from the server, so that the following download check fails
+ * with the status code instead of waiting for a file that a failed request never wrote.
+ *
+ * `cy.intercept` has to be registered before the request happens, and a custom command only runs once
+ * the queue reaches it, so the download check itself is too late to do this. Call this command
+ * before the click that starts the download:
+ *
+ *   ```
+ *   cy.watchDownloadRequest('/sequence/exportAll*');
+ *   cy.get('...').click();
+ *   cy.checkDownloadByContentOfFixture('sequence.json', '');
+ *   ```
+ *
+ * The CSV buttons of the DataTables build their file in the browser and never reach the server, so
+ * there is no status code for them and this command does not apply.
+ *
+ * @param {string|object} routeMatcher - anything `cy.intercept` accepts, matching the download request
+ */
+Cypress.Commands.add('watchDownloadRequest', (routeMatcher) => {
+  'use strict';
+
+  downloadRequestIsWatched = true;
+  cy.intercept(routeMatcher).as(DOWNLOAD_REQUEST_ALIAS);
+});
+
+/**
  * checks download files
  *
  * check that
+ * - the request delivering the file answered with 200, if it was announced with cy.watchDownloadRequest()
  * - a file exists with given name, the current date and the given ending
  * - the file has all the given headers in given order
  * - the files contains all the given lines, the order within the line needs to match (but not the order of all lines)
@@ -198,6 +236,15 @@ Cypress.Commands.add('checkPage', (url) => {
  *
  * [[v3a,v3b,v3c],[v2a,v2b,v2c]]
  *
+ * The browser writes the file while cypress already runs the next command, so the content is
+ * checked inside a `should()` callback. That makes `cy.readFile` re-read the file until it matches,
+ * which is the only thing that ties the check to the download it belongs to. A `then()` would look at
+ * whatever happens to be on disk at that moment, which is the file of the previous download when
+ * the same page is downloaded twice.
+ *
+ * The verified file is removed afterwards. Downloads are named after the page and the current date,
+ * so every download of a page uses the same name, and a leftover file would make the browser write
+ * the next one as 'name (1).csv' while the check keeps reading the stale 'name.csv'.
  */
 
 Cypress.Commands.add(
@@ -210,37 +257,53 @@ Cypress.Commands.add(
   const day = String(today.getDate()).padStart(2, '0');
   const date = `${year}-${month}-${day}`;
 
-  const checkContent = (content) => {
-    cy.log(`content: ${content}`);
-    const lines = content.split('\n');
-    cy.log('rows:');
-    lines.forEach((line) => {
-      cy.log(`line: ${line}`);
-    });
+  const headerLineExpected = `${quote}${headerList.join(`${quote},${quote}`)}${quote}`;
+  const expectedContentLines = contentListList.map(
+    (contentList) => `${quote}${contentList.join(`${quote},${quote}`)}${quote}`
+  );
 
-    // check header
-    const headerLine = lines[0];
-    const headerLineExpected = `${quote}${headerList.join(`${quote},${quote}`)}${quote}`;
-    cy.log(`Check header: ${headerLineExpected}`);
-    cy.wrap(headerLine).should('equal', headerLineExpected);
+  if (downloadRequestIsWatched) {
+    downloadRequestIsWatched = false;
+    cy.wait(`@${DOWNLOAD_REQUEST_ALIAS}`).its('response.statusCode')
+      .should('equal', 200);
+  }
 
-    // check for expected content
-    contentListList.forEach((contentList) => {
-      const expectedContentLine = `${quote}${contentList.join(`${quote},${quote}`)}${quote}`;
-      cy.log(`Check for content: ${expectedContentLine}`);
-      cy.wrap(lines).should('include', expectedContentLine);
-    });
+  const checkContentAndCleanUp = (filepath) => {
+    cy.readFile(filepath, 'utf8', { timeout: Cypress.config('defaultCommandTimeout') })
+      .should((content) => {
+        // cy.readFile yields null as long as the file is missing, so this reports a download that
+        // never arrived, or one that the browser wrote under a different name
+        expect(content, `content of the downloaded file ${filepath}`).to.be.a('string');
+        const lines = content.split('\n');
+        expect(lines[0], `header of ${filepath}`).to.equal(headerLineExpected);
+        expectedContentLines.forEach((expectedContentLine) => {
+          expect(lines, `lines of ${filepath}`).to.include(expectedContentLine);
+        });
+      });
+
+    cy.exec(`rm -f "${filepath}"`, { log: false });
   };
 
   if (wildcardFilename) {
+    // cy.exec is not retried by cypress, so the search has to be repeated until the file shows up
     const pattern = `${filename}_${date}*${fileEnding}`;
-    cy.exec(`find ${downloadsFolder} -name "${pattern}" -type f | head -1`)
+    const findDownloadedFile = (remainingTries) => 
+      cy.exec(`find "${downloadsFolder}" -name "${pattern}" -type f`, { failOnNonZeroExit: false, log: false })
       .then(({ stdout }) => {
-        cy.readFile(stdout.trim(), 'utf8', { timeout: 5000 }).then((content) => checkContent(content));
+        const found = stdout.trim().split('\n').filter((line) => line !== '');
+        if (found.length > 0) {
+          return checkContentAndCleanUp(found[0]);
+        }
+        if (remainingTries <= 0) {
+          throw new Error(`no file matching '${pattern}' was downloaded to ${downloadsFolder}`);
+        }
+        cy.wait(500, { log: false });
+        return findDownloadedFile(remainingTries - 1);
       });
+
+    findDownloadedFile(Math.ceil(Cypress.config('defaultCommandTimeout') / 500));
   } else {
-    const filepath = path.join(downloadsFolder, `${filename}_${date}${fileEnding}`);
-    cy.readFile(filepath, 'utf8', { timeout: 5000 }).then((content) => checkContent(content));
+    checkContentAndCleanUp(path.join(downloadsFolder, `${filename}_${date}${fileEnding}`));
   }
   }
 );
@@ -252,12 +315,53 @@ Cypress.Commands.add('checkDownloadByContentOfFixture', (fixtureFileName, quote 
   });
 });
 
+/**
+ * Fails when the page does not show the given project.
+ *
+ * The options of the project selection link to the page of their project, so their value carries
+ * the project name as it appears in the URL. The visible text cannot be used for this, that one is
+ * the display name of the project.
+ */
+const assertSelectedProject = (projectName) => {
+  cy.get('select#project option:selected', { log: false }).should(($option) => {
+    // the base is only needed to parse the relative link, it does not reach any server
+    const shown = new URL($option.attr('value'), 'http://localhost').searchParams.get('project');
+    expect(shown, 'project shown by the page').to.equal(projectName);
+  });
+};
+
+/**
+ * Visits a page for a given project and makes sure the page really shows that project.
+ *
+ * When the project of the URL is not available to the logged in user, OTP puts them on the first
+ * project they may see, without any visible error. A test then runs against different data than it
+ * asked for, and depending on the test that stays unnoticed or shows up much later as a download
+ * whose file name does not match. Both cases mean the test is wrong, so the mismatch is reported
+ * here, right where it happens.
+ *
+ * Use this instead of `cy.visit()` wherever a page is opened for a specific project. It does not
+ * apply to pages without the project selection, for example the project filter of workflowConfig,
+ * which is a different concept.
+ *
+ * @param {string} url - the page to visit, without the project parameter; further parameters and a
+ *                       fragment are kept
+ * @param {string} projectName - name of the project, added as the parameter 'project'
+ * @param {object} options - passed on to `cy.visit()`
+ */
+Cypress.Commands.add('visitProjectPage', (url, projectName, options = {}) => {
+  const target = new URL(url, 'http://localhost');
+  target.searchParams.set('project', projectName);
+
+  cy.visit(`${target.pathname}${target.search}${target.hash}`, options);
+  assertSelectedProject(projectName);
+});
+
 Cypress.Commands.add('clearDownloadsFolder', () => {
   'use strict';
 
   const downloadsFolder = Cypress.config('downloadsFolder');
 
-  cy.exec(`rm ${downloadsFolder}/*`, {
+  cy.exec(`mkdir -p "${downloadsFolder}" && rm -rf "${downloadsFolder}"/*`, {
     log: true,
     failOnNonZeroExit: false
   });

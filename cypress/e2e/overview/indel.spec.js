@@ -31,7 +31,7 @@ describe('Check indel pages', () => {
         cy.loginAs(role);
         cy.intercept('/indel/dataTableResults*').as('loadDataTable');
         cy.fixture('downloadChecks/indel.json').then((config) => {
-          cy.visit(`/indel/results?project=${config.project}`);
+          cy.visitProjectPage('/indel/results', config.project);
         });
         cy.wait('@loadDataTable').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);

@@ -422,7 +422,7 @@ const loadTriggerWorkflowsPage = () => {
 const addConfig = () => {
   'use strict';
 
-  cy.visit('/workflowSelection/index?project=ExampleProject');
+  cy.visitProjectPage('/workflowSelection/index', 'ExampleProject');
 
   cy.intercept('/workflowSelection/saveAlignmentConfiguration?project=ExampleProject').as('saveConfig');
 
@@ -451,7 +451,7 @@ const addConfig = () => {
 const deleteConfig = () => {
   'use strict';
 
-  cy.visit('/workflowSelection/index?project=ExampleProject');
+  cy.visitProjectPage('/workflowSelection/index', 'ExampleProject');
 
   cy.intercept('/workflowSelection/deleteConfiguration?project=ExampleProject').as('deleteConfig');
 

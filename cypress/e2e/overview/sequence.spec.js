@@ -62,6 +62,7 @@ describe('Check statistics page', () => {
 
         cy.get('#sequenceTable_processing').should('exist');
         cy.get('div#sequenceTable_wrapper button').contains('Options').click();
+        cy.watchDownloadRequest('/sequence/exportAll*');
         cy.get('div.dt-button-collection').contains('Download CSV').click();
         cy.checkDownloadByContentOfFixture('sequence.json', '');
       });
@@ -72,6 +73,7 @@ describe('Check statistics page', () => {
         filterForDownload('dataSwapTemplate.json');
 
         cy.get('div#sequenceTable_wrapper button').contains('Options').click();
+        cy.watchDownloadRequest('/sequence/sampleSwapTemplate*');
         cy.get('div.dt-button-collection').contains('Download Sample Swap Template').click();
 
         cy.checkDownloadByContentOfFixture('dataSwapTemplate.json', '');
@@ -83,6 +85,7 @@ describe('Check statistics page', () => {
         filterForDownload('ghgaTemplate.json');
 
         cy.get('div#sequenceTable_wrapper button').contains('Options').click();
+        cy.watchDownloadRequest('/sequence/ghgaExport*');
         cy.get('div.dt-button-collection').contains('Download GHGA Template').click();
 
         cy.checkDownloadByContentOfFixture('ghgaTemplate.json', '');
