@@ -86,6 +86,37 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Wo
         WorkflowRun.get(restartedRun.id).restartedFrom == null
     }
 
+    void "deleteWorkflowRun, when another run still shares the skip message, keeps the skip message"() {
+        given:
+        WorkflowStepSkipMessage skipMessage = createSkipMessage()
+        WorkflowRun runToDelete = createWorkflowRun(skipMessage: skipMessage)
+        WorkflowRun remainingRun = createWorkflowRun(skipMessage: skipMessage)
+
+        when:
+        workflowDeletionService.deleteWorkflowRun(runToDelete)
+
+        then:
+        !WorkflowRun.get(runToDelete.id)
+        WorkflowStepSkipMessage.get(skipMessage.id)
+        WorkflowRun.get(remainingRun.id).skipMessage == skipMessage
+    }
+
+    void "deleteWorkflowRun, when the last run sharing the skip message is deleted, deletes the skip message"() {
+        given:
+        WorkflowStepSkipMessage skipMessage = createSkipMessage()
+        WorkflowRun firstRun = createWorkflowRun(skipMessage: skipMessage)
+        WorkflowRun secondRun = createWorkflowRun(skipMessage: skipMessage)
+
+        when:
+        workflowDeletionService.deleteWorkflowRun(firstRun)
+        workflowDeletionService.deleteWorkflowRun(secondRun)
+
+        then:
+        !WorkflowRun.get(firstRun.id)
+        !WorkflowRun.get(secondRun.id)
+        !WorkflowStepSkipMessage.get(skipMessage.id)
+    }
+
     void "deleteWorkflowRun, should drop the run from notifications referencing it, keeping the other runs"() {
         given:
         WorkflowRun runToDelete = createWorkflowRun()

@@ -925,6 +925,27 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         !WorkflowRun.get(alignmentRun.id)
     }
 
+    void "deleteAllProcessingInformationAndResultOfOneSeqTrack, when the graph contains a workflow artefact without concrete object, ignores it and deletes the bam file"() {
+        given:
+        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
+        roddyBamFile.workPackage.bamFileInProjectFolder = roddyBamFile
+        roddyBamFile.workPackage.save(flush: true)
+        SeqTrack seqTrack = roddyBamFile.seqTracks.iterator().next()
+        WorkflowRun alignmentRun = wireSeqTrackToBamFile(seqTrack, roddyBamFile)
+        // Metadata-only co-output of the alignment run: a workflow artefact whose concrete object does not (or no
+        // longer) exist, as it occurs for artefacts whose domain object was already deleted.
+        WorkflowArtefact metadataOnlyArtefact = createWorkflowArtefact(producedBy: alignmentRun)
+
+        when:
+        deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
+
+        then:
+        !RoddyBamFile.get(roddyBamFile.id)
+        !MergingWorkPackage.get(roddyBamFile.workPackage.id)
+        !WorkflowRun.get(alignmentRun.id)
+        !WorkflowArtefact.get(metadataOnlyArtefact.id)
+    }
+
     void "testDeleteAllProcessingInformationAndResultOfOneSeqTrack_SingleCellBamFile"() {
         given:
         setupDataForProcessingFiles()

@@ -160,10 +160,22 @@ class WorkflowDeletionService {
         }
     }
 
+    /**
+     * One {@link WorkflowStepSkipMessage} is shared by all runs skipped together: {@code changeStateToSkipped} assigns
+     * the same instance to the skipped run and to every depending run. It may therefore only be deleted once the last
+     * run referencing it is gone -- deleting it earlier would let a still attached {@link WorkflowRun} re-save it by
+     * cascade on the next flush, which Hibernate rejects with "deleted object would be re-saved by cascade".
+     *
+     * Re-reading the message also covers the recursion entering the same run twice, where it was already deleted.
+     */
     @CompileDynamic
     void deleteSkipMessage(WorkflowStepSkipMessage skipMessage) {
-        if (skipMessage) {
-            skipMessage.delete(flush: true)
+        if (!skipMessage) {
+            return
+        }
+        WorkflowStepSkipMessage skipMessageToDelete = WorkflowStepSkipMessage.get(skipMessage.id)
+        if (skipMessageToDelete && !WorkflowRun.countBySkipMessage(skipMessageToDelete)) {
+            skipMessageToDelete.delete(flush: true)
         }
     }
 

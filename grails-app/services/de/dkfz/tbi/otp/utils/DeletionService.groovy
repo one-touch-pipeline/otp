@@ -426,6 +426,11 @@ class DeletionService {
      * sequence files are removed separately by deleteSeqTrack via deleteRawSequenceFile.
      */
     private static boolean isDeletableArtefact(Artefact artefact) {
+        if (!artefact) {
+            // Metadata-only entry: the workflow artefact has no concrete object (anymore), so there is nothing to
+            // delete here. Its graph metadata is still cleaned up along with the producing run.
+            return false
+        }
         // getClassWithoutInitializingProxy resolves the artefact's real domain class. It is used for every type check
         // and class-name lookup in this service, because instanceof and artefact.class both misreport a Hibernate
         // proxy's subtype and would otherwise misclassify a proxied artefact.
