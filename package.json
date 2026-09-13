@@ -26,6 +26,6 @@
     "start-server-and-test": "~3.0.12"
   },
   "dependencies": {
-    "@humanfs/core": "^0.19.2"
+    "@humanfs/core": "^0.20.0"
   }
 }
