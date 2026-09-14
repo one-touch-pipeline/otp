@@ -18,5 +18,16 @@
     "errorExpression": "error",
     "allowRestartingCount": 3,
     "mailText": "This is the edited mail text."
+  },
+  {
+    "name": "workflow job error definition with cluster log check",
+    "jobBeanName": "panCancerValidationJob",
+    "sourceType": "CLUSTER_JOB",
+    "restartAction": "RESTART_JOB",
+    "beanToRestart": "panCancerValidationJob",
+    "errorExpression": "Unknown error 512",
+    "allowRestartingCount": 1,
+    "mailText": "This definition also checks the cluster log on success.",
+    "checkClusterLogOnSuccess": true
   }
 ]

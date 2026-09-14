@@ -21,18 +21,25 @@
  */
 package de.dkfz.tbi.otp.workflow.alignment.roddy
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.workflow.alignment.AlignmentWorkflowShared
 import de.dkfz.tbi.otp.workflow.jobs.AbstractRoddyClusterValidationJob
+import de.dkfz.tbi.otp.workflow.restartHandler.LogWithIdentifier
+import de.dkfz.tbi.otp.workflow.restartHandler.WorkflowJobErrorDefinition
+import de.dkfz.tbi.otp.workflow.restartHandler.logging.ClusterJobLogService
 import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
+import java.util.regex.Pattern
 
 @Component
 @Slf4j
@@ -40,6 +47,46 @@ abstract class AbstractRoddyAlignmentValidationJob extends AbstractRoddyClusterV
 
     @Autowired
     PanCancerWorkFileService panCancerWorkFileService
+
+    @Autowired
+    ProcessingOptionService processingOptionService
+
+    @Autowired
+    ClusterJobLogService clusterJobLogService
+
+    /**
+     * In addition to the {@link AbstractRoddyClusterValidationJob} check, also scan the cluster job logs
+     * for configured error patterns on the success path — some infrastructure faults (e.g. hanging NFS
+     * mounts) make a Roddy cluster job exit 0 while still printing an error, which the JobStateLogFile
+     * check alone cannot catch. See otp-3022.
+     */
+    @CompileDynamic
+    @Override
+    protected void ensureExternalJobsRunThrough(WorkflowStep workflowStep) {
+        super.ensureExternalJobsRunThrough(workflowStep)
+
+        if (!processingOptionService.findOptionAsBoolean(OptionName.ENABLE_CHECKING_CLUSTER_LOG_ON_SUCCESS)) {
+            return
+        }
+
+        List<WorkflowJobErrorDefinition> definitions = WorkflowJobErrorDefinition.findAllByJobBeanNameAndSourceTypeAndCheckClusterLogOnSuccess(
+                workflowStep.beanName, WorkflowJobErrorDefinition.SourceType.CLUSTER_JOB, true)
+        if (!definitions) {
+            return
+        }
+
+        Collection<LogWithIdentifier> logs = clusterJobLogService.createLogsWithIdentifier(workflowStep)
+        for (LogWithIdentifier logWithIdentifier in logs) {
+            WorkflowJobErrorDefinition matchedDefinition = definitions.find {
+                it.errorExpression && Pattern.compile(it.errorExpression, Pattern.CASE_INSENSITIVE).matcher(logWithIdentifier.log).find()
+            }
+            if (matchedDefinition) {
+                throw new ValidationJobFailedException(
+                        "Cluster job log ${logWithIdentifier.identifier} matches error definition " +
+                                "'${matchedDefinition.name}': ${matchedDefinition.errorExpression}")
+            }
+        }
+    }
 
     /**
      * Returns the expected files for validation

@@ -111,6 +111,7 @@ class WorkflowJobErrorDefinitionCreateCommand implements Validateable {
     int allowRestartingCount
     String beanToRestart
     String mailText
+    boolean checkClusterLogOnSuccess
 
     static constraints = {
         errorExpression(validator: { val, obj ->
@@ -135,6 +136,11 @@ class WorkflowJobErrorDefinitionCreateCommand implements Validateable {
                 if (obj.beanToRestart) {
                     return 'workflowJobErrorDefinition.beanToRestart.notNull'
                 }
+            }
+        }
+        checkClusterLogOnSuccess validator: { val, obj ->
+            if (val && obj.sourceType != WorkflowJobErrorDefinition.SourceType.CLUSTER_JOB) {
+                return 'workflowJobErrorDefinition.checkClusterLogOnSuccess.sourceTypeMismatch'
             }
         }
     }

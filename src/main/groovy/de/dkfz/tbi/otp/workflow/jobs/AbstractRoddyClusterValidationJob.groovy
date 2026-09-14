@@ -60,7 +60,7 @@ abstract class AbstractRoddyClusterValidationJob extends AbstractValidationJob {
      */
     @CompileDynamic
     @Override
-    protected final void ensureExternalJobsRunThrough(WorkflowStep workflowStep) {
+    protected void ensureExternalJobsRunThrough(WorkflowStep workflowStep) {
         // cluster jobs are connected to the job sending them, not to this validation job
         Set<ClusterJob> clusterJobs = workflowStepService.getPreviousRunningWorkflowStep(workflowStep).clusterJobs
         if (!clusterJobs) {

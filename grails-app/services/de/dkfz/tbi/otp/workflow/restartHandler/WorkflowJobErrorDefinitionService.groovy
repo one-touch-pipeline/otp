@@ -57,14 +57,15 @@ class WorkflowJobErrorDefinitionService {
     @CompileDynamic
     WorkflowJobErrorDefinition create(WorkflowJobErrorDefinitionCreateCommand cmd) {
         return new WorkflowJobErrorDefinition([
-                name                : cmd.name,
-                jobBeanName         : cmd.jobBeanName,
-                sourceType          : cmd.sourceType,
-                action              : cmd.restartAction,
-                errorExpression     : cmd.errorExpression,
-                allowRestartingCount: cmd.allowRestartingCount,
-                beanToRestart       : cmd.beanToRestart ?: null,
-                mailText            : cmd.mailText,
+                name                    : cmd.name,
+                jobBeanName             : cmd.jobBeanName,
+                sourceType              : cmd.sourceType,
+                action                  : cmd.restartAction,
+                errorExpression         : cmd.errorExpression,
+                allowRestartingCount    : cmd.allowRestartingCount,
+                beanToRestart           : cmd.beanToRestart ?: null,
+                mailText                : cmd.mailText,
+                checkClusterLogOnSuccess: cmd.checkClusterLogOnSuccess,
         ]).save(flush: true)
     }
 

@@ -153,6 +153,58 @@ class WorkflowJobErrorDefinitionServiceSpec extends Specification implements Dat
         definition.allowRestartingCount == cmd.allowRestartingCount
         definition.beanToRestart == cmd.beanToRestart
         definition.mailText == cmd.mailText
+        !definition.checkClusterLogOnSuccess
+    }
+
+    void "create, when checkClusterLogOnSuccess is true and sourceType is CLUSTER_JOB, then create object with flag set"() {
+        given:
+        WorkflowJobErrorDefinitionCreateCommand cmd = new WorkflowJobErrorDefinitionCreateCommand([
+                name                     : "name_${nextId}",
+                jobBeanName              : "job_${nextId}",
+                sourceType               : WorkflowJobErrorDefinition.SourceType.CLUSTER_JOB,
+                restartAction            : WorkflowJobErrorDefinition.Action.RESTART_WORKFLOW,
+                errorExpression          : "someExpression ${nextId}",
+                allowRestartingCount     : 5,
+                beanToRestart            : null,
+                mailText                 : "Some mail text\n${nextId}",
+                checkClusterLogOnSuccess : true,
+        ])
+
+        WorkflowJobErrorDefinitionService service = new WorkflowJobErrorDefinitionService(null, [])
+
+        when:
+        WorkflowJobErrorDefinition definition = service.create(cmd)
+
+        then:
+        definition.checkClusterLogOnSuccess
+    }
+
+    @Unroll
+    void "create, when checkClusterLogOnSuccess is true and sourceType is #sourceType, then fail validation"() {
+        given:
+        WorkflowJobErrorDefinitionCreateCommand cmd = new WorkflowJobErrorDefinitionCreateCommand([
+                name                     : "name_${nextId}",
+                jobBeanName              : "job_${nextId}",
+                sourceType               : sourceType,
+                restartAction            : WorkflowJobErrorDefinition.Action.RESTART_WORKFLOW,
+                errorExpression          : "someExpression ${nextId}",
+                allowRestartingCount     : 5,
+                beanToRestart            : null,
+                mailText                 : "Some mail text\n${nextId}",
+                checkClusterLogOnSuccess : true,
+        ])
+
+        WorkflowJobErrorDefinitionService service = new WorkflowJobErrorDefinitionService(null, [])
+
+        when:
+        service.create(cmd)
+
+        then:
+        grails.validation.ValidationException e = thrown(grails.validation.ValidationException)
+        e.message.contains('checkClusterLogOnSuccess')
+
+        where:
+        sourceType << (WorkflowJobErrorDefinition.SourceType.values() - WorkflowJobErrorDefinition.SourceType.CLUSTER_JOB)
     }
 
     // false positives, since rule can not recognize calling class

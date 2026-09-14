@@ -51,6 +51,60 @@ describe('Check workflow job error definition page', () => {
       });
     });
 
+    it('should create a workflow job error definition with checkClusterLogOnSuccess enabled', () => {
+      cy.visit('/workflowJobErrorDefinition/create');
+      cy.intercept('workflowJobErrorDefinition/createObject*').as('createErrorDefinition');
+
+      cy.fixture('workflowJobErrorDefinition.json').then((errorDefinition) => {
+        cy.get('input#name').type(errorDefinition[2].name);
+        cy.get('select#jobBeanName').select(errorDefinition[2].jobBeanName, { force: true });
+        cy.get('select#sourceType').select(errorDefinition[2].sourceType, { force: true });
+        cy.get('select#restartAction').select(errorDefinition[2].restartAction, { force: true });
+        cy.get('select#beanToRestart').select(errorDefinition[2].beanToRestart, { force: true });
+        cy.get('input#errorExpression').type(errorDefinition[2].errorExpression);
+        cy.get('input#allowRestartingCount').type(errorDefinition[2].allowRestartingCount);
+        cy.get('textarea#mailText').type(errorDefinition[2].mailText);
+        cy.get('input#checkClusterLogOnSuccess').check();
+      });
+
+      cy.get('input#create').click();
+
+      cy.wait('@createErrorDefinition').then((interception) => {
+        expect(interception.response.statusCode).to.eq(302);
+        cy.location('pathname').should('contain', '/workflowJobErrorDefinition/index');
+      });
+
+      cy.get('div.errorDefinitions tbody tr').last().find('td').eq(8)
+        .find('span.icon-true').should('exist');
+    });
+
+    it('should not create a workflow job error definition when checkClusterLogOnSuccess is set for a non-CLUSTER_JOB sourceType', () => {
+      cy.visit('/workflowJobErrorDefinition/create');
+      cy.intercept('workflowJobErrorDefinition/createObject*').as('createErrorDefinition');
+
+      cy.fixture('workflowJobErrorDefinition.json').then((errorDefinition) => {
+        cy.get('input#name').type('invalid checkClusterLogOnSuccess combination');
+        cy.get('select#jobBeanName').select(errorDefinition[0].jobBeanName, { force: true });
+        cy.get('select#sourceType').select('MESSAGE', { force: true });
+        cy.get('select#restartAction').select('STOP', { force: true });
+        cy.get('input#errorExpression').type('some error');
+        cy.get('input#allowRestartingCount').type('1');
+        cy.get('textarea#mailText').type('should not be created');
+        cy.get('input#checkClusterLogOnSuccess').invoke('removeAttr', 'disabled').check();
+      });
+
+      cy.get('input#create').click();
+
+      cy.wait('@createErrorDefinition').then((interception) => {
+        expect(interception.response.statusCode).to.eq(302);
+        // redirects back to 'create' (not 'index') on validation failure
+        cy.location('pathname').should('contain', '/workflowJobErrorDefinition/create');
+      });
+
+      cy.visit('/workflowJobErrorDefinition/index');
+      cy.get('div.errorDefinitions').should('not.contain', 'invalid checkClusterLogOnSuccess combination');
+    });
+
     it('should edit a workflow job error definition', () => {
       cy.visit('/workflowJobErrorDefinition/index');
       cy.intercept('workflowJobErrorDefinition/updateField*').as('updateErrorDefinition');
@@ -118,6 +172,29 @@ describe('Check workflow job error definition page', () => {
           cy.wrap(errorColumns).eq(7).find('button.edit-button-left').click();
           cy.wrap(errorColumns).eq(7).find('textarea').type(errorDefinition[1].mailText);
           cy.wrap(errorColumns).eq(7).find('button.save').click();
+          cy.wait('@updateErrorDefinition').then((interception) => {
+            expect(interception.response.statusCode).to.eq(200);
+            expect(interception.response.body.success).to.eq(true);
+          });
+
+          // checkClusterLogOnSuccess additionally requires action RESTART_WORKFLOW
+          // (see the WorkflowJobErrorDefinition.checkClusterLogOnSuccess validator).
+          // The action was set to STOP above, so the edit control must stay hidden.
+          cy.wrap(errorColumns).eq(8).find('button.edit').should('have.css', 'display', 'none');
+
+          // Switching the action to RESTART_WORKFLOW completes the valid combination with the
+          // sourceType CLUSTER_JOB set above, so the toggle becomes editable again.
+          cy.wrap(errorColumns).eq(3).find('button.edit').click();
+          cy.wrap(errorColumns).eq(3).find('select').select('RESTART_WORKFLOW', { force: true });
+          cy.wrap(errorColumns).eq(3).find('button.save').click();
+          cy.wait('@updateActionFieldForErrorDefinition').then((interception) => {
+            expect(interception.response.statusCode).to.eq(200);
+            expect(interception.response.body.success).to.eq(true);
+          });
+
+          cy.wrap(errorColumns).eq(8).find('button.edit').should('not.have.css', 'display', 'none');
+          cy.wrap(errorColumns).eq(8).find('button.edit').click();
+          cy.wrap(errorColumns).eq(8).find('button.toggle').click();
           cy.wait('@updateErrorDefinition').then((interception) => {
             expect(interception.response.statusCode).to.eq(200);
             expect(interception.response.body.success).to.eq(true);

@@ -38,6 +38,9 @@ import de.dkfz.tbi.otp.utils.CreateJobStateLogFileHelper
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.RoddyService
 import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerValidationJob
+import de.dkfz.tbi.otp.workflow.restartHandler.LogWithIdentifier
+import de.dkfz.tbi.otp.workflow.restartHandler.WorkflowJobErrorDefinition
+import de.dkfz.tbi.otp.workflow.restartHandler.logging.ClusterJobLogService
 import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -72,6 +75,7 @@ abstract class AbstractRoddyAlignmentValidationJobSpec extends Specification imp
                 FileType,
                 FastqImportInstance,
                 ClusterJob,
+                WorkflowJobErrorDefinition,
         ]
     }
 
@@ -175,6 +179,9 @@ abstract class AbstractRoddyAlignmentValidationJobSpec extends Specification imp
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             1 * getOutputArtefact(workflowStepCurrent, _) >> abstractBamFile
         }
+        job.processingOptionService = Mock(ProcessingOptionService) {
+            1 * findOptionAsBoolean(ProcessingOption.OptionName.ENABLE_CHECKING_CLUSTER_LOG_ON_SUCCESS) >> true
+        }
 
         when:
         job.ensureExternalJobsRunThrough(workflowStepCurrent)
@@ -215,5 +222,198 @@ abstract class AbstractRoddyAlignmentValidationJobSpec extends Specification imp
         then:
         final ValidationJobFailedException e = thrown()
         e.message.contains("Status code of cluster job ${testJobId}: " + STATUS_CODE_FAILED)
+    }
+
+    private void mockCleanJobStateLogFileCheck(WorkflowStep workflowStepCurrent, String testJobId) {
+        job.roddyService = Mock(RoddyService) {
+            1 * getJobStateLogFile(_) >> CreateJobStateLogFileHelper.createJobStateLogFile(tempDir.toFile(), [
+                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: testJobId, statusCode: STATUS_CODE_FINISHED]),
+            ])
+        }
+        job.logService = Mock(LogService)
+        job.workflowStepService = Mock(WorkflowStepService) {
+            1 * getPreviousRunningWorkflowStep(workflowStepCurrent) >> workflowStep
+        }
+        job.panCancerWorkFileService = Mock(PanCancerWorkFileService)
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            1 * getOutputArtefact(workflowStepCurrent, _) >> abstractBamFile
+        }
+    }
+
+    void "test ensureExternalJobsRunThrough, when checkClusterLogOnSuccess is enabled and a cluster log matches, then throw a ValidationJobFailedException naming the definition"() {
+        given:
+        final WorkflowStep workflowStepCurrent = createWorkflowStep([previous: workflowStep])
+        final String testJobId = "cluster_job_id"
+        createClusterJob([
+                workflowStep: workflowStep,
+                clusterJobId: testJobId,
+                checkStatus : ClusterJob.CheckStatus.FINISHED,
+                jobLog      : CreateFileHelper.createFile(tempDir.resolve("test.txt")).toString(),
+        ])
+        mockCleanJobStateLogFileCheck(workflowStepCurrent, testJobId)
+
+        WorkflowJobErrorDefinition definition = createWorkflowJobErrorDefinition([
+                jobBeanName             : workflowStepCurrent.beanName,
+                sourceType              : WorkflowJobErrorDefinition.SourceType.CLUSTER_JOB,
+                action                  : WorkflowJobErrorDefinition.Action.RESTART_WORKFLOW,
+                checkClusterLogOnSuccess: true,
+                errorExpression         : 'Unknown error 512',
+        ])
+
+        job.processingOptionService = Mock(ProcessingOptionService) {
+            1 * findOptionAsBoolean(ProcessingOption.OptionName.ENABLE_CHECKING_CLUSTER_LOG_ON_SUCCESS) >> true
+        }
+        job.clusterJobLogService = Mock(ClusterJobLogService) {
+            1 * createLogsWithIdentifier(workflowStepCurrent) >> [
+                    new LogWithIdentifier('some/log', 'wait for tar subprocess failed: Unknown error 512.'),
+            ]
+        }
+
+        when:
+        job.ensureExternalJobsRunThrough(workflowStepCurrent)
+
+        then:
+        final ValidationJobFailedException e = thrown()
+        e.message.contains('some/log')
+        e.message.contains(definition.name)
+    }
+
+    @Unroll
+    void "test ensureExternalJobsRunThrough, when the cluster log matches the error expression only by case, then still throw (case-insensitive)"() {
+        given:
+        final WorkflowStep workflowStepCurrent = createWorkflowStep([previous: workflowStep])
+        final String testJobId = "cluster_job_id"
+        createClusterJob([
+                workflowStep: workflowStep,
+                clusterJobId: testJobId,
+                checkStatus : ClusterJob.CheckStatus.FINISHED,
+                jobLog      : CreateFileHelper.createFile(tempDir.resolve("test.txt")).toString(),
+        ])
+        mockCleanJobStateLogFileCheck(workflowStepCurrent, testJobId)
+
+        createWorkflowJobErrorDefinition([
+                jobBeanName             : workflowStepCurrent.beanName,
+                sourceType              : WorkflowJobErrorDefinition.SourceType.CLUSTER_JOB,
+                action                  : WorkflowJobErrorDefinition.Action.RESTART_WORKFLOW,
+                checkClusterLogOnSuccess: true,
+                errorExpression         : 'Unknown error 512',
+        ])
+
+        job.processingOptionService = Mock(ProcessingOptionService) {
+            1 * findOptionAsBoolean(ProcessingOption.OptionName.ENABLE_CHECKING_CLUSTER_LOG_ON_SUCCESS) >> true
+        }
+        job.clusterJobLogService = Mock(ClusterJobLogService) {
+            1 * createLogsWithIdentifier(workflowStepCurrent) >> [
+                    new LogWithIdentifier('some/log', logContent),
+            ]
+        }
+
+        when:
+        job.ensureExternalJobsRunThrough(workflowStepCurrent)
+
+        then:
+        thrown(ValidationJobFailedException)
+
+        where:
+        logContent << [
+                'wait for tar subprocess failed: unknown error 512.',
+                'WAIT FOR TAR SUBPROCESS FAILED: UNKNOWN ERROR 512.',
+                'wait for tar subprocess failed: Unknown Error 512.',
+        ]
+    }
+
+    void "test ensureExternalJobsRunThrough, when the ProcessingOption kill-switch is off, then skip the check without reading cluster logs"() {
+        given:
+        final WorkflowStep workflowStepCurrent = createWorkflowStep([previous: workflowStep])
+        final String testJobId = "cluster_job_id"
+        createClusterJob([
+                workflowStep: workflowStep,
+                clusterJobId: testJobId,
+                checkStatus : ClusterJob.CheckStatus.FINISHED,
+                jobLog      : CreateFileHelper.createFile(tempDir.resolve("test.txt")).toString(),
+        ])
+        mockCleanJobStateLogFileCheck(workflowStepCurrent, testJobId)
+
+        createWorkflowJobErrorDefinition([
+                jobBeanName             : workflowStepCurrent.beanName,
+                sourceType              : WorkflowJobErrorDefinition.SourceType.CLUSTER_JOB,
+                action                  : WorkflowJobErrorDefinition.Action.RESTART_WORKFLOW,
+                checkClusterLogOnSuccess: true,
+        ])
+
+        job.processingOptionService = Mock(ProcessingOptionService) {
+            1 * findOptionAsBoolean(ProcessingOption.OptionName.ENABLE_CHECKING_CLUSTER_LOG_ON_SUCCESS) >> false
+        }
+        job.clusterJobLogService = Mock(ClusterJobLogService) {
+            0 * createLogsWithIdentifier(_)
+        }
+
+        when:
+        job.ensureExternalJobsRunThrough(workflowStepCurrent)
+
+        then:
+        noExceptionThrown()
+    }
+
+    void "test ensureExternalJobsRunThrough, when no checkClusterLogOnSuccess definition exists for the bean, then skip reading cluster logs"() {
+        given:
+        final WorkflowStep workflowStepCurrent = createWorkflowStep([previous: workflowStep])
+        final String testJobId = "cluster_job_id"
+        createClusterJob([
+                workflowStep: workflowStep,
+                clusterJobId: testJobId,
+                checkStatus : ClusterJob.CheckStatus.FINISHED,
+                jobLog      : CreateFileHelper.createFile(tempDir.resolve("test.txt")).toString(),
+        ])
+        mockCleanJobStateLogFileCheck(workflowStepCurrent, testJobId)
+
+        job.processingOptionService = Mock(ProcessingOptionService) {
+            1 * findOptionAsBoolean(ProcessingOption.OptionName.ENABLE_CHECKING_CLUSTER_LOG_ON_SUCCESS) >> true
+        }
+        job.clusterJobLogService = Mock(ClusterJobLogService) {
+            0 * createLogsWithIdentifier(_)
+        }
+
+        when:
+        job.ensureExternalJobsRunThrough(workflowStepCurrent)
+
+        then:
+        noExceptionThrown()
+    }
+
+    void "test ensureExternalJobsRunThrough, when the matched cluster job's log is unreadable, then not throw"() {
+        given:
+        final WorkflowStep workflowStepCurrent = createWorkflowStep([previous: workflowStep])
+        final String testJobId = "cluster_job_id"
+        createClusterJob([
+                workflowStep: workflowStep,
+                clusterJobId: testJobId,
+                checkStatus : ClusterJob.CheckStatus.FINISHED,
+                jobLog      : CreateFileHelper.createFile(tempDir.resolve("test.txt")).toString(),
+        ])
+        mockCleanJobStateLogFileCheck(workflowStepCurrent, testJobId)
+
+        createWorkflowJobErrorDefinition([
+                jobBeanName             : workflowStepCurrent.beanName,
+                sourceType              : WorkflowJobErrorDefinition.SourceType.CLUSTER_JOB,
+                action                  : WorkflowJobErrorDefinition.Action.RESTART_WORKFLOW,
+                checkClusterLogOnSuccess: true,
+                errorExpression         : 'Unknown error 512',
+        ])
+
+        job.processingOptionService = Mock(ProcessingOptionService) {
+            1 * findOptionAsBoolean(ProcessingOption.OptionName.ENABLE_CHECKING_CLUSTER_LOG_ON_SUCCESS) >> true
+        }
+        // RestartHandlerLogService.createLogWithIdentifier already fails open for unreadable files,
+        // returning no entry for them rather than throwing — simulated here as an empty result.
+        job.clusterJobLogService = Mock(ClusterJobLogService) {
+            1 * createLogsWithIdentifier(workflowStepCurrent) >> []
+        }
+
+        when:
+        job.ensureExternalJobsRunThrough(workflowStepCurrent)
+
+        then:
+        noExceptionThrown()
     }
 }

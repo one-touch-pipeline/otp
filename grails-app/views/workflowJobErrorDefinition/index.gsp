@@ -81,6 +81,11 @@
                         <g:message code="workflowJobErrorDefinition.header.mailText"/>
                     </span>
                 </th>
+                <th>
+                    <span title="${g.message(code: "workflowJobErrorDefinition.header.tooltip.checkClusterLogOnSuccess")}">
+                        <g:message code="workflowJobErrorDefinition.header.checkClusterLogOnSuccess"/>
+                    </span>
+                </th>
                 <th class="delete">
                     <span title="${g.message(code: "workflowJobErrorDefinition.header.tooltip.delete")}">
                         <g:message code="workflowJobErrorDefinition.header.delete"/>
@@ -171,6 +176,16 @@
                                         'property': 'mailText',
                                 ])}"
                                 value="${definition.mailText}"/>
+                    </td>
+                    <td class="checkClusterLogOnSuccess">
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="toggle"
+                                link="${g.createLink(controller: 'workflowJobErrorDefinition', action: 'updateField', params: [
+                                        'entityId': "${definition.id}",
+                                        'property': 'checkClusterLogOnSuccess',
+                                ])}"
+                                value="${definition.checkClusterLogOnSuccess}"/>
                     </td>
                     <td class="delete">
                         <g:form action="delete" method="POST" useToken="true">

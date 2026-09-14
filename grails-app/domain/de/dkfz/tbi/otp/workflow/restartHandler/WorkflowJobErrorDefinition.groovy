@@ -59,6 +59,9 @@ class WorkflowJobErrorDefinition implements Entity {
     /** Additional text for the mail, for example which manual steps should be done before restart. */
     String mailText
 
+    /** If true and {@link #sourceType} is {@link SourceType#CLUSTER_JOB}, also check the cluster job log when the job otherwise finished successfully. */
+    boolean checkClusterLogOnSuccess
+
     /**
      * Defines the different sources of logs handled by the restart handler.
      */
@@ -110,6 +113,14 @@ class WorkflowJobErrorDefinition implements Entity {
                 if (obj.beanToRestart != null) {
                     return 'workflowJobErrorDefinition.beanToRestart.notNull'
                 }
+            }
+        }
+        checkClusterLogOnSuccess validator: { val, obj ->
+            if (val && obj.sourceType != SourceType.CLUSTER_JOB) {
+                return 'workflowJobErrorDefinition.checkClusterLogOnSuccess.sourceTypeMismatch'
+            }
+            if (val && obj.action != Action.RESTART_WORKFLOW) {
+                return 'workflowJobErrorDefinition.checkClusterLogOnSuccess.actionMismatch'
             }
         }
     }

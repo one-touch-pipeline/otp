@@ -156,6 +156,20 @@
                     <g:message code="workflowJobErrorDefinition.header.tooltip.mailText"/>
                 </td>
             </tr>
+            <tr>
+                <td>
+                    <label for="checkClusterLogOnSuccess">
+                        <g:message code="workflowJobErrorDefinition.header.checkClusterLogOnSuccess"/>
+                    </label>
+                </td>
+                <td>
+                    <g:checkBox id="checkClusterLogOnSuccess" name="checkClusterLogOnSuccess"
+                                value="${cmd?.checkClusterLogOnSuccess}"/>
+                </td>
+                <td>
+                    <g:message code="workflowJobErrorDefinition.header.tooltip.checkClusterLogOnSuccess"/>
+                </td>
+            </tr>
         </table>
 
         <div>

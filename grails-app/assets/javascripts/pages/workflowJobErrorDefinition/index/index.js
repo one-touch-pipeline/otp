@@ -38,7 +38,20 @@ window.workflowJobErrorDefinitionActionChangeSuccessHandler = function (containe
     select.val('').trigger('change');
     editSwitch.hide();
   }
+
+  updateCheckClusterLogOnSuccessEditability(row);
 };
+
+// checkClusterLogOnSuccess is only allowed while the row's action is RESTART_WORKFLOW
+// (see WorkflowJobErrorDefinition's checkClusterLogOnSuccess validator). Hide the toggle's
+// edit control for every other action so it can't be flipped to a value the server rejects.
+function updateCheckClusterLogOnSuccessEditability(row) {
+  'use strict';
+
+  const action = $('.restartAction select', row).val();
+  const editSwitch = $('.checkClusterLogOnSuccess .edit-switch-label', row);
+  editSwitch.find('.js-edit').toggle(action === 'RESTART_WORKFLOW');
+}
 
 $(() => {
   'use strict';
@@ -52,5 +65,6 @@ $(() => {
       const editSwitch = $('.restartJob .edit-switch-label', row);
       editSwitch.hide();
     }
+    updateCheckClusterLogOnSuccessEditability(row);
   });
 });

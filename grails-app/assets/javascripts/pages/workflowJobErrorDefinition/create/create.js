@@ -36,4 +36,26 @@ $(() => {
   };
   $('#restartAction').on('change', update);
   update();
+
+  const updateRestartAction = function () {
+    const restrictToRestartWorkflow = $('#checkClusterLogOnSuccess').is(':checked');
+    $('#restartAction option').not('[value="RESTART_WORKFLOW"]').prop('disabled', restrictToRestartWorkflow);
+    if (restrictToRestartWorkflow) {
+      $('#restartAction').val('RESTART_WORKFLOW');
+    }
+    $('#restartAction').trigger('change');
+  };
+
+  const updateCheckClusterLogOnSuccess = function () {
+    const isClusterJob = $('#sourceType').val() === 'CLUSTER_JOB';
+    if (!isClusterJob) {
+      $('#checkClusterLogOnSuccess').prop('checked', false);
+    }
+    $('#checkClusterLogOnSuccess').prop('disabled', !isClusterJob);
+    updateRestartAction();
+  };
+
+  $('#checkClusterLogOnSuccess').on('change', updateRestartAction);
+  $('#sourceType').on('change', updateCheckClusterLogOnSuccess);
+  updateCheckClusterLogOnSuccess();
 });

@@ -678,6 +678,10 @@ class ProcessingOption implements Entity {
                 "Whether or not WESKit should use the accounting feature",
                 Necessity.OPTIONAL, "false", TypeValidators.BOOLEAN,
         ),
+        ENABLE_CHECKING_CLUSTER_LOG_ON_SUCCESS(
+                "Boolean flag to  turn on/off checking cluster job logs for error patterns on the success path",
+                Necessity.OPTIONAL, "false", TypeValidators.BOOLEAN,
+        ),
 
         private final String description
         private final Necessity necessity
