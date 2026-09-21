@@ -129,7 +129,7 @@ class SingleCellBamFile extends AbstractBamFile implements HasIdentifier, Proces
     ]
 
     static constraints = {
-        workDirectoryName validator: { String val, SingleCellBamFile obj ->
+        workDirectoryName maxSize: 1023, validator: { String val, SingleCellBamFile obj ->
             uniquePerWorkPackageAndProperties(obj, ["workDirectoryName": val]) && OtpPathValidator.isValidRelativePath(val)
         }
         seqTracks minSize: 1

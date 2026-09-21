@@ -70,7 +70,7 @@ class RoddyBamFile extends AbstractBamFile implements HasIdentifier, ProcessPara
             !RoddyBamFile.findAllByWorkPackageAndIdentifierAndIdNotEqual(obj.workPackage, val, obj.id)
         }
         roddyExecutionDirectoryNames nullable: true
-        workDirectoryName nullable: true, validator: { val, obj ->
+        workDirectoryName nullable: true, maxSize: 1023, validator: { val, obj ->
             (val == null || (OtpPathValidator.isValidPathComponent(val) &&
                     !RoddyBamFile.findAllByWorkPackageAndWorkDirectoryNameAndIdNotEqual(obj.workPackage, val, obj.id)))
         } // needs to be nullable for objects created before link structure was used

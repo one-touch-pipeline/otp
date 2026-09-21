@@ -178,7 +178,7 @@ class ExternallyProcessedBamFile extends AbstractBamFile {
 
     static Closure constraints = {
         seqTracks nullable: true, maxSize: 0
-        importedFrom nullable: true, blank: false, shared: "absolutePath"
+        importedFrom nullable: true, blank: false, maxSize: 4095, shared: "absolutePath"
         fileName blank: false, shared: "pathComponent"
         workPackage validator: { val, obj ->
             List<ExternallyProcessedBamFile> epmbfs = ExternallyProcessedBamFile.findAllByFileName(obj.fileName).findAll {
