@@ -157,6 +157,34 @@ describe('Check projectUser page', () => {
       });
     });
 
+    it('should show an error when user is already part of project', () => {
+      cy.intercept('/projectUser/addUserToProject*').as('addUserToProject');
+
+      cy.get('form .ldap-user')
+          .find('input#username')
+          .type('dori');
+
+        cy.get('form .ldap-user')
+          .find('#projectRoles')
+          .select('PI', { force: true });
+
+        cy.get('form .ldap-user')
+          .find('input[name="accessToFiles"]')
+          .check({ force: true });
+
+        cy.get('.submit-container')
+          .find('button[type=submit]')
+          .click();
+
+        cy.wait('@addUserToProject').then((interception) => {
+          expect(interception.response.statusCode).to.eq(302);
+        });
+
+        cy.get('#otpToastBox .otpErrorToast')
+          .should('be.visible')
+          .and('contain.text', "User 'dori' is already part of project");
+    })
+
     shouldBeAbleToToggleNotification('dori');
   });
 

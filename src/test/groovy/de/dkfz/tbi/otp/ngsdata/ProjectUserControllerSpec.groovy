@@ -232,4 +232,48 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
     private List<String> roleNamesExcept(ProjectRole.Basic... exclusions) {
         return allRolesExcept(exclusions)*.name
     }
+
+    void "test addUserToProject, should not add user or send error mail when user is already part of project"() {
+        given:
+        Project project = DomainFactory.createProject()
+        User user = DomainFactory.createUser([
+                username: "username"
+        ])
+
+        Set<ProjectRole> projectRoles = [
+                createProjectRole(),
+        ]
+
+        DomainFactory.createUserProjectRole([
+                project     : project,
+                user        : user,
+                projectRoles: projectRoles,
+        ])
+
+        controller.userProjectRoleService = Mock(UserProjectRoleService)
+        controller.mailHelperService = Mock(MailHelperService)
+        controller.projectSelectionService = Mock(ProjectSelectionService) {
+            getRequestedProject() >> project
+        }
+
+        when:
+        controller.request.method = 'POST'
+        controller.params.addViaLdap = true
+        controller.params.username = user.username
+        controller.params.projectRoles = projectRoles
+
+        controller.addUserToProject()
+
+        then:
+        controller.response.status == SC_MOVED_TEMPORARILY
+        controller.response.redirectedUrl == "/projectUser/index"
+
+        controller.flash.message.message == "An error occurred"
+        controller.flash.message.errorList == [
+                "User '${user.username}' is already part of project '${project.name}'"
+        ]
+
+        0 * controller.userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(_, _, _, _)
+        0 * controller.mailHelperService.saveErrorMailInNewTransaction(_, _)
+    }
 }

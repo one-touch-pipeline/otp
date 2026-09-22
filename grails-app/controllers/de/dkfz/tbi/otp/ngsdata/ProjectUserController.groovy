@@ -133,36 +133,47 @@ class ProjectUserController implements CheckAndCall {
         if (cmd.hasErrors()) {
             flash.message = new FlashMessage("An error occurred", cmd.errors)
         } else {
-            try {
-                if (cmd.addViaLdap) {
-                    userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(
-                            project,
-                            cmd.projectRoles,
-                            cmd.username,
-                            [
-                                    accessToOtp           : cmd.accessToOtp,
-                                    accessToFiles         : cmd.accessToFiles,
-                                    manageUsers           : cmd.manageUsers,
-                                    manageUsersAndDelegate: cmd.manageUsersAndDelegate,
-                                    receivesNotifications : cmd.receivesNotifications,
-                            ]
-                    )
-                } else {
-                    userProjectRoleService.addExternalUserToProject(
-                            project,
-                            cmd.realName,
-                            cmd.email,
-                            cmd.projectRoles,
+            User user = cmd.addViaLdap ?
+                    CollectionUtils.atMostOneElement(User.findAllByUsername(cmd.username)) :
+                    null
+
+            if (user && UserProjectRole.findAllByUserAndProject(user, project)) {
+                flash.message = new FlashMessage(
+                        "An error occurred",
+                        "User '${user.username ?: user.realName}' is already part of project '${project.name}'"
+                )
+            } else {
+                try {
+                    if (cmd.addViaLdap) {
+                        userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(
+                                project,
+                                cmd.projectRoles,
+                                cmd.username,
+                                [
+                                        accessToOtp           : cmd.accessToOtp,
+                                        accessToFiles         : cmd.accessToFiles,
+                                        manageUsers           : cmd.manageUsers,
+                                        manageUsersAndDelegate: cmd.manageUsersAndDelegate,
+                                        receivesNotifications : cmd.receivesNotifications,
+                                ]
+                        )
+                    } else {
+                        userProjectRoleService.addExternalUserToProject(
+                                project,
+                                cmd.realName,
+                                cmd.email,
+                                cmd.projectRoles,
+                        )
+                    }
+                    flash.message = new FlashMessage("Data stored successfully")
+                } catch (Exception | AssertionError e) {
+                    flash.message = new FlashMessage("An error occurred", e.message)
+                    log.error(g.message(code: 'projectUser.addUser.error', args: [cmd.username, project]) + "\n" + e.message, e)
+                    mailHelperService.saveErrorMailInNewTransaction(
+                            "Error - Could not add user to project",
+                            g.message(code: 'projectUser.addUser.error', args: [cmd.username, project]) + "\n\n" + e.message
                     )
                 }
-                flash.message = new FlashMessage("Data stored successfully")
-            } catch (Exception | AssertionError e) {
-                flash.message = new FlashMessage("An error occurred", e.message)
-                log.error(g.message(code: 'projectUser.addUser.error', args: [cmd.username, project]) + "\n" + e.message, e)
-                mailHelperService.saveErrorMailInNewTransaction(
-                        "Error - Could not add user to project",
-                        g.message(code: 'projectUser.addUser.error', args: [cmd.username, project]) + "\n\n" + e.message
-                )
             }
         }
         redirect(controller: "projectUser")
