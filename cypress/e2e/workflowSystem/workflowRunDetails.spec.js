@@ -334,7 +334,8 @@ describe('Check workflow run details page', () => {
 });
 
 
-// This is a helper function to set a workflow to failed waiting since the test database currently does not have any failed waiting workflows
+// This is a helper function to set a workflow to failed waiting since the test database currently
+// does not have any failed waiting workflows
 function setWorkflowToFailedWaiting() {
   cy.visit('/workflowRunList/index?state=FAILED');
   cy.get('table#runs tbody tr').first().find('a').click();

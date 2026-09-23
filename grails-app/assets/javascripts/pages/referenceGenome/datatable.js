@@ -189,7 +189,7 @@ $(() => {
   $.otp.refgen.exportableReferenceGenomeTable();
 
   // hide the auxiliary columns after the table is rendered completely
-  // unfortunately not working if called in the initComplete() function
+  // unfortunately not working if called in the `initComplete()` function
   $(() => $.otp.refgen.toggleColumnVisibility(false));
 });
 

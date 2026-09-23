@@ -749,7 +749,7 @@ describe('Check projectRequest page', () => {
         cy.get('table td').should('contain', 'custom value');
       });
 
-      // delete the draft immediately so the field becomes unused for after() cleanup
+      // delete the draft immediately so the field becomes unused for `after()` cleanup
       cy.get('a#delete-request-btn').click();
       cy.get('div#confirmationModal').should('be.visible').find('button#confirmModal').click();
       cy.wait('@deleteProjectRequest').its('response.statusCode').should('eq', 200);

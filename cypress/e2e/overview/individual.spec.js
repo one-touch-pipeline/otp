@@ -195,7 +195,9 @@ describe('test for individual page', () => {
         cy.wait('@loadDataTable').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
           expect(interception.response.body.aaData).to.have.length(1);
-          interception.response.body.aaData.forEach((seq) => expect(seq.pid).to.contains(fixture.filterQuickSearch.toLowerCase()));
+          interception.response.body.aaData.forEach(
+            (seq) => expect(seq.pid).to.contains(fixture.filterQuickSearch.toLowerCase())
+          );
         });
       });
     });

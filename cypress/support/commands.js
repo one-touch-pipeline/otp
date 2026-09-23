@@ -110,11 +110,13 @@ Cypress.Commands.add('beginPage', () => {
 });
 
 /**
- * Reset-first TEST level database isolation, on top of the page transaction opened by cy.beginPage().
+ * Reset-first TEST level database isolation, on top of the page transaction opened by `cy.beginPage()`.
  *
  * Resets to a single per-test savepoint so each test starts from the same page-seed state. Call it in a beforeEach:
  *
+ *   ```
  *   beforeEach(() => cy.beginTest());
+ *   ```
  *
  * NOTE: opt-in per spec, NOT wired globally. Most specs are ordered create -> edit -> delete chains whose later tests
  * rely on state from earlier tests and must NOT be reset between tests. Only add this to a spec that is genuinely
@@ -223,7 +225,7 @@ Cypress.Commands.add('watchDownloadRequest', (routeMatcher) => {
  * checks download files
  *
  * check that
- * - the request delivering the file answered with 200, if it was announced with cy.watchDownloadRequest()
+ * - the request delivering the file answered with 200, if it was announced with `cy.watchDownloadRequest()`
  * - a file exists with given name, the current date and the given ending
  * - the file has all the given headers in given order
  * - the files contains all the given lines, the order within the line needs to match (but not the order of all lines)
@@ -271,7 +273,7 @@ Cypress.Commands.add(
   const checkContentAndCleanUp = (filepath) => {
     cy.readFile(filepath, 'utf8', { timeout: Cypress.config('defaultCommandTimeout') })
       .should((content) => {
-        // cy.readFile yields null as long as the file is missing, so this reports a download that
+        // `cy.readFile` yields null as long as the file is missing, so this reports a download that
         // never arrived, or one that the browser wrote under a different name
         expect(content, `content of the downloaded file ${filepath}`).to.be.a('string');
         const lines = content.split('\n');
@@ -285,7 +287,7 @@ Cypress.Commands.add(
   };
 
   if (wildcardFilename) {
-    // cy.exec is not retried by cypress, so the search has to be repeated until the file shows up
+    // `cy.exec` is not retried by cypress, so the search has to be repeated until the file shows up
     const pattern = `${filename}_${date}*${fileEnding}`;
     const findDownloadedFile = (remainingTries) => 
       cy.exec(`find "${downloadsFolder}" -name "${pattern}" -type f`, { failOnNonZeroExit: false, log: false })
@@ -504,9 +506,11 @@ Cypress.Commands.add('logDebug', (message, ...args) => {
  * @param {string} expectedSelector - The selector to verify after clicking
  * @param {(currentSubject: JQuery<HTMLElement>) => void} assertionCallback - Callback for assertions
  * @example
+ * ```
  * cy.toggleButton('Show Edit', '.edit-switches', ($el) => {
  *   expect($el).to.be.visible;
  * });
+ * ```
  */
 Cypress.Commands.add('toggleButton', (buttonText, expectedSelector, assertionCallback) => {
   'use strict';
@@ -525,8 +529,10 @@ Cypress.Commands.add('toggleButton', (buttonText, expectedSelector, assertionCal
  * @param {string} selectName - The name attribute of the select element
  * @param {number} optionIndex - The index of the option to select (default: 1 to skip the placeholder)
  * @example
+ * ```
  * cy.selectAvailableOptionFromDropdown('property');
  * cy.selectAvailableOptionFromDropdown('seqType.id', 2);
+ * ```
  */
 
 Cypress.Commands.add('selectAvailableOptionFromDropdown', (selectName, optionIndex = 1) => {

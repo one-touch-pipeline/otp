@@ -22,8 +22,8 @@
 const { defineConfig } = require('cypress');
 
 module.exports = defineConfig({
-  // Disallow the deprecated, insecure Cypress.env() browser API. Sensitive values are read via
-  // cy.env() and public values via Cypress.expose() instead. See https://on.cypress.io/cypress-env-migration
+  // Disallow the deprecated, insecure `Cypress.env()` browser API. Sensitive values are read via
+  // `cy.env()` and public values via `Cypress.expose()` instead. See https://on.cypress.io/cypress-env-migration
   allowCypressEnv: false,
   e2e: {
     baseUrl: 'http://localhost:8080/',
@@ -31,13 +31,11 @@ module.exports = defineConfig({
     supportFile: 'cypress/support/index.js',
     experimentalRunAllSpecs: true,
     testIsolation: false,
-    // eslint-disable-next-line strict
     setupNodeEvents(on, config) {
       // Load env vars from cypress/cypress.env.json (canonical location alongside other cypress config).
       // Split them so only non-sensitive values reach the browser: usernames are public and accessed
-      // synchronously via Cypress.expose(); passwords and secrets stay sensitive and are read via the
-      // async cy.env() command. See https://on.cypress.io/cypress-env-migration
-      // eslint-disable-next-line global-require
+      // synchronously via `Cypress.expose()`; passwords and secrets stay sensitive and are read via the
+      // async `cy.env()` command. See https://on.cypress.io/cypress-env-migration
       const envFile = require('./cypress/cypress.env.json');
       const isPublic = (key) => key.endsWith('_username');
 
@@ -50,12 +48,12 @@ module.exports = defineConfig({
           config.env[key] = value;
         }
       });
-      // Optional local debug toggle, formerly read via Cypress.env('LOG_DEBUG_ENABLED').
+      // Optional local debug toggle, formerly read via `Cypress.env('LOG_DEBUG_ENABLED')`.
       config.expose.LOG_DEBUG_ENABLED = process.env.CYPRESS_LOG_DEBUG_ENABLED;
 
       on('task', {
         log(message) {
-          // eslint-disable-no-console
+          // eslint-disable-next-line no-console
           console.log(message);
           return null;
         }

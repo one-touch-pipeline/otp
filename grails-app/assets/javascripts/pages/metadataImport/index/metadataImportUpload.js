@@ -119,7 +119,7 @@ $(() => {
           // Check if wrapper parent is overflowing along the y-axis
           if ($t.height() > $stickyWrap.height()) {
             // If it is overflowing (advanced layout)
-            // Position sticky header based on wrapper scrollTop()
+            // Position sticky header based on wrapper `scrollTop()`
             if ($stickyWrap.scrollTop() > 0) {
               // When top of wrapping parent is out of view
               $stickyHead.css({

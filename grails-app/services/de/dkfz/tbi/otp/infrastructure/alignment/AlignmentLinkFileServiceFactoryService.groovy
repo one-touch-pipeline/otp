@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.infrastructure.alignment
 
 import grails.gorm.transactions.Transactional
+import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
@@ -46,7 +47,7 @@ class AlignmentLinkFileServiceFactoryService {
     }
 
     def <T extends AbstractBamFile> AbstractAlignmentLinkFileService<T> getService(T instance) {
-        return getService(instance.class)
+        return getService(Hibernate.getClass(instance))
     }
 
     private Map getMap() {

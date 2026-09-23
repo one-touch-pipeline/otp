@@ -334,11 +334,13 @@ describe('Check reference genome overview page', () => {
       });
       // Activate the code below after the issue (otp-2703) has resolved
       // https://one-touch-pipeline.myjetbrains.com/youtrack/agiles/106-5/current?issue=otp-2703
-/*      cy.get('#otpToastBox .otpErrorToast').should('have.length', 1)
+      /* ```
+      cy.get('#otpToastBox .otpErrorToast').should('have.length', 1)
         .and('be.visible')
         .and('contain.text', 'Request failed')
         .and('contain.text', 'There is one error')
-        .and('contain.text', 'Field "name" cannot be empty');*/
+        .and('contain.text', 'Field "name" cannot be empty');
+      ``` */
     });
 
     it('should show error toast if trying to remove all species', () => {
@@ -375,11 +377,13 @@ describe('Check reference genome overview page', () => {
       cy.wait('@updateSpeciesWithStrain').its('response.statusCode').should('eq', 400);
       // Activate the code below after the issue (otp-2703) has resolved
       // https://one-touch-pipeline.myjetbrains.com/youtrack/agiles/106-5/current?issue=otp-2703
-/*      cy.get('#otpToastBox .otpErrorToast').should('have.length', 1)
+      /* ```
+      cy.get('#otpToastBox .otpErrorToast').should('have.length', 1)
         .and('be.visible')
         .and('contain.text', 'Request failed')
         .and('contain.text', 'There is one error')
-        .and('contain.text', 'Reference genome needs at least one species');*/
+        .and('contain.text', 'Reference genome needs at least one species');
+      ``` */
     });
 
     it('should show error toast if trying to set wrong number to genome length', () => {
@@ -409,11 +413,13 @@ describe('Check reference genome overview page', () => {
 
       // Activate the code below after the issue (otp-2703) has resolved
       // https://one-touch-pipeline.myjetbrains.com/youtrack/agiles/106-5/current?issue=otp-2703
-/*      cy.get('#otpToastBox .otpErrorToast').should('have.length', 1)
+      /* ```
+      cy.get('#otpToastBox .otpErrorToast').should('have.length', 1)
         .and('be.visible')
         .and('contain.text', 'Request failed')
         .and('contain.text', 'There is one error')
-        .and('contain.text', 'Field "length" with value "-100" must be greater than zero');*/
+        .and('contain.text', 'Field "length" with value "-100" must be greater than zero');
+      ``` */
     });
 
     // Check for downloading files

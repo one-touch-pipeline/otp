@@ -72,7 +72,7 @@ $.otp.dataTableFilter = {
       } else {
         /* 'change.select2' is a limited 'changed'-event, that triggers only a sync between the
                  * 'raw' select-tag and the select2 visuals.
-                 * We can't use a normal 'trigger(change)' because this function is an event handler, so
+                 * We can't use a normal `trigger(change)` because this function is an event handler, so
                  * would trigger a recursive stack overflow. (Ask me how I know this ;-) )
                  *
                  * see also: https://select2.org/programmatic-control/events#limiting-the-scope-of-the-change-event
@@ -113,7 +113,7 @@ $.otp.dataTableFilter = {
 
       /* 'change.select2' is a limited 'changed'-event, that triggers only a sync between the
              * 'raw' select-tag and the select2 visuals.
-             * We can't use a normal 'trigger(change)' because this function is an event handler, so
+             * We can't use a normal `trigger(change)` because this function is an event handler, so
              * would trigger a recursive stack overflow. (Ask me how I know this ;-) )
              *
              * see also: https://select2.org/programmatic-control/events#limiting-the-scope-of-the-change-event

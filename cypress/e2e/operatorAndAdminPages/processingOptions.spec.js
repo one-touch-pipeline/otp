@@ -37,7 +37,7 @@ describe('Check processingOptions page', () => {
 
       cy.contains('Processing Options').should('exist');
 
-      for (const [name, validator] of Object.entries(this.validators)) {
+      for (const validator of Object.values(this.validators)) {
         validator.options.forEach((option) => {
           cy.contains(option).should('exist');
         });

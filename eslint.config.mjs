@@ -23,10 +23,19 @@
 import js from "@eslint/js";
 import globals from "globals";
 
+import requireCodeInComments from "./eslint-rules/require-code-in-comments.mjs";
+
 export default [
   js.configs.recommended,
   {
     files: ["**/*.{js,mjs,cjs}"],
+    plugins: {
+      local: {
+        rules: {
+          "require-code-in-comments": requireCodeInComments
+        }
+      }
+    },
     languageOptions: {
       ecmaVersion: 2020,
       sourceType: "module",
@@ -55,7 +64,8 @@ export default [
       'func-names': 'off',
       'no-use-before-define': 'off',
       strict: 'off',
-      'no-console': 'error'
+      'no-console': 'error',
+      'local/require-code-in-comments': 'error'
     }
   },
   {
@@ -64,6 +74,15 @@ export default [
       globals: {
         statusToClassName: "readonly",
         button: "readonly"
+      }
+    }
+  },
+  {
+    files: ["cypress.config.js"],
+    languageOptions: {
+      sourceType: "commonjs",
+      globals: {
+        ...globals.node
       }
     }
   },
@@ -81,6 +100,19 @@ export default [
         Cypress: "readonly",
         expect: "readonly"
       }
+    },
+    rules: {
+      // test titles and selectors are single string literals that cannot be wrapped, everything
+      // around them stays within the limit
+      'max-len': [
+        'error',
+        {
+          comments: 120,
+          code: 120,
+          ignoreStrings: true,
+          ignoreTemplateLiterals: true
+        }
+      ]
     }
   }
 ];

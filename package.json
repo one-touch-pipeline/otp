@@ -6,7 +6,8 @@
   "scripts": {
     "audit-fix": "npm audit fix",
     "audit-fix-force": "npm audit fix --force",
-    "lint": "eslint ./grails-app/assets/javascripts",
+    "test-eslint-rules": "node --test \"eslint-rules/**/*.test.mjs\"",
+    "lint": "eslint ./grails-app/assets/javascripts ./cypress ./eslint-rules ./cypress.config.js ./eslint.config.mjs",
     "lint-fix": "npm run lint -- --fix --rule \"prefer-template: 0\" --rule \"strict: 0\"",
     "lint-export": "npm run lint -- -f html -o ./build/reports/eslint/lint.html",
     "cyclonedx-npm": "cyclonedx-npm --output-file ./build/reports/softwareInventory/npm/bom-npm.json",

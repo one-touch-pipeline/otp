@@ -513,7 +513,7 @@ $.otp.copyToClipboard = function (text) {
  *   - https://stackoverflow.com/questions/17175534/cloned-select2-is-not-responding
  *   - https://github.com/select2/select2/issues/2522
  *
- * @param jqSelection JQ selector, e.g. "$('.use-select-2').not('.dont-use-select-2')"
+ * @param jqSelection JQ selector, e.g. `$('.use-select-2').not('.dont-use-select-2')`
  *        Careful: This method assumes that the selection only contains `select` tags.
  *        If other tags are in there, strange things will happen.
  */

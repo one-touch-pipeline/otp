@@ -45,7 +45,7 @@ $(document).ready(() => {
 
     /**
      * The function startPoll triggers a polling call
-     * in every @param interval (ms) and will stop after calling stopPolling().
+     * in every @param interval (ms) and will stop after calling `stopPolling()`.
      * Keep functions asynchronous so that the js process is not blocked by polling
      * @param promiseFn function to be called
      * @param interval polling interval in millisecond

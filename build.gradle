@@ -786,6 +786,11 @@ task esLint(type: NpmTask) {
     args = ['run', 'lint']
 }
 
+task esLintRuleTests(type: NpmTask) {
+    dependsOn npmInstall
+    args = ['run', 'test-eslint-rules']
+}
+
 task esLintExport(type: NpmTask) {
     dependsOn npmInstall
     args = ['run', 'lint-export']

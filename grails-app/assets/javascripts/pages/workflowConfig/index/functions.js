@@ -215,7 +215,7 @@ $.otp.workflowConfig = {
   },
 
   /**
-   * Fetch table data from backend by calling the data() method of controller
+   * Fetch table data from backend by calling the `data()` method of controller
    */
   fetchData: (inputdata) => {
     'use strict';
