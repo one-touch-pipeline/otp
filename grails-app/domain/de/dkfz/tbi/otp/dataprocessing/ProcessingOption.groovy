@@ -525,6 +525,10 @@ class ProcessingOption implements Entity {
                 "linux group of the otp user",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
+        OTP_BASE_UNIX_GROUP(
+                "unix group to use for base directories not owned by a project, for example the parent directory of a project directory",
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
+        ),
         WITHDRAWN_UNIX_GROUP(
                 "unix group to use for withdrawn data",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL

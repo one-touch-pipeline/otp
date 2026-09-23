@@ -115,7 +115,7 @@ class AbstractPrepareJobSpec extends Specification implements DataTest, Workflow
         0 * job.fileService._
     }
 
-    void "test execute, create work folder"() {
+    void "test execute, create work folder, when #name, then use '#expectedBaseGroup' for the parent directory"() {
         given:
         String testGroup = "TestGroup"
         Path workFolder = Paths.get("/test")
@@ -136,9 +136,10 @@ class AbstractPrepareJobSpec extends Specification implements DataTest, Workflow
 
         then:
         1 * job.filestoreService.getWorkFolderPath(_) >> workFolder
+        1 * job.processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_BASE_UNIX_GROUP) >> baseGroupOption
         1 * job.processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> testGroup
 
-        1 * job.fileService.createDirectoryRecursivelyAndSetPermissions(workFolder.parent, testGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
+        1 * job.fileService.createDirectoryRecursivelyAndSetPermissions(workFolder.parent, expectedBaseGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
         1 * job.fileService.createDirectoryRecursivelyAndSetPermissions(workFolder, testGroup, FileService.DEFAULT_DIRECTORY_PERMISSION)
 
         1 * job.generateMapForLinking(workflowStep) >> [new LinkEntry(link, target)]
@@ -150,5 +151,10 @@ class AbstractPrepareJobSpec extends Specification implements DataTest, Workflow
 
         0 * job.processingOptionService._
         0 * job.fileService._
+
+        where:
+        name                              | baseGroupOption || expectedBaseGroup
+        "the base unix group is set"      | "TestBaseGroup" || "TestBaseGroup"
+        "the base unix group is not set"  | null            || "TestGroup"
     }
 }

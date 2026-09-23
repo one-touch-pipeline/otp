@@ -166,6 +166,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
 
             findOrCreateProcessingOption(name: OptionName.OTP_SYSTEM_USER, value: createUser().username)
             findOrCreateProcessingOption(name: OptionName.OTP_USER_LINUX_GROUP, value: configService.testingGroup)
+            findOrCreateProcessingOption(name: OptionName.OTP_BASE_UNIX_GROUP, value: configService.testingGroup)
             findOrCreateProcessingOption(name: OptionName.WITHDRAWN_UNIX_GROUP, value: configService.testingGroup)
             findOrCreateProcessingOption(name: OptionName.TICKET_SYSTEM_URL, value: "1234")
             findOrCreateProcessingOption(name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX, value: "asdf")

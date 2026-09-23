@@ -59,9 +59,11 @@ abstract class AbstractPrepareJob extends AbstractJob {
             Path workFolder = filestoreService.getWorkFolderPath(workflowStep.workflowRun)
             logService.addSimpleLogEntry(workflowStep, "Creating uuid work directory ${workFolder}")
             String group = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+            // fall back to the group of the work folder itself, as long as the option is not configured
+            String baseGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_BASE_UNIX_GROUP) ?: group
             fileService.createDirectoryRecursivelyAndSetPermissions(
                     workFolder.parent,
-                    group,
+                    baseGroup,
                     fileService.DIRECTORY_WITH_OTHER_PERMISSION
             )
             fileService.createDirectoryRecursivelyAndSetPermissions(

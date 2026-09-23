@@ -364,8 +364,10 @@ class ProjectService {
             return
         }
 
+        // fall back to the group of the project itself, as long as the option is not configured
+        String baseUnixGroup = processingOptionService.findOptionAsString(OptionName.OTP_BASE_UNIX_GROUP) ?: unixGroup
         fileService.createDirectoryRecursivelyAndSetPermissions(projectDirectory.parent,
-                unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
+                baseUnixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
         fileService.createDirectoryRecursivelyAndSetPermissions(projectDirectory, unixGroup)
     }
 

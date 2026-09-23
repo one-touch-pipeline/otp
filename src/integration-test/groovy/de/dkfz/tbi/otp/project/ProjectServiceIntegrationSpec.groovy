@@ -81,6 +81,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     static final String FILE_NAME = "fileName"
     static final byte[] CONTENT = 0..3
 
+    static final String BASE_UNIX_GROUP = "base-unix-group"
+
     @TempDir
     Path tempDir
 
@@ -150,6 +152,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(configService.rootPath, "reference_genome").path)
         findOrCreateProcessingOption([name: OptionName.DEFAULT_FASTQC_TYPE, value: "BASH"])
+        findOrCreateProcessingOption([name: OptionName.OTP_BASE_UNIX_GROUP, value: BASE_UNIX_GROUP])
     }
 
     void cleanup() {
@@ -245,7 +248,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         String unixGroup = configService.testingGroup
         Path projectPath = configService.rootPath.toPath().resolve(dirName)
         projectService.fileService = Mock(FileService) {
-            1 * createDirectoryRecursivelyAndSetPermissions(projectPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
+            1 * createDirectoryRecursivelyAndSetPermissions(projectPath.parent, BASE_UNIX_GROUP, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
             1 * createDirectoryRecursivelyAndSetPermissions(projectPath, unixGroup)
             0 * _
         }
@@ -363,7 +366,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(projectPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(projectPath.parent, BASE_UNIX_GROUP, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(projectPath, unixGroup)
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(analysisPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(analysisPath, unixGroup, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
@@ -464,7 +467,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(projectPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(projectPath.parent, BASE_UNIX_GROUP, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(projectPath, unixGroup)
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(analysisPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(analysisPath, unixGroup, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION) >> {
@@ -548,7 +551,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(projectPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION) >> {
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(projectPath.parent, BASE_UNIX_GROUP, FileService.DIRECTORY_WITH_OTHER_PERMISSION) >> {
             throw new ChangeFileGroupException(exceptionMessage)
         }
         0 * projectService.fileService._
@@ -627,7 +630,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(projectPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(projectPath.parent, BASE_UNIX_GROUP, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(projectPath, unixGroup)
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(analysisPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(analysisPath, unixGroup, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
