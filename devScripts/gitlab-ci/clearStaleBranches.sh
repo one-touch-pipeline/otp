@@ -26,6 +26,21 @@ git remote set-url origin "https://merge-request:${PROJECT_TOKEN}@${CI_SERVER_HO
 
 ALL_BRANCHES=$(git for-each-ref 'refs/remotes/origin' --sort='-committerdate' --format='%(refname)|%(committerdate:short)')
 
+# branches, which should never be deleted, can be put in the variable SKIP_BRANCHES (separated with spaces),
+# master is always skipped
+read -r -a SKIP_BRANCH_LIST <<< "master ${SKIP_BRANCHES:-}"
+
+isSkippedBranch() {
+  local SKIP_BRANCH
+  for SKIP_BRANCH in "${SKIP_BRANCH_LIST[@]}"; do
+    if [ "$SKIP_BRANCH" == "$1" ]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+
 CURRENT_SECONDS=$(date +%s)
 THREE_MONTH_SECONDS=$((60 * 60 * 24 * 30 * 3))
 CUTOFF_SECONDS=$(($CURRENT_SECONDS - $THREE_MONTH_SECONDS))
@@ -35,6 +50,12 @@ echo "Delete all branches without commits before $(date -d @$CUTOFF_SECONDS +"%d
 
 while IFS='|' read -r BRANCH_NAME BRANCH_DATE; do
   export BRANCH_TO_CHECK=${BRANCH_NAME#refs/remotes/origin/}
+
+  if isSkippedBranch "$BRANCH_TO_CHECK"; then
+    echo "Skip branch $BRANCH_TO_CHECK"
+    continue
+  fi
+
   DATE_SECONDS=$(date -d ${BRANCH_DATE} +%s)
 
   if [ $CUTOFF_SECONDS -ge $DATE_SECONDS ]; then
