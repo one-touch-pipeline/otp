@@ -102,7 +102,7 @@ exportAnalyses.put(PipelineType.ACESEQ, false)
 exportAnalyses.put(PipelineType.SNV, false)
 exportAnalyses.put(PipelineType.RUN_YAPSA, false)
 
-// ! Note: RNA_ANALYSIS will be exported only if exportBamFile is also set to be true !//
+// ! Note: If RNA_ANALYSIS is enabled, the corresponding RNA BAM files will also be exported !//
 exportAnalyses.put(PipelineType.RNA_ANALYSIS, false)
 
 // ************ Check if and which files exist (true/false) ************//
@@ -272,10 +272,20 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
     }
 
     // Bam Files
-    if (exportBamFiles) {
-        if (bamFiles) {
-            bamFileList.addAll(bamFiles)
-            bamFiles.collect { AbstractBamFile bam ->
+    if (exportBamFiles || exportAnalyses[PipelineType.RNA_ANALYSIS]) {
+
+        List<AbstractBamFile> bamFilesToExport = bamFiles.findAll { AbstractBamFile bamFile ->
+
+            boolean isRna = bamFile.seqType == SeqTypeService.rnaSingleSeqType ||
+                    bamFile.seqType == SeqTypeService.rnaPairedSeqType
+
+            return exportBamFiles || isRna
+        }
+
+        if (bamFilesToExport) {
+            bamFileList.addAll(bamFilesToExport)
+
+            bamFilesToExport.collect { AbstractBamFile bam ->
                 [bam.individual, bam.sampleType, bam.seqType]
             }.unique().each {
                 dataExportOverview.add(new DataExportOverviewItem(
@@ -283,7 +293,7 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
                         individual: it[0],
                         sampleType: it[1],
                         seqType: it[2],
-                        externalBamFiles: bamFiles.findAll { AbstractBamFile bamFile ->
+                        externalBamFiles: bamFilesToExport.findAll { AbstractBamFile bamFile ->
                             bamFile.workPackage.pipeline.name == Pipeline.Name.EXTERNALLY_PROCESSED
                         },
                 ))
@@ -357,7 +367,7 @@ List<DataExportOutput> outputList = [
         // Processing FASTQ Files
         seqTrackOutput = exportFastqFiles ? dataExportService.exportRawSequenceFiles(dataExportParameters) : emptyOutput,
         // Processing BAM Files
-        bamFileOutput = exportBamFiles ? dataExportService.exportBamFiles(dataExportParameters) : emptyOutput,
+        bamFileOutput = (exportBamFiles || exportAnalyses[PipelineType.RNA_ANALYSIS]) ? dataExportService.exportBamFiles(dataExportParameters) : emptyOutput,
         // Processing Analysis Files
         analysisOutput = dataExportService.exportAnalysisFiles(dataExportParameters),
 ]
