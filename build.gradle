@@ -199,15 +199,15 @@ task jacocoIntegrationTestReport(type: JacocoReport) {
     }
 }
 
-task jacocoAllTestReport(type: JacocoReport) {
+task jacocoTestReportUnitIntegration(type: JacocoReport) {
     dependsOn test, integrationTest // tests are required to run before generating the report
     executionData test, integrationTest
     group = LifecycleBasePlugin.VERIFICATION_GROUP
     sourceSets sourceSets.main
     reports {
         xml.required = true
-        xml.outputLocation = file('build/reports/jacoco/allTest/jacoco.xml')
-        html.outputLocation = layout.buildDirectory.dir('reports/jacoco/allTest')
+        xml.outputLocation = file('build/reports/jacoco/unitIntegrationTest/jacoco.xml')
+        html.outputLocation = layout.buildDirectory.dir('reports/jacoco/unitIntegrationTest')
     }
     afterEvaluate {
         filterCoverage(classDirectories)
@@ -215,35 +215,6 @@ task jacocoAllTestReport(type: JacocoReport) {
 
     doLast {
         println "Coverage unit & integration report is created in file://${project.projectDir}/build/reports/jacoco/allTest/index.html"
-    }
-}
-
-jacocoToCobertura {
-    dependsOn jacocoAllTestReport
-    splitByPackage.set(true)
-    inputFile.set(layout.buildDirectory.file("reports/jacoco/allTest/jacoco.xml"))
-    outputFile.set(layout.buildDirectory.file("reports/jacocoToCobertura/cobertura.xml"))
-    sourceDirectories.from(
-            layout.projectDirectory.dir("src/main/groovy"),
-            layout.projectDirectory.dir("grails-app/controllers"),
-            layout.projectDirectory.dir("grails-app/services"),
-            layout.projectDirectory.dir("grails-app/domain"),
-            layout.projectDirectory.dir("grails-app/init"),
-    )
-
-    doFirst {
-        // Workaround for parse error: Download JaCoCo DTD to working directory
-        // see https://github.com/razvn/jacoco-to-cobertura-gradle-plugin/issues/11
-        File workingDir = new File(".").getAbsoluteFile().getParentFile()
-        File file = new File(workingDir, 'report.dtd')
-        if (!file.exists()) {
-            println "Create file ${file} from class loader"
-            def jacocoClasspathUrls = jacocoTestReport.jacocoClasspath.collect { it.toURI().toURL() }
-            def classloader = new URLClassLoader(jacocoClasspathUrls as URL[])
-            file.withWriter {
-                it << classloader.getResourceAsStream('org/jacoco/report/xml/report.dtd')
-            }
-        }
     }
 }
 
@@ -406,6 +377,57 @@ task jacocoWorkflowTestReport(type: JacocoReport) {
 workflowTest(){
     finalizedBy jacocoWorkflowTestReport // report is always generated after tests run
 }
+
+task jacocoAllTestReport(type: JacocoReport) {
+    dependsOn test, integrationTest, workflowTest // tests are required to run before generating the report
+    executionData test, integrationTest, workflowTest
+    executionData fileTree(layout.buildDirectory.dir('jacoco')) { include 'workflowTest-*.exec' }
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    sourceSets sourceSets.main
+    reports {
+        xml.required = true
+        xml.outputLocation = file('build/reports/jacoco/allTest/jacoco.xml')
+        html.outputLocation = layout.buildDirectory.dir('reports/jacoco/allTest')
+    }
+    afterEvaluate {
+        filterCoverage(classDirectories)
+    }
+
+    doLast {
+        println "Coverage unit & integration & workflow report is created in file://${project.projectDir}/build/reports/jacoco/allTest/index.html"
+    }
+}
+
+
+jacocoToCobertura {
+    dependsOn jacocoAllTestReport
+    splitByPackage.set(true)
+    inputFile.set(layout.buildDirectory.file("reports/jacoco/allTest/jacoco.xml"))
+    outputFile.set(layout.buildDirectory.file("reports/jacocoToCobertura/cobertura.xml"))
+    sourceDirectories.from(
+            layout.projectDirectory.dir("src/main/groovy"),
+            layout.projectDirectory.dir("grails-app/controllers"),
+            layout.projectDirectory.dir("grails-app/services"),
+            layout.projectDirectory.dir("grails-app/domain"),
+            layout.projectDirectory.dir("grails-app/init"),
+    )
+
+    doFirst {
+        // Workaround for parse error: Download JaCoCo DTD to working directory
+        // see https://github.com/razvn/jacoco-to-cobertura-gradle-plugin/issues/11
+        File workingDir = new File(".").getAbsoluteFile().getParentFile()
+        File file = new File(workingDir, 'report.dtd')
+        if (!file.exists()) {
+            println "Create file ${file} from class loader"
+            def jacocoClasspathUrls = jacocoTestReport.jacocoClasspath.collect { it.toURI().toURL() }
+            def classloader = new URLClassLoader(jacocoClasspathUrls as URL[])
+            file.withWriter {
+                it << classloader.getResourceAsStream('org/jacoco/report/xml/report.dtd')
+            }
+        }
+    }
+}
+
 
 tasks.withType(GroovyCompile).configureEach {
     options.incremental = true

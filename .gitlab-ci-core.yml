@@ -281,6 +281,7 @@ workflow tests:
     # fetch the logs of the mocked servers and the file system created by the workflow tests,
     # they are not part of the job log, since they are written in the service container
     - devScripts/gitlab-ci/workflow-test/copyMockedClusterLogs.sh
+    - mv build/jacoco/workflowTest.exec build/jacoco/workflowTest-${WORKFLOW_TEST_GROUP}.exec
   artifacts:
     paths:
       - build/test-results/*/*.xml
@@ -298,15 +299,17 @@ test coverage:
     - build gradle
     - unit tests
     - integration tests
+    - workflow tests
   dependencies:
     - build gradle
     - unit tests
     - integration tests
+    - workflow tests
   coverage: '/Instruction Coverage: (\d+(?:\.\d+)?)%/'
   script:
     - set -e
     - ./gradlew --build-cache classes
-    - ./gradlew --build-cache --exclude-task test --exclude-task integrationTest --rerun-tasks jacocoAllTestReport jacocoToCobertura
+    - ./gradlew --build-cache --exclude-task test --exclude-task integrationTest --exclude-task workflowTest --rerun-tasks jacocoAllTestReport jacocoToCobertura
   rules:
     - !reference [ .shared, rules-default ]
     - !reference [ .shared, rules-test ]
