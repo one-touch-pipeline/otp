@@ -203,7 +203,8 @@ class DeletionService {
     @SuppressWarnings('JavaIoPackageAccess')
     @CompileDynamic
     List<SeqTrack> deleteProcessingFilesOfProject(String projectName, Path scriptOutputDirectory, boolean everythingVerified = false,
-                                                  boolean ignoreWithdrawn = false, List<SeqTrack> explicitSeqTracks = []) throws FileNotFoundException {
+                                                  boolean ignoreWithdrawn = false, List<SeqTrack> explicitSeqTracks = [], boolean deleteAnalysisOnly = false,
+                                                  String scriptName = "Delete_${projectName}.sh") throws FileNotFoundException {
         Project project = CollectionUtils.atMostOneElement(Project.findAllByName(projectName))
         assert project: "Project does not exist"
         assert project.state != Project.State.ARCHIVED
@@ -293,49 +294,51 @@ class DeletionService {
         output << "delete content in db...\n\n"
 
         seqTrackList.each { SeqTrack seqTrack ->
-            File processingDir = new File(dataProcessingFilesService.getOutputDirectory(
-                    seqTrack.individual, DataProcessingFilesService.OutputDirectories.MERGING).toString())
-            if (processingDir.exists()) {
-                dirsToDelete.add(processingDir.path)
-            }
+            if (!deleteAnalysisOnly) {
+                File processingDir = new File(dataProcessingFilesService.getOutputDirectory(seqTrack.individual,
+                        DataProcessingFilesService.OutputDirectories.MERGING).toString())
+                if (processingDir.exists()) {
+                    dirsToDelete.add(processingDir.path)
+                }
 
-            Set<AbstractBamFile> bamFiles = (RoddyBamFile.createCriteria().listDistinct {
-                seqTracks {
-                    eq("id", seqTrack.id)
-                }
-            } + SingleCellBamFile.createCriteria().listDistinct {
-                seqTracks {
-                    eq("id", seqTrack.id)
-                }
-            }).findAll { AbstractBamFile bamFile ->
-                bamFile.isMostRecentBamFile()
-            } as Set
-            bamFiles.each { AbstractBamFile bamfile ->
-                if (bamfile) {
-                    Path mergingDir = abstractBamFileService.getBaseDirectory(bamfile)
-                    if (Files.exists(mergingDir)) {
-                        List<ExternallyProcessedBamFile> files = seqTrackService.returnExternallyProcessedBamFiles([seqTrack])
-                        files.each {
-                            externalMergedBamFolders.add(externalAlignmentWorkFileService.getNonOtpFolder(it).toString())
-                            if (it.workflowArtefact?.producedBy?.workFolder) {
-                                externalMergedBamFolders.add(filestoreService.getWorkFolderPath(it.workflowArtefact.producedBy))
+                Set<AbstractBamFile> bamFiles = (RoddyBamFile.createCriteria().listDistinct {
+                    seqTracks { eq("id", seqTrack.id) }
+                } + SingleCellBamFile.createCriteria().listDistinct {
+                    seqTracks { eq("id", seqTrack.id) }
+                }).findAll { AbstractBamFile bamFile ->
+                    bamFile.isMostRecentBamFile()
+                } as Set
+
+                bamFiles.each { AbstractBamFile bamFile ->
+                    if (bamFile) {
+                        Path mergingDir = abstractBamFileService.getBaseDirectory(bamFile)
+                        if (Files.exists(mergingDir)) {
+                            List<ExternallyProcessedBamFile> files = seqTrackService.returnExternallyProcessedBamFiles([seqTrack])
+
+                            files.each {
+                                externalMergedBamFolders.add(externalAlignmentWorkFileService.getNonOtpFolder(it).toString())
+                                if (it.workflowArtefact?.producedBy?.workFolder) {
+                                    externalMergedBamFolders.add(filestoreService.getWorkFolderPath(it.workflowArtefact.producedBy))
+                                }
                             }
-                        }
-                        Files.list(mergingDir).each {
-                            dirsToDelete.add(it.toString())
+
+                            Files.list(mergingDir).each {
+                                dirsToDelete.add(it.toString())
+                            }
                         }
                     }
                 }
             }
-            deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, false).each {
+
+            deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, false, deleteAnalysisOnly).each {
                 if (it) {
-                    dirsToDelete.add(it)
+                    dirsToDelete.add(it.toString())
                 }
             }
         }
 
         String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
-        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "Delete_${projectName}.sh", unixGroup)
+        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, scriptName, unixGroup)
         bashScriptToMoveFiles << AbstractDataSwapService.BASH_HEADER
 
         (dirsToDelete*.toString() - externalMergedBamFolders).each {
@@ -358,48 +361,113 @@ class DeletionService {
      * !! If it is not needed to delete this information, this method can be used without pre-work.
      */
     @CompileDynamic
-    List<File> deleteAllProcessingInformationAndResultOfOneSeqTrack(SeqTrack seqTrack, boolean enableChecks = true) {
-        notNull(seqTrack, "The input seqTrack of the method deleteAllProcessingInformationAndResultOfOneSeqTrack is null")
+    List<File> deleteAllProcessingInformationAndResultOfOneSeqTrack(
+            SeqTrack seqTrack,
+            boolean enableChecks = true,
+            boolean deleteAnalysisOnly = false
+    ) {
+        notNull(seqTrack, "The input seqTrack is null")
         assert seqTrack.project.state != Project.State.ARCHIVED
-        List<File> dirsToDelete = []
 
         if (enableChecks) {
             seqTrackService.throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
             seqTrackService.throwExceptionInCaseOfExternallyProcessedBamFileIsAttached([seqTrack])
         }
 
-        // Verification set: the processing results this method is responsible for deleting, found via the legacy
-        // hardcoded queries. It does not drive the graph deletion order -- it is the completeness cross-check deciding
-        // whether the graph path can be taken, and the input of the legacy fallback when it cannot.
         List<RoddyBamFile> roddyBamFiles = RoddyBamFile.createCriteria().listDistinct {
             seqTracks {
                 eq("id", seqTrack.id)
             }
         }
+
         List<SingleCellBamFile> singleCellBamFiles = SingleCellBamFile.createCriteria().list {
             seqTracks {
                 eq("id", seqTrack.id)
             }
         }
-        List<AbstractBamFile> verificationBamFiles = (roddyBamFiles + singleCellBamFiles) as List<AbstractBamFile>
-        List<BamFilePairAnalysis> verificationAnalyses = verificationBamFiles ?
-                BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(verificationBamFiles, verificationBamFiles) : []
-        List<Artefact> verificationSet = (verificationBamFiles + verificationAnalyses) as List<Artefact>
 
-        // Graph-ordered downstream artefacts (consumers before producers), filtered to the ones this method deletes.
+        List<AbstractBamFile> bamFiles =
+                (roddyBamFiles + singleCellBamFiles) as List<AbstractBamFile>
+
+        List<BamFilePairAnalysis> analyses = bamFiles ?
+                BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(
+                        bamFiles, bamFiles
+                ) : []
+
         ArtefactGraph graph = collectArtefactGraph(seqTrack)
+
+        if (deleteAnalysisOnly) {
+            return deleteAnalysisResults(graph, analyses)
+        }
+
+        return deleteAllProcessingResults(graph, analyses, bamFiles, seqTrack)
+    }
+
+    @CompileDynamic
+    private List<File> deleteAnalysisResults(
+            ArtefactGraph graph,
+            List<BamFilePairAnalysis> analyses
+    ) {
+        List<File> dirsToDelete = []
+
+        List<ArtefactDeletionEntry> analysisEntries = graph.entriesInDeletionOrder.findAll {
+            Artefact artefact = it.concreteArtefact
+            artefact && BamFilePairAnalysis.isAssignableFrom(
+                    getClassWithoutInitializingProxy(artefact)
+            )
+        }
+
+        if (graphCoversVerificationSet(analyses as List<Artefact>, analysisEntries)) {
+            analysisEntries.each { ArtefactDeletionEntry entry ->
+                dirsToDelete.addAll(deleteConcreteArtefact(entry.concreteArtefact))
+            }
+
+            analysisEntries.collect {
+                it.workflowArtefact.producedBy
+            }.findAll { it }.unique { it.id }.each { WorkflowRun run ->
+                if (WorkflowRun.exists(run.id)) {
+                    workflowDeletionService.deleteWorkflowRun(run)
+                }
+            }
+        } else {
+            analyses.each { BamFilePairAnalysis analysis ->
+                dirsToDelete.addAll(deleteConcreteArtefact(analysis))
+            }
+        }
+
+        return dirsToDelete
+    }
+
+    @CompileDynamic
+    private List<File> deleteAllProcessingResults(
+            ArtefactGraph graph,
+            List<BamFilePairAnalysis> analyses,
+            List<AbstractBamFile> bamFiles,
+            SeqTrack seqTrack
+    ) {
+        List<File> dirsToDelete = []
+
+        List<Artefact> verificationSet =
+                (bamFiles + analyses) as List<Artefact>
+
         List<ArtefactDeletionEntry> deletableEntries = graph.entriesInDeletionOrder.findAll {
             isDeletableArtefact(it.concreteArtefact)
         }
 
         if (graphCoversVerificationSet(verificationSet, deletableEntries)) {
-            // Abort before deleting anything if cleaning up the graph metadata would also remove a retained artefact.
+            // Abort before deleting anything if cleaning up the graph metadata
+            // would also remove a retained artefact.
             assertGraphDeletionTouchesNoRetainedArtefact(graph, deletableEntries)
-            dirsToDelete.addAll(deleteProcessingResultsInGraphOrder(deletableEntries))
+
+            dirsToDelete.addAll(
+                    deleteProcessingResultsInGraphOrder(deletableEntries)
+            )
         } else {
-            // Legacy data whose results are missing a workflowArtefact cannot be deleted in graph order. Fall back to
-            // the pre-graph deletion flow over the verification set; any partial workflow metadata stays untouched.
-            dirsToDelete.addAll(deleteConcreteArtefacts(verificationAnalyses, verificationBamFiles))
+            // Legacy data whose results are missing a workflowArtefact cannot be
+            // deleted in graph order. Fall back to the pre-graph deletion flow.
+            dirsToDelete.addAll(
+                    deleteConcreteArtefacts(analyses, bamFiles)
+            )
         }
 
         List<MergingWorkPackage> mergingWorkPackages = MergingWorkPackage.createCriteria().list {
@@ -407,6 +475,7 @@ class DeletionService {
                 eq('id', seqTrack.id)
             }
         }
+
         mergingWorkPackages.each {
             if (AbstractBamFile.countByWorkPackage(it)) {
                 it.seqTracks.remove(seqTrack)

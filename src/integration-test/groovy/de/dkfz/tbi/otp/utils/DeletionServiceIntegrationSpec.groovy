@@ -1915,4 +1915,48 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         Files.exists(linkDir.resolve("roddyExecutionStore"))
         Files.exists(linkDir.resolve("qualitycontrol"))
     }
+
+    void "deleteAllProcessingInformationAndResultOfOneSeqTrack, analysis only keeps bam file"() {
+        given:
+        SnvCallingInstance analysis = DomainFactory.createSnvInstanceWithRoddyBamFiles()
+        RoddyBamFile bamFile = analysis.sampleType1BamFile as RoddyBamFile
+        SeqTrack seqTrack = bamFile.seqTracks.first()
+
+        wireSeqTrackToBamFile(seqTrack, bamFile)
+        wireBamFilesToAnalysis(analysis, [bamFile])
+
+        when:
+        deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, true, true)
+
+        then:
+        !SnvCallingInstance.get(analysis.id)
+        RoddyBamFile.get(bamFile.id)
+        MergingWorkPackage.get(bamFile.workPackage.id)
+    }
+
+    void "deleteProcessingFilesOfProject, uses custom script name"() {
+        given:
+        setupDataForProcessingFiles()
+        RoddyBamFile bamFile = deleteProcessingFilesOfProject_RBF_Setup()
+
+        String scriptName = "customDeletionScript.sh"
+        Path outputFile = outputFolder.resolve(scriptName)
+
+        File finalBamFile = bamFile.baseDirectory
+
+        when:
+        deletionService.deleteProcessingFilesOfProject(
+                bamFile.project.name,
+                outputFolder,
+                true,
+                false,
+                [],
+                false,
+                scriptName
+        )
+
+        then:
+        Files.exists(outputFile)
+        outputFile.text.contains(finalBamFile.path)
+    }
 }
