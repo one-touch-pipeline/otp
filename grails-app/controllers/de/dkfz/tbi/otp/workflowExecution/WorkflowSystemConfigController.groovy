@@ -30,16 +30,20 @@ import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.utils.TimeFormats
+import de.dkfz.tbi.otp.workflow.Version
 
 @PreAuthorize("hasRole('ROLE_ADMIN')")
 class WorkflowSystemConfigController implements CheckAndCall {
 
     static allowedMethods = [
-            index                : "GET",
-            getWorkflows         : "GET",
-            getWorkflowVersions  : "GET",
-            updateWorkflow       : "POST",
-            updateWorkflowVersion: "PATCH",
+            index                     : "GET",
+            getWorkflows              : "GET",
+            getWorkflowVersions       : "GET",
+            updateWorkflow            : "POST",
+            updateWorkflowVersion     : "PATCH",
+            getWorkflowDefaultGroups  : "GET",
+            saveWorkflowDefaultGroup  : "POST",
+            deleteWorkflowDefaultGroup: "POST",
     ]
 
     MergingCriteriaService mergingCriteriaService
@@ -52,14 +56,17 @@ class WorkflowSystemConfigController implements CheckAndCall {
 
     WorkflowVersionService workflowVersionService
 
+    WorkflowDefaultGroupService workflowDefaultGroupService
+
     def index() {
         return [
-                refGenomes: referenceGenomeService.list().sort { ReferenceGenome a, ReferenceGenome b ->
+                refGenomes       : referenceGenomeService.list().sort { ReferenceGenome a, ReferenceGenome b ->
                     (a.legacy <=> b.legacy) ?: a.name.compareToIgnoreCase(b.name)
                 },
-                seqTypes  : seqTypeService.list().sort {
+                seqTypes         : seqTypeService.list().sort {
                     it.displayNameWithLibraryLayout
                 },
+                analysisWorkflows: workflowService.findAllAnalysisWorkflows().sort { it.displayName },
         ]
     }
 
@@ -111,11 +118,75 @@ class WorkflowSystemConfigController implements CheckAndCall {
         }
     }
 
+    def getWorkflowDefaultGroups() {
+        List<WorkflowDefaultGroup> groups = workflowDefaultGroupService.list()
+        Map<Long, List<WorkflowVersionSelectorDefault>> entriesByGroupId =
+                workflowDefaultGroupService.findAllEntries().groupBy { it.group.id }
+        render(groups.collectMany { buildWorkflowDefaultGroupRows(it, entriesByGroupId[it.id] ?: []) } as JSON)
+    }
+
+    def saveWorkflowDefaultGroup(SaveWorkflowDefaultGroupCommand cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
+            WorkflowDefaultGroup group = workflowDefaultGroupService.saveGroup(cmd.group, cmd.name, cmd.seqType, cmd.workflowVersions)
+            render(buildWorkflowDefaultGroupOutputObject(group) as JSON)
+        }
+    }
+
+    def deleteWorkflowDefaultGroup(DeleteWorkflowDefaultGroupCommand cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
+            workflowDefaultGroupService.delete(cmd.group)
+            render([] as JSON)
+        }
+    }
+
+    private Map buildWorkflowDefaultGroupOutputObject(WorkflowDefaultGroup group) {
+        return [
+                id     : group.id,
+                name   : group.name,
+                seqType: [id: group.seqType.id, displayName: group.seqType.displayNameWithLibraryLayout],
+                entries: workflowDefaultGroupService.findEntries(group).collect { buildWorkflowDefaultEntryOutputObject(it) },
+        ]
+    }
+
+    /**
+     * Flattens a group into one row per entry, ready for the defaults DataTable: each row carries
+     * the group's own fields (for the rowspan-merged name/edit columns) alongside that entry's
+     * workflow/version. The edit modal rebuilds a group's full entry list client-side by matching
+     * `groupId` across rows, rather than this endpoint repeating it in every sibling row.
+     */
+    private List<Map> buildWorkflowDefaultGroupRows(WorkflowDefaultGroup group, List<WorkflowVersionSelectorDefault> groupEntries) {
+        Map seqType = [id: group.seqType.id, displayName: group.seqType.displayNameWithLibraryLayout]
+
+        return groupEntries.collect { buildWorkflowDefaultEntryOutputObject(it) }.collect { entry ->
+            [
+                    groupId        : group.id,
+                    name           : group.name,
+                    seqType        : seqType,
+                    workflow       : entry.workflow,
+                    workflowVersion: entry.workflowVersion,
+            ]
+        }
+    }
+
+    private Map buildWorkflowDefaultEntryOutputObject(WorkflowVersionSelectorDefault entry) {
+        return [
+                id             : entry.id,
+                workflow       : [id: entry.workflowVersion.workflow.id, displayName: entry.workflowVersion.workflow.displayName],
+                workflowVersion: [id: entry.workflowVersion.id, displayName: entry.workflowVersion.workflowVersion],
+                referenceGenome: entry.referenceGenome ? [id: entry.referenceGenome.id, displayName: entry.referenceGenome.displayName] : null,
+                species        : entry.species.collect { [id: it.id, displayName: it.displayName] },
+        ]
+    }
+
     private Map buildWorkflowVersionOutputObject(WorkflowVersion wv) {
+        Version version = Version.fromWorkflowVersion(wv)
+
         return [
                 workflowId       : wv.workflow.id,
                 id               : wv.id,
                 name             : wv.workflowVersion,
+                displayName      : version.nameWithDefault,
+                isDefault        : version.isDefault,
                 comment          : wv.comment?.comment ?: '',
                 allowedRefGenomes: buildReferenceGenomesOutputObject(wv.allowedReferenceGenomes),
                 supportedSeqTypes: buildSeqTypesOutputObject(wv.supportedSeqTypes),
@@ -179,4 +250,28 @@ class WorkflowUpdateCommand extends UpdateWorkflowDto implements Validateable {
 }
 
 class WorkflowVersionUpdateCommand extends UpdateWorkflowVersionDto implements Validateable {
+}
+
+class SaveWorkflowDefaultGroupCommand implements Validateable {
+    WorkflowDefaultGroup group
+    String name
+    SeqType seqType
+    List<Long> workflowVersion = []
+
+    Set<WorkflowVersion> getWorkflowVersions() {
+        return workflowVersion.collect { WorkflowVersion.get(it) }
+    }
+
+    static constraints = {
+        group nullable: true
+        name blank: false
+        seqType nullable: false
+        workflowVersion validator: { List<Long> val ->
+            val && val.every { it != null && WorkflowVersion.exists(it) }
+        }
+    }
+}
+
+class DeleteWorkflowDefaultGroupCommand implements Validateable {
+    WorkflowDefaultGroup group
 }

@@ -265,6 +265,22 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
         ], properties, saveAndValidate)
     }
 
+    WorkflowDefaultGroup createWorkflowDefaultGroup(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(WorkflowDefaultGroup, [
+                name   : "workflowDefaultGroupName_${nextId}",
+                seqType: { createSeqType() },
+        ], properties, saveAndValidate)
+    }
+
+    WorkflowVersionSelectorDefault createWorkflowVersionSelectorDefault(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(WorkflowVersionSelectorDefault, [
+                group          : { createWorkflowDefaultGroup() },
+                workflowVersion: { createWorkflowVersion() },
+                referenceGenome: null,
+                species        : { [] as Set },
+        ], properties, saveAndValidate)
+    }
+
     ReferenceGenomeSelector createReferenceGenomeSelector(Map properties = [:], boolean saveAndValidate = true) {
         ReferenceGenome referenceGenome = properties.referenceGenome ?: createReferenceGenome(properties.species ? [
                 speciesWithStrain: new HashSet<SpeciesWithStrain>(properties.species),

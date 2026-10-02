@@ -29,6 +29,7 @@
     <asset:javascript src="pages/workflowSelection/index.js"/>
     <asset:javascript src="pages/workflowSelection/alignmentTable.js"/>
     <asset:javascript src="pages/workflowSelection/analysisTable.js"/>
+    <asset:javascript src="pages/workflowSelection/workflowDefaults.js"/>
     <asset:javascript src="pages/workflowSelection/initialize.js"/>
     <asset:stylesheet src="pages/workflowSelection/index.less"/>
 </head>
@@ -259,6 +260,18 @@
                             </tfoot>
                         </sec:ifAllGranted>
                     </table>
+
+                    <sec:ifAllGranted roles="ROLE_OPERATOR">
+                        <h5 class="mt-3">${g.message(code: "workflowSelection.default.select")}</h5>
+                        <div class="d-flex gap-2 align-items-center">
+                            <select id="analysis-default-select" class="w-50"
+                                    data-placeholder="${g.message(code: "workflowSelection.default.searchPlaceholder")}">
+                            </select>
+                            <button type="button" class="btn btn-primary" id="add-analysis-default-btn">
+                                <i class="bi bi-plus-lg"></i> ${g.message(code: "workflowSelection.default.add")}
+                            </button>
+                        </div>
+                    </sec:ifAllGranted>
                 </div>
             </div>
         </div>

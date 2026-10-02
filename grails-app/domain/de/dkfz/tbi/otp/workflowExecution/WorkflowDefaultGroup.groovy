@@ -1,0 +1,55 @@
+/*
+ * Copyright 2011-2026 The OTP authors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package de.dkfz.tbi.otp.workflowExecution
+
+import grails.gorm.hibernate.annotation.ManagedEntity
+import groovy.transform.ToString
+
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.utils.Entity
+
+/**
+ * A named, project-independent template grouping one or more {@link WorkflowVersionSelectorDefault}s for a
+ * {@link SeqType}, e.g. the "WGS Default" group of analysis workflow defaults, or a single alignment workflow
+ * default. Applying a group to a project replays the individual defaults through the existing
+ * WorkflowVersionSelectorService/ReferenceGenomeSelectorService createOrUpdate methods.
+ */
+@ToString(includeNames = true, includePackage = false)
+@ManagedEntity
+class WorkflowDefaultGroup implements Entity {
+
+    String name
+    SeqType seqType
+
+    static Closure constraints = {
+        name unique: true, blank: false
+    }
+
+    static Closure mapping = {
+        seqType index: "workflow_default_group_seq_type_idx"
+    }
+
+    @Override
+    String toString() {
+        return "WorkflowDefaultGroup ${id}: ${name} (${seqType})"
+    }
+}

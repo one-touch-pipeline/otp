@@ -115,7 +115,7 @@ $.otp.workflowSelection = {
         } else if (errorThrown) {
           errorMessage = errorThrown;
         }
-        $.otp.toaster.showErrorToast(`Saving ${workflowType} Configuration failed`, errorMessage);
+        $.otp.toaster.showErrorToast(`Saving ${workflowType} configuration failed`, errorMessage);
       }
     }).always(() => {
       button.removeAttr('disabled');
@@ -146,14 +146,14 @@ $.otp.workflowSelection = {
       const updatedData = $.otp.workflowSelection.convertDataToDisplayString(workflowType, row.data(), oldData);
 
       $.otp.toaster.showSuccessToast(
-        `Successfully updated ${workflowType} Configuration`,
+        `Successfully updated ${workflowType} configuration`,
         `The ${workflowType} configuration ${updatedData} was updated.`
       );
     } else {
       const row = table.row.add(rowData).draw();
       const dataInfo = $.otp.workflowSelection.convertDataToDisplayString(workflowType, row.data());
       $.otp.toaster.showSuccessToast(
-        `Successfully created ${workflowType} Configuration`,
+        `Successfully created ${workflowType} configuration`,
         `The ${workflowType} configuration ${dataInfo} was created.`
       );
       alteredRow = row.node();
@@ -165,7 +165,7 @@ $.otp.workflowSelection = {
     'use strict';
 
     $.otp.workflowSelection.disableRemoveButtons(workflowType);
-    const target = $(event.target);
+    const target = $(event.target).closest('button');
     const dataSelectors = {
       'workflowVersionSelector.id': +target.data('versionSelector'),
       'referenceGenomeSelector.id': +target.data('refGenomeSelector')
@@ -184,7 +184,7 @@ $.otp.workflowSelection = {
       success() {
         dataRow.remove().draw();
         $.otp.toaster.showSuccessToast(
-          `Successfully deleted ${workflowType} Configuration`,
+          `Successfully deleted ${workflowType} configuration`,
           `Deleting the ${workflowType} configuration ${dataInfo} was successful.`
         );
       },
@@ -196,7 +196,7 @@ $.otp.workflowSelection = {
           errorMessage = errorThrown;
         }
         $.otp.toaster.showErrorToast(
-          `Deleting ${workflowType} Configuration failed`,
+          `Deleting ${workflowType} configuration failed`,
           `Failed to delete ${workflowType} configuration ${dataInfo} ${errorMessage}`
         );
       }

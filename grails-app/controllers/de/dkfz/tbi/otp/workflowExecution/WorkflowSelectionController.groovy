@@ -26,7 +26,6 @@ import grails.databinding.BindUsing
 import grails.databinding.SimpleMapDataBindingSource
 import grails.validation.Validateable
 import groovy.transform.Canonical
-import groovy.transform.Immutable
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CheckAndCall
@@ -38,6 +37,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflow.Version
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
@@ -45,15 +45,17 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 class WorkflowSelectionController implements CheckAndCall {
 
     static allowedMethods = [
-            index                     : "GET",
-            updateFastqcVersion       : "POST",
-            updateMergingCriteriaLPK  : "POST",
-            updateMergingCriteriaSPG  : "POST",
-            possibleAlignmentOptions  : "POST",
-            saveAlignmentConfiguration: "POST",
-            possibleAnalysisOptions   : "POST",
-            saveAnalysisConfiguration : "POST",
-            deleteConfiguration       : "POST",
+            index                      : "GET",
+            updateFastqcVersion        : "POST",
+            updateMergingCriteriaLPK   : "POST",
+            updateMergingCriteriaSPG   : "POST",
+            possibleAlignmentOptions   : "POST",
+            saveAlignmentConfiguration : "POST",
+            possibleAnalysisOptions    : "POST",
+            saveAnalysisConfiguration  : "POST",
+            deleteConfiguration        : "POST",
+            searchWorkflowDefaultGroups: "POST",
+            applyWorkflowDefaultGroup  : "POST",
     ]
 
     MergingCriteriaService mergingCriteriaService
@@ -64,6 +66,7 @@ class WorkflowSelectionController implements CheckAndCall {
     WorkflowService workflowService
     WorkflowVersionService workflowVersionService
     ReferenceGenomeService referenceGenomeService
+    WorkflowDefaultGroupService workflowDefaultGroupService
 
     @PreAuthorize('isFullyAuthenticated()')
     def index() {
@@ -239,6 +242,44 @@ class WorkflowSelectionController implements CheckAndCall {
         }
     }
 
+    def searchWorkflowDefaultGroups(SearchWorkflowDefaultGroupsCommand cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
+            List<WorkflowDefaultGroup> groups = cmd.seqType ?
+                    workflowDefaultGroupService.findAllBySeqType(cmd.seqType) :
+                    workflowDefaultGroupService.search(cmd.query ?: "")
+            render(groups.collect {
+                [id: it.id, text: "${it.name} (${it.seqType.displayNameWithLibraryLayout})"]
+            } as JSON)
+        }
+    }
+
+    def applyWorkflowDefaultGroup(ApplyWorkflowDefaultGroupCommand cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
+            Project project = projectSelectionService.requestedProject
+            List<AppliedDefaultEntry> applied = workflowDefaultGroupService.applyToProject(project, cmd.group)
+            render(applied.collect { buildAppliedDefaultEntryOutputObject(it) } as JSON)
+        }
+    }
+
+    private Map buildAppliedDefaultEntryOutputObject(AppliedDefaultEntry applied) {
+        WorkflowVersionSelector wvSelector = applied.workflowVersionSelector
+        ReferenceGenomeSelector refGenomeSelector = applied.referenceGenomeSelector
+        Map result = [
+                workflow               : [id: wvSelector.workflowVersion.workflow.id, displayName: wvSelector.workflowVersion.workflow.displayName],
+                seqType                : [id: wvSelector.seqType.id, displayName: wvSelector.seqType.displayNameWithLibraryLayout],
+                version                : [id: wvSelector.workflowVersion.id, displayName: wvSelector.workflowVersion.workflowVersion],
+                workflowVersionSelector: [id: wvSelector.id, previousId: wvSelector.previous?.id],
+        ]
+        if (refGenomeSelector) {
+            result += [
+                    species         : refGenomeSelector.species.collect { [id: it.id, displayName: it.displayName] },
+                    refGenome       : [id: refGenomeSelector.referenceGenome.id, displayName: refGenomeSelector.referenceGenome.displayName],
+                    refGenSelectorId: refGenomeSelector.id,
+            ]
+        }
+        return result
+    }
+
     def updateFastqcVersion(UpdateWorkflowVersionCommand cmd) {
         checkDefaultErrorsAndCallMethod(cmd) {
             try {
@@ -271,31 +312,6 @@ class WorkflowSelectionController implements CheckAndCall {
             mergingCriteriaService.updateMergingCriteria(cmd.mergingCriteria, cmd.value)
             render([success: true] as JSON)
         }
-    }
-}
-
-@Immutable
-class Version {
-    long id
-    String name
-    String workflowName
-    boolean isDefault
-    boolean isDeprecated
-
-    String getNameWithDefault() {
-        return "${name}${this.defaultAndDeprecatedText}"
-    }
-
-    String getNameWithDefaultAndWorkflow() {
-        return "${workflowName}: ${name}${this.defaultAndDeprecatedText}"
-    }
-
-    private getDefaultAndDeprecatedText() {
-        return "${isDefault ? " (default)" : ""}${isDeprecated ? " (deprecated)" : ""}"
-    }
-
-    static Version fromWorkflowVersion(WorkflowVersion wv) {
-        return new Version(wv.id, wv.workflowVersion, wv.workflow.name, wv == wv.workflow.defaultVersion, wv.deprecatedDate as boolean)
     }
 }
 
@@ -409,6 +425,20 @@ class UpdateMergingCriteriaCommandLPK implements Validateable {
 class UpdateMergingCriteriaCommandSPG implements Validateable {
     MergingCriteria mergingCriteria
     MergingCriteria.SpecificSeqPlatformGroups value
+}
+
+class SearchWorkflowDefaultGroupsCommand implements Validateable {
+    SeqType seqType
+    String query
+
+    static constraints = {
+        seqType nullable: true
+        query nullable: true
+    }
+}
+
+class ApplyWorkflowDefaultGroupCommand implements Validateable {
+    WorkflowDefaultGroup group
 }
 
 class WorkflowVersionComparatorConsideringDefaultAndDeprecated implements Comparator<WorkflowVersion> {

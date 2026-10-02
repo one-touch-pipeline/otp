@@ -226,9 +226,10 @@ class OtpTagLib {
         String backdrop = attrs.closable == "true" ? "" : 'data-backdrop="static" data-keyboard="false"'
         String confirmText = attrs.confirmText ?: "Confirm"
         String closeText = attrs.closeText ?: "Close"
+        String dialogClasses = 'modal-dialog' + (attrs.classes ? " ${attrs.classes}" : "")
 
         out << "<div id='${attrs.modalId}' tabindex='-1' class='modal fade' role='dialog' ${backdrop}>"
-        out << "<div class='modal-dialog'>"
+        out << "<div class='${dialogClasses}'>"
         out << "<div class='modal-content'>"
         if (attrs.title || attrs.closable) {
             out << "<div class='modal-header'>"

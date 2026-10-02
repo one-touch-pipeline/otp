@@ -25,6 +25,7 @@
     <asset:javascript src="common/editWorkflow.js"/>
     <asset:javascript src="pages/workflowSystemConfig/index.js"/>
     <asset:javascript src="pages/workflowSystemConfig/workflowVersions.js"/>
+    <asset:javascript src="pages/workflowSystemConfig/workflowDefaults.js"/>
 </head>
 
 <body>
@@ -79,6 +80,8 @@
         <tbody>
         </tbody>
     </table>
+
+    <g:render template="/templates/bootstrap/workflowDefaultsCreation"/>
 </div>
 
 <otp:otpModal modalId="editWorkflowModal" title="${g.message(code: 'workflowSystemConfig.modal.title')}" type="dialog"
