@@ -23,24 +23,38 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.ngsdata.Individual
+import de.dkfz.tbi.otp.ngsdata.IndividualService
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
+import de.dkfz.tbi.otp.ngsdata.Sample
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.DeletionService
+import de.dkfz.tbi.otp.filestore.FilestoreService
+import de.dkfz.tbi.otp.workflowExecution.Artefact
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
+import java.nio.file.Files
 
 /**
- * Script to delete individuals with all data.
+ * Script to delete or archive individuals with all associated data.
  *
- * It deletes all data of the individual in OTP database and generates a bash script to delete it on the files system.
- * The file name is constructed by all names, but truncated to 100 chars.
+ * In deletion mode, it deletes all data of the individuals from the OTP database and generates a bash script
+ * to delete the corresponding data from the file system.
  *
- * The individuals are given by there pid.
+ * In archiving mode, it deletes all data of the individuals from the OTP database without generating a deletion
+ * script. Instead, all affected data folders are written to the specified archive output file and printed to
+ * the console. The data itself remains on the file system and can be archived separately.
  *
- * Please note, that the script needs some time per pid, depending of the amount of data. This can cause proxy timeout. But a proxy timeout does not stop the
- * request in OTP, it will continue to run until it succeeds or an error is thrown.
+ * The individuals are specified by their PIDs.
+ *
+ * The script provides a `tryRun` mode to roll back database changes after processing, allowing the result to be
+ * checked before the changes are committed.
  */
 
 // input area
@@ -51,10 +65,14 @@ import java.nio.file.Path
  * All values are trimmed, empty lines and lines starting with '#' are ignored.
  */
 String pids = """
-#pid
-#pid2
-
+#PID
 """
+
+/**
+ * Absolute path of the file containing all directories affected by archiving.
+ * Only used if archiving is true.
+ */
+String archiveFilePath = ""
 
 /**
  * Flag to indicate, if it should be checked for files only linked and for external bam files.
@@ -62,17 +80,34 @@ String pids = """
  */
 boolean check = true
 
+/**
+ * Flag to archive the data
+ * and generate a list with the location of the archived files.
+ */
+boolean archiving = false
+
+/**
+ * Flag to allow a trial run, which rolls back the changes at the end (if set to `true`),
+ * or to execute the changes (if set to `false`).
+ */
+boolean tryRun = true
+
 // script area
 // -----------------------------
 
 List<Individual> individuals = pids.split('\n')*.trim().findAll { String line ->
     line && !line.startsWith('#')
 }.collect {
-    CollectionUtils.exactlyOneElement(Individual.findAllByPid(it), "Could not find pid '${it}'")
+    CollectionUtils.exactlyOneElement(
+            Individual.findAllByPid(it),
+            "Could not find pid '${it}'"
+    )
 }.unique()
 
+assert individuals: "No individuals were defined"
+
 String combinedPids = individuals*.pid.join('__')
-String fileName = "Delete_${combinedPids.size() < 110 ? combinedPids : combinedPids.substring(0, 100) + '_and_others'}.sh"
+String deletionFileName = "Delete_${combinedPids.size() < 110 ? combinedPids : combinedPids.substring(0, 100) + '_and_others'}.sh"
 
 DeletionService deletionService = ctx.deletionService
 FileService fileService = ctx.fileService
@@ -85,26 +120,106 @@ FileSystem fileSystem = fileSystemService.remoteFileSystem
 Path baseOutputDir = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve('sample_swap')
 
 Individual.withTransaction {
-    List<String> allFilesToRemove = [
-            "#!/bin/bash",
-            "",
-            "set -evx",
-    ]
+    if (archiving) {
+        assert archiveFilePath?.trim():
+                "No archive output file was given"
 
-    individuals.each {
-        println "Delete: ${it} of project ${it.project}"
-        allFilesToRemove << "\n\n#${it}"
-        allFilesToRemove << deletionService.deleteIndividual(it, check)
+        if (!archiveFilePath.endsWith(".txt")) {
+            archiveFilePath = archiveFilePath.concat(".txt")
+        }
+
+        Path archiveFile = fileSystem.getPath(archiveFilePath)
+
+        assert archiveFile.isAbsolute():
+                "Archive output file has to be an absolute path"
+
+        Set<Path> archiveDirectories = [] as Set<Path>
+
+        individuals.each { Individual individual ->
+            println "Archive: ${individual} of project ${individual.project}"
+
+            String deletionCommands = deletionService.deleteIndividual(
+                    individual,
+                    check
+            )
+
+            deletionCommands.readLines()*.trim().findAll { String line ->
+                        line.startsWith('rm -rf ')
+                    }.collect { String line ->
+                        line.substring('rm -rf '.length())
+                    }.findAll().each { String pathString ->
+                        Path path = fileSystem.getPath(pathString)
+
+                        if (!Files.isDirectory(path)) {
+                            archiveDirectories << path.parent
+                        } else {
+                            archiveDirectories << path
+                        }
+                    }
+        }
+
+        Set<Path> filteredArchiveDirectories = archiveDirectories.findAll { Path path ->
+            !archiveDirectories.any { Path other ->
+                other != path && path.startsWith(other)
+            }
+        }
+
+        List<String> archiveDirectoryStrings = filteredArchiveDirectories*.toString().sort()
+
+        println ''
+        println "Folders affected by archiving:"
+        archiveDirectoryStrings.each { String path ->
+            println path
+        }
+
+        String unixGroup = processingOptionService.findOptionAsString(
+                ProcessingOption.OptionName.OTP_USER_LINUX_GROUP
+        )
+
+        Path archiveList = fileService.createOrOverwriteScriptOutputFile(
+                archiveFile.parent,
+                archiveFile.fileName.toString(),
+                unixGroup
+        )
+
+        archiveList << archiveDirectoryStrings.join('\n')
+
+        println ''
+        println "Archive folder list is written to:"
+        println archiveList
+    } else {
+        List<String> allFilesToRemove = [
+                "#!/bin/bash",
+                "",
+                "set -evx",
+        ]
+
+        individuals.each { Individual individual ->
+            println "Delete: ${individual} of project ${individual.project}"
+
+            allFilesToRemove << "\n\n#${individual}"
+            allFilesToRemove << deletionService.deleteIndividual(
+                    individual,
+                    check
+            )
+        }
+
+        String unixGroup = processingOptionService.findOptionAsString(
+                ProcessingOption.OptionName.OTP_USER_LINUX_GROUP
+        )
+
+        Path deleteFileCmd = fileService.createOrOverwriteScriptOutputFile(
+                baseOutputDir,
+                deletionFileName,
+                unixGroup
+        )
+
+        deleteFileCmd << allFilesToRemove.join('\n')
+
+        println ''
+        println "Deletion file is written to:"
+        println deleteFileCmd
     }
 
-    String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
-    Path deleteFileCmd = fileService.createOrOverwriteScriptOutputFile(baseOutputDir, fileName, unixGroup)
-
-    deleteFileCmd << allFilesToRemove.join('\n')
-
-    println ''
-    println "Deletion file is written to:"
-    println deleteFileCmd
-
-    assert false: "DEBUG: transaction intentionally failed to rollback changes"
+    assert !tryRun: "Rollback, since it was only a tryRun."
 }
