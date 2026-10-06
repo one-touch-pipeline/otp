@@ -377,6 +377,12 @@ task workflowTest(type: Test) {
     group = LifecycleBasePlugin.VERIFICATION_GROUP
     shouldRunAfter "integrationTest"
     systemProperty "grails.env", "WORKFLOW_TEST" // change to TEST??
+
+    // report each single workflow test with its result, since the workflow tests are long running and their output is hard to follow otherwise
+    afterTest { desc, result ->
+        println("${result.resultType} ${desc.className} > ${desc.displayName} " +
+                "(${(result.endTime - result.startTime).intdiv(1000)}s)")
+    }
 }
 
 task jacocoWorkflowTestReport(type: JacocoReport) {

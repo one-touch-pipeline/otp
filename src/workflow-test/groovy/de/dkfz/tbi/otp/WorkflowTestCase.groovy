@@ -194,11 +194,6 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
                 }
             }
 
-            findOrCreateProcessingOption(
-                    name: OptionName.RODDY_APPLICATION_INI,
-                    value: new File(inputRootDirectory, "applicationProperties-test.ini").absolutePath
-            )
-
             assert schedulerService.running.empty
             assert schedulerService.queue.empty
             assert !ProcessingStep.list()

@@ -113,10 +113,6 @@ class ConfigService implements ApplicationContextAware {
         return getAndCheckPathFromProperty(OtpProperty.PATH_STACK_TRACES)
     }
 
-    File getRoddyPath() {
-        return new File(otpProperties.get(OtpProperty.PATH_RODDY).toString() ?: "")
-    }
-
     File getMetadataStoragePath() {
         return new File(otpProperties.get(OtpProperty.PATH_METADATA_STORAGE).toString() ?: "")
     }

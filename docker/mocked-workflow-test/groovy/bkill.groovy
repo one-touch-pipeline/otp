@@ -20,32 +20,22 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import java.nio.file.Files
+import java.nio.file.Path
 
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
+class BResume {
+    static void main(String[] args) {
+        if (!args) {
+            System.err.println("No job ids")
+            System.exit(1)
+        }
+        Path basePath = Path.of(System.getenv("HOME"), 'jobs')
 
-ConfigService configService = ctx.configService
-ProcessingOptionService processingOptionService = ctx.processingOptionService
-
-String roddy_base_path = configService.roddyPath.toString()
-
-processingOptionService.createOrUpdate(
-        RODDY_PATH,
-        "${roddy_base_path}/roddy/3.8.2"
-)
-
-processingOptionService.createOrUpdate(
-        RODDY_BASE_CONFIGS_PATH,
-        "${roddy_base_path}/configs"
-)
-
-processingOptionService.createOrUpdate(
-        RODDY_APPLICATION_INI,
-        "${roddy_base_path}/applicationProperties.ini"
-)
-
-processingOptionService.createOrUpdate(
-        RODDY_FEATURE_TOGGLES_CONFIG_PATH,
-        "${roddy_base_path}/configs/featureToggles.ini"
-)
+        args.each {
+            Path stat = basePath.resolve(it).resolve('state')
+            assert Files.exists(stat)
+            stat.text = "EXIT\n"
+            println "Job <$it> is being killed"
+        }
+    }
+}

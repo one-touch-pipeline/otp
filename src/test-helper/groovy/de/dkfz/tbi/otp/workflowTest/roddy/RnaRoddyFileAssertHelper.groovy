@@ -75,6 +75,16 @@ class RnaRoddyFileAssertHelper extends RoddyFileAssertHelper {
         return rnaAlignmentWorkFileService.getSingleLaneQAJsonFiles(bamFile)
     }
 
+    /**
+     * The rna workflow writes the merged quality control file and the RNAseQC directory into the quality control directory,
+     * independent of the number of merged lanes.
+     */
+    @Override
+    @SuppressWarnings("UnusedMethodParameter")
+    int expectedNumberOfFilesInQaDirectory(RoddyBamFile bamFile) {
+        return 2
+    }
+
     @Override
     List<Path> getAdditionalWorkFiles(RoddyBamFile bamFile) {
         return [

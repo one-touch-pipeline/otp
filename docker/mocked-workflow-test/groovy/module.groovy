@@ -22,10 +22,17 @@
 
 class Module {
 
-    static final List<String> MODULES = [
-            "FastQC/0.11.5",
-            "groovy/2.4.15",
-            "samtools/1.2",
+    /**
+     * The modules OTP may load during the workflow tests.
+     *
+     * They are the values of the activation commands set by 'initModuleSystem' in 'src/workflow-test/resources/mockedWorkflowTestInit.groovy',
+     * which overwrites the values of 'scripts/initializations/LoadSoftwareModules.groovy'.
+     */
+    static final List<String> MODULES_TO_LOAD = [
+            "FastQC/0.11.5",    // Fastqc workflow
+            "Groovy/4.0.22",    // bam import and roddy workflows
+            "Java/1.8.0_131",   // roddy workflows
+            "SAMtools/1.20",    // bam import
     ].asImmutable()
 
     static void main(String[] args) {
@@ -36,6 +43,6 @@ class Module {
 
         assert args.length == 2
         assert args[0] == 'load'
-        assert args[1] in MODULES
+        assert args[1] in MODULES_TO_LOAD
     }
 }

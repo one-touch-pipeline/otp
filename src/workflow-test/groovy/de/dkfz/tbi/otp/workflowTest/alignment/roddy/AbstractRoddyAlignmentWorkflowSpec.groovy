@@ -237,7 +237,8 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
 
         // content of the bam file
         LogThreadLocal.withThreadLog(System.out) {
-            LocalShellHelper.executeAndWait(" zcat  ${panCancerLinkFileService.getBamFile(bamFile)} 1> /dev/null").assertExitCodeZeroAndStderrEmpty()
+            remoteShellHelper.executeCommandReturnProcessOutput("zcat ${panCancerLinkFileService.getBamFile(bamFile)} 1> /dev/null")
+                    .assertExitCodeZeroAndStderrEmpty()
         }
         assert Files.size(panCancerLinkFileService.getBamFile(bamFile)) == bamFile.fileSize
 

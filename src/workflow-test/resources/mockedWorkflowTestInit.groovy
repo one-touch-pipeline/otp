@@ -23,6 +23,7 @@
 import groovy.transform.Field
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.roddy.rna.RnaAlignmentWorkflow
@@ -35,15 +36,10 @@ import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.commands.CreateCommand
 import de.dkfz.tbi.otp.workflowTest.WorkflowTestProperty
 
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
+
 /**
- * This script configures workflow test properties that were previously configured
- * in .otp.properties files for mocked workflow tests.
- *
- * This script is automatically loaded by AbstractWorkflowSpec and WorkflowTestCase
- * during test setup if configured via otp.testing.workflows.init.script property
- * in .otp.properties file.
- *
- * Note: Adapt this file to fit your local workflow test environment.
+ * This script configures mocked workflow test properties.
  */
 
 @Field
@@ -51,6 +47,9 @@ TestConfigService configService = ctx.configService
 
 @Field
 ConfigSelectorService configSelectorService = ctx.configSelectorService
+
+@Field
+ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 /**
  * Map of workflow test properties.
@@ -65,6 +64,43 @@ Map<WorkflowTestProperty, String> workflowTestProperties = [
         (WorkflowTestProperty.TEST_WORKFLOW_QUEUE)                            : 'devel',
         (WorkflowTestProperty.TEST_WORKFLOW_CONFIG_SUFFIX)                    : 'devel',
 ]
+
+/**
+ * setting module configurations
+ */
+void settingModuleSystem() {
+    println "init module system"
+
+    processingOptionService.createOrUpdate(COMMAND_LOAD_MODULE_LOADER, "")
+
+    processingOptionService.createOrUpdate(COMMAND_ENABLE_MODULE, "module load")
+
+    // fastqc
+    processingOptionService.createOrUpdate(COMMAND_FASTQC, "fastqc")
+
+    // roddy / bam import
+    processingOptionService.createOrUpdate(COMMAND_GROOVY, 'groovy')
+    processingOptionService.createOrUpdate(COMMAND_ACTIVATION_GROOVY, 'module load Groovy/4.0.22')
+
+    // roddy
+    processingOptionService.createOrUpdate(COMMAND_ACTIVATION_JAVA, 'module load Java/1.8.0_131')
+
+    // bam import
+    processingOptionService.createOrUpdate(COMMAND_SAMTOOLS, 'samtools')
+    processingOptionService.createOrUpdate(COMMAND_ACTIVATION_SAMTOOLS, 'module load SAMtools/1.20')
+}
+
+/**
+ * setting roddy configurations
+ */
+void settingRoddy() {
+    String roddyBasePath = "/workflows/roddy"
+    String roddyVersion = "current"
+    processingOptionService.createOrUpdate(RODDY_PATH, "${roddyBasePath}/roddy/${roddyVersion}")
+    processingOptionService.createOrUpdate(RODDY_BASE_CONFIGS_PATH, "${roddyBasePath}/configs")
+    processingOptionService.createOrUpdate(RODDY_APPLICATION_INI, "${roddyBasePath}/applicationProperties-test.ini")
+    processingOptionService.createOrUpdate(RODDY_FEATURE_TOGGLES_CONFIG_PATH, "${roddyBasePath}/configs/featureToggles.ini")
+}
 
 /**
  * configure apptainer for roddy
@@ -216,6 +252,8 @@ try {
     println("=== Starting workflow test initialization ===")
 
     configService.storeWorkflowTestProperties(workflowTestProperties)
+    settingModuleSystem()
+    settingRoddy()
 
     if (Workflow.count == 0) {
         println "Skip fragment configuration, since no workflows in new system initialized"

@@ -78,6 +78,10 @@ mkdir fastqFiles/wes/tumor/paired/run4
 mkdir fastqFiles/wes/tumor/paired/run4/sequence
 mkdir fastqFiles/fastqc
 mkdir fastqFiles/rna
+mkdir fastqFiles/rna/tumor
+mkdir fastqFiles/rna/tumor/paired
+mkdir fastqFiles/rna/tumor/paired/run4
+mkdir fastqFiles/rna/tumor/paired/run4/sequence
 mkdir reference-genomes
 mkdir reference-genomes/hg_GRCh38
 mkdir reference-genomes/hg_GRCh38/indexes

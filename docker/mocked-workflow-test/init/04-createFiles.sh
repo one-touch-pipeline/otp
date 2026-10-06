@@ -91,6 +91,8 @@ fastqFiles/wgbs/tumor/paired/lib5/run1/sequence/gerald_D1VCPACXX_1_R2.fastq.bz2
 fastqFiles/wgbs/tumor/paired/lib5/run1/sequence/gerald_D1VCPACXX_1_R1.fastq.bz2
 fastqFiles/wes/tumor/paired/run4/sequence/gerald_D1VCPACXX_x_R2.fastq.gz
 fastqFiles/wes/tumor/paired/run4/sequence/gerald_D1VCPACXX_x_R1.fastq.gz
+fastqFiles/rna/tumor/paired/run4/sequence/gerald_D1VCPACXX_x_R2.fastq.gz
+fastqFiles/rna/tumor/paired/run4/sequence/gerald_D1VCPACXX_x_R1.fastq.gz
 fastqFiles/fastqc/input_fastqc.fastq.bz2
 fastqFiles/fastqc/input_fastqc.fastq.tar.gz
 fastqFiles/fastqc/input_fastqc.fastq.tar.bz2

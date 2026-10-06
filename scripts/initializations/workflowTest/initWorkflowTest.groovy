@@ -42,11 +42,11 @@ import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
  * This script configures workflow test properties that were previously configured
  * in .otp.properties files.
  *
- * This script is automatically loaded by AbstractWorkflowSpec and WorkflowTestCase
+ * This script is automatically loaded by AbstractWorkflowSpec
  * during test setup if configured via otp.testing.workflows.init.script property
  * in .otp.properties file.
  *
- * Note: Adapt this file to fit your local workflow test environment.
+ * Note: Adapt this file to fit your local workflow test environment. Values in '<...>' are placeholder for your environment settings.
  */
 
 @Field
@@ -65,12 +65,12 @@ ProcessingOptionService processingOptionService = ctx.processingOptionService
  */
 Map<WorkflowTestProperty, String> workflowTestProperties = [
         // Required properties for workflow tests
-        (WorkflowTestProperty.TEST_WORKFLOW_INPUT_DIR)                        : "/path/to/your-reference-data",
-        (WorkflowTestProperty.TEST_WORKFLOW_RESULT_DIR)                       : "/path/to/your-test-result",
-        (WorkflowTestProperty.TEST_WORKFLOW_RODDY_SHARED_FILES_BASE_DIRECTORY): '/path/to/your-legacy-share',
-        (WorkflowTestProperty.TEST_WORKFLOW_RODDY_VIRTUAL_ENVS_DIRECTORY)     : '/path/to/your-virtualenvs',
-        (WorkflowTestProperty.TEST_WORKFLOW_QUEUE)                            : 'your-queue',
-        (WorkflowTestProperty.TEST_WORKFLOW_CONFIG_SUFFIX)                    : 'your-config-suffix',
+        (WorkflowTestProperty.TEST_WORKFLOW_INPUT_DIR)                        : "</path/to/your-reference-data>",
+        (WorkflowTestProperty.TEST_WORKFLOW_RESULT_DIR)                       : "</path/to/your-test-result>",
+        (WorkflowTestProperty.TEST_WORKFLOW_RODDY_SHARED_FILES_BASE_DIRECTORY): '</path/to/your-legacy-share>',
+        (WorkflowTestProperty.TEST_WORKFLOW_RODDY_VIRTUAL_ENVS_DIRECTORY)     : '</path/to/your-virtualenvs>',
+        (WorkflowTestProperty.TEST_WORKFLOW_QUEUE)                            : '<your-queue>',
+        (WorkflowTestProperty.TEST_WORKFLOW_CONFIG_SUFFIX)                    : '<your-config-suffix>',
 ]
 
 /**
@@ -88,14 +88,26 @@ void settingModuleSystem() {
 
     // roddy / bam import
     processingOptionService.createOrUpdate(COMMAND_GROOVY, 'groovy')
-    processingOptionService.createOrUpdate(COMMAND_ACTIVATION_GROOVY, 'module load $YOUR_GROOVY_VERSION')
+    processingOptionService.createOrUpdate(COMMAND_ACTIVATION_GROOVY, 'module load <YOUR_GROOVY_VERSION>')
 
     // roddy
-    processingOptionService.createOrUpdate(COMMAND_ACTIVATION_JAVA, 'module load $YOUR_JAVA_VERSION')
+    processingOptionService.createOrUpdate(COMMAND_ACTIVATION_JAVA, 'module load <YOUR_JAVA_VERSION>')
 
     // bam import
     processingOptionService.createOrUpdate(COMMAND_SAMTOOLS, 'samtools')
-    processingOptionService.createOrUpdate(COMMAND_ACTIVATION_SAMTOOLS, 'module load $YOUR_SAMTOOLS_VERSION')
+    processingOptionService.createOrUpdate(COMMAND_ACTIVATION_SAMTOOLS, 'module load <YOUR_SAMTOOLS_VERSION>')
+}
+
+/**
+ * setting roddy configurations
+ */
+void settingRoddy() {
+    String roddyBasePath = "<BASE_RODDY_PATH>"
+    String roddyVersion = "<RODDY_VERSION>"
+    processingOptionService.createOrUpdate(RODDY_PATH, "${roddyBasePath}/roddy/${roddyVersion}")
+    processingOptionService.createOrUpdate(RODDY_BASE_CONFIGS_PATH, "${roddyBasePath}/configs")
+    processingOptionService.createOrUpdate(RODDY_APPLICATION_INI, "${roddyBasePath}/applicationProperties-test.ini")
+    processingOptionService.createOrUpdate(RODDY_FEATURE_TOGGLES_CONFIG_PATH, "${roddyBasePath}/configs/featureToggles.ini")
 }
 
 /**
@@ -141,11 +153,11 @@ void configureApptainer() {
                                         },
                                         "containerImage": {
                                             "type": "path",
-                                            "value": "$YOUR_APPTAINER_IMAGE"
+                                            "value": "<YOUR_APPTAINER_IMAGE>"
                                         },
                                         "containerMounts": {
                                             "type": "bashArray",
-                                            "value": "( $YOUR_MOUNT_LIST )"
+                                            "value": "( <YOUR_MOUNT_LIST> )"
                                         }
                                     }
                                 }
@@ -182,7 +194,7 @@ void configureVepForSnvAndIndelLocationSpecific() {
                                     "cvalues": {
                                         "VEP_CACHE_BASE": {
                                             "type": "path",
-                                            "value": "$PATH_TO_VEP"
+                                            "value": "<PATH_TO_VEP>"
                                         }
                                     }
                                 }
@@ -222,8 +234,8 @@ void configureWorkflowSpecificSettings() {
             value       : """
                             {
                                 "WESKIT": {
-                                    "WORKFLOW_TYPE_VERSION": "$WORKFLOW_TYPE_VERSION",
-                                    "PROFILE": "$PROFILE",
+                                    "WORKFLOW_TYPE_VERSION": "<WORKFLOW_TYPE_VERSION>",
+                                    "PROFILE": "<PROFILE>",
                                 }
                             }
                           """
@@ -236,7 +248,7 @@ void configureWorkflowSpecificSettings() {
             value       : """
                             {
                                 "WESKIT": {
-                                    "WORKFLOW_CONFIG_URL": "$WORKFLOW_CONFIG_URL",
+                                    "WORKFLOW_CONFIG_URL": "<WORKFLOW_CONFIG_URL>",
                                 }
                             }
                           """
@@ -249,6 +261,7 @@ try {
 
     configService.storeWorkflowTestProperties(workflowTestProperties)
     settingModuleSystem()
+    settingRoddy()
 
     if (Workflow.count == 0) {
         println "Skip fragment configuration, since no workflows in new system initialized"

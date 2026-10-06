@@ -223,13 +223,6 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         return [:]
     }
 
-    /**
-     * Returns the applicationProperties path
-     */
-    protected Path getRoddyApplicationPropertyFile() {
-        return referenceDataDirectory.resolve("applicationProperties-test.ini")
-    }
-
     @SuppressWarnings("CatchThrowable")
     void setup() {
         log.debug("Start to setup ${getClass().simpleName}.${specificationContext.currentIteration.name}")
@@ -561,7 +554,6 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         findOrCreateProcessingOption(name: OptionName.EMAIL_CLUSTER_ADMINISTRATION, value: HelperUtils.randomEmail)
 
         // roddy and other paths
-        findOrCreateProcessingOption(name: OptionName.RODDY_APPLICATION_INI, value: roddyApplicationPropertyFile.toString())
         findOrCreateProcessingOption(name: OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY, value: configService.workflowTestRoddySharedFilesBaseDir.toString())
         findOrCreateProcessingOption(name: OptionName.BASE_PATH_REFERENCE_GENOME, value: referenceGenomeDirectory.toString())
 

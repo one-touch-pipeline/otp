@@ -21,22 +21,30 @@
 # SOFTWARE.
 #
 
-# The script copies the logs of the mocked servers, which run in the mocked cluster (image 'otp-mocked-cluster'),
-# into the artifact directory, so they can be analysed after the job has finished.
+# The script copies the following directories of the mocked cluster (image 'otp-mocked-cluster') into the artifact
+# directory, so they can be analysed after the job has finished:
+# - the logs of the mocked servers, always
+# - the file system the workflow tests have created and the jobs of the mocked cluster, only if the job did not
+#   succeed, since they are only needed to analyse failing tests
 #
-# The script is used in the after script and therefore never fails the job: if the logs cannot be fetched, it only
-# writes a warning, since a failing log collection should not hide the result of the tests.
+# If a directory cannot be fetched, the script writes a warning and continues with the next one, so as many directories
+# as possible are collected. At the end it fails, if at least one directory could not be fetched.
 
 set -e -o pipefail
 
 PROPERTIES=~/.otp.properties
 
-# the value of '$LOGS' of the image 'otp-mocked-cluster', see 'docker/mocked-workflow-test/Dockerfile'.
-# it is hardcoded, since sshd does not pass the environment of the container to the ssh sessions
+# the values of '$LOGS', '$WORKFLOWS/tests' and '$JOBS' of the image 'otp-mocked-cluster',
+# see 'docker/mocked-workflow-test/Dockerfile'.
+# they are hardcoded, since sshd does not pass the environment of the container to the ssh sessions
 REMOTE_LOGS=/workflows/logs
+REMOTE_TESTS=/workflows/tests
+REMOTE_JOBS=/workflows/jobs
 
-# the artifacts of the job must be inside the project directory, therefore the logs cannot be put in the home directory
-TARGET="${CI_PROJECT_DIR:-.}/mocked-servers"
+# the artifacts of the job must be inside the project directory, therefore the directories cannot be put in the home directory
+TARGET_LOGS="${CI_PROJECT_DIR:-.}/mocked-servers"
+TARGET_TESTS="${CI_PROJECT_DIR:-.}/mocked-tests"
+TARGET_JOBS="${CI_PROJECT_DIR:-.}/mocked-jobs"
 
 # reads a property from the otp properties, fails if it is missing or empty
 readProperty() {
@@ -73,13 +81,48 @@ export SSH_ASKPASS="$askpass"
 export SSH_ASKPASS_REQUIRE=force
 export DISPLAY=none
 
-mkdir -p "$TARGET"
+# set to 1 if at least one directory could not be copied
+failed=0
 
-# the remote directory itself is copied, therefore the copy is named like it
-if scp -r -P "$sshPort" "${sshUser}@${sshHost}:${REMOTE_LOGS}" "$TARGET"
+# copies a directory of the mocked cluster into the given target directory.
+# a failure is only recorded in 'failed', so the following directories are still copied
+copyRemoteDirectory() {
+    local remote="$1"
+    local target="$2"
+    local description="$3"
+
+    if ! mkdir -p "$target"
+    then
+        echo "WARNING: could not create $target, therefore ${remote} is not copied" >&2
+        failed=1
+        return 0
+    fi
+
+    # the remote directory itself is copied, therefore the copy is named like it
+    if scp -r -P "$sshPort" "${sshUser}@${sshHost}:${remote}" "$target"
+    then
+        echo "copied ${description} to ${target}/$(basename "$remote")"
+        ls -l "${target}/$(basename "$remote")" || true
+    else
+        echo "WARNING: could not copy ${sshUser}@${sshHost}:${remote} to $target" >&2
+        failed=1
+    fi
+}
+
+copyRemoteDirectory "$REMOTE_LOGS" "$TARGET_LOGS" 'the logs of the mocked servers'
+
+# 'CI_JOB_STATUS' is only defined in the after script of a gitlab job. If it is unset, the script is called manually
+# and the directories are fetched, since that is done to analyse something.
+if [[ "${CI_JOB_STATUS:-}" == "success" ]]
 then
-    echo "copied the logs of the mocked servers to ${TARGET}/$(basename "$REMOTE_LOGS")"
-    ls -l "${TARGET}/$(basename "$REMOTE_LOGS")" || true
+    echo "skipped ${REMOTE_TESTS} and ${REMOTE_JOBS}, they are only needed to analyse failing tests and the job succeeded"
 else
-    echo "WARNING: could not copy ${sshUser}@${sshHost}:${REMOTE_LOGS} to $TARGET" >&2
+    copyRemoteDirectory "$REMOTE_TESTS" "$TARGET_TESTS" 'the file system created by the workflow tests'
+    copyRemoteDirectory "$REMOTE_JOBS" "$TARGET_JOBS" 'the jobs of the mocked cluster'
+fi
+
+if [[ "$failed" -ne 0 ]]
+then
+    echo "ERROR: at least one directory of the mocked cluster could not be copied, see the warnings above" >&2
+    exit 1
 fi

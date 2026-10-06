@@ -76,18 +76,25 @@ class RoddyFileAssertHelper {
         qaDirs.addAll(getAdditionalQaDirectories(bamFile))
         fileAssertHelper.assertDirectoryContentReadable([], [], qaDirs)
 
-        // qa for merged and one for each read group and for each library (if available)
+        Stream<Path> paths = null
+        try {
+            paths = Files.list(panCancerLinkFileService.getQADirectory(bamFile))
+            assert expectedNumberOfFilesInQaDirectory(bamFile) == paths.count()
+        } finally {
+            paths?.close()
+        }
+    }
+
+    /**
+     * The number of entries expected in the final quality control directory: one for the merged quality control, one for each read group
+     * and, for wgbs with multiple libraries, one for each library.
+     */
+    int expectedNumberOfFilesInQaDirectory(RoddyBamFile bamFile) {
         int numberOfFilesInFinalQaDir = bamFile.numberOfMergedLanes + 1
         if (bamFile.seqType.wgbs && bamFile.hasMultipleLibraries()) {
             numberOfFilesInFinalQaDir += bamFile.seqTracks*.libraryDirectoryName.unique().size()
         }
-        Stream<Path> paths = null
-        try {
-            paths = Files.list(panCancerLinkFileService.getQADirectory(bamFile))
-            assert numberOfFilesInFinalQaDir == paths.count()
-        } finally {
-            paths?.close()
-        }
+        return numberOfFilesInFinalQaDir
     }
 
     void assertWorkDirectoryFileSystemState(RoddyBamFile bamFile) {

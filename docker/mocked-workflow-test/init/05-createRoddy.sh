@@ -1,3 +1,4 @@
+#!/bin/bash
 #
 # Copyright 2011-2026 The OTP authors
 #
@@ -20,38 +21,14 @@
 # SOFTWARE.
 #
 
-##ssh
-otp.ssh.user=otp
-otp.ssh.authMethod=password
-otp.ssh.password=otp
-otp.ssh.host=openssh-server
-otp.ssh.port=2222
-otp.ssh.timeout=0
-otp.scheduler=LSF
+# create directories / files needed for Roddy
 
-## weskit
-otp.wes.url=http://openssh-server:8200/ga4gh/wes/v1
-otp.wes.data.directory=/tmp
-otp.wes.auth.tokenUri=http://openssh-server:8100/realms/test/protocol/openid-connect/token
-otp.wes.auth.clientId=dummy
-otp.wes.auth.clientSecret=dummy
+set -e -o pipefail
 
-##oidc
-otp.security.oidc.enabled=false
-otp.security.oidc.client=dummy
-otp.security.oidc.redirectUri=http://127.0.0.1:8080/login/oauth2/code/
+mkdir -p /workflows/roddy/roddy/current
+mkdir -p /workflows/roddy/configs
 
-## Keycloak Settings for API connection
-otp.security.keycloak.server=http://127.0.0.1:8100
-otp.security.keycloak.clientId=dummy
-otp.security.keycloak.clientSecret=dummy
+echo dummy >> /workflows/roddy/applicationProperties-test.ini
+echo dummy >> /workflows/roddy/configs/featureToggles.ini
 
-## properties for tests
-otp.testing.group=otpGroup
-otp.testing.project.unix.group=otp
-
-## paths: tools
-otp.path.tools=/workflows/tools
-
-## settings for workflow tests
-#otp.testing.workflows.init.script added automatically in the ci
+ln -s /workflows/bin/roddy /workflows/roddy/roddy/current/roddy.sh
