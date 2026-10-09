@@ -35,6 +35,13 @@ abstract class RawSequenceFile implements CommentableWithProject, Entity {
     String fileName                // file name
     String pathName                // path from run folder to file
     String vbpFileName             // file name used in view-by-pid linking
+
+    /**
+     * The md5sum of the source FASTQ file, or {@code null} if the file was not created from exactly one FASTQ file.
+     * <p>
+     * A {@link SequenceCramFile} converted from a read pair has no single source FASTQ file, therefore it has no
+     * value here; its own checksum is {@link SequenceCramFile#cramMd5sum} (see {@link #isFastqMd5sumRequired()}).
+     */
     String fastqMd5sum
 
     /**
@@ -92,6 +99,17 @@ abstract class RawSequenceFile implements CommentableWithProject, Entity {
      */
     String sequenceLength
 
+    /**
+     * The mate this file contains the reads of, starting with 1, or {@code null} if the file does not represent a
+     * single mate.
+     * <p>
+     * {@code null} is valid for:
+     * <ul>
+     * <li>files containing all reads of the lane instead of a single mate, for example a
+     * {@link SequenceCramFile} converted from a read pair (see {@link #isMateNumberRequired()})</li>
+     * <li>legacy data</li>
+     * </ul>
+     */
     Integer mateNumber
 
     boolean indexFile = false
@@ -119,7 +137,7 @@ abstract class RawSequenceFile implements CommentableWithProject, Entity {
         vbpFileName(blank: false, shared: "pathComponent")
 
         pathName(shared: "relativePath")
-        fastqMd5sum matches: /^([0-9a-f]{32})$/
+        fastqMd5sum nullable: true, matches: /^([0-9a-f]{32})$/, validator: { val, obj -> val != null || !obj.isFastqMd5sumRequired() }
         initialDirectory(blank: false, shared: "absolutePath")
 
         project nullable: true,  // Shall not be null, but legacy data exists
@@ -143,22 +161,8 @@ abstract class RawSequenceFile implements CommentableWithProject, Entity {
 
         comment(nullable: true)
 
-        mateNumber nullable: true,  // Shall not be null, but legacy data exists
-                min: 1, validator: { val, obj ->
-            if (obj.indexFile) {
-                return val != null // no value restriction for indexFile, except that it is given
-            }
-            if (val != null) {
-                Integer mateCount = obj.seqTrack?.seqType?.libraryLayout?.mateCount
-                if (mateCount != null && val > mateCount) {
-                    return false
-                }
-            }
-            if (obj.fileType && obj.fileType.type == FileType.Type.SEQUENCE && obj.fileType.vbpPath == "/sequence/") {
-                return (val == 1 || val == 2)
-            }
-            return true
-        }
+        mateNumber nullable: true,  // Shall not be null for single mate files, but legacy data exists
+                min: 1, validator: { val, obj -> obj.isMateNumberValid(val) }
         dateLastChecked(nullable: true, validator: { val, obj ->
             if (!val && obj.seqTrack?.dataInstallationState == SeqTrack.DataProcessingState.FINISHED) {
                 return false
@@ -191,8 +195,39 @@ abstract class RawSequenceFile implements CommentableWithProject, Entity {
         return seqTrack.seqType
     }
 
+    boolean isMateNumberValid(Integer value) {
+        if (indexFile) {
+            return value != null // no value restriction for indexFile, except that it is given
+        }
+        if (value != null) {
+            Integer mateCount = seqTrack?.seqType?.libraryLayout?.mateCount
+            if (mateCount != null && value > mateCount) {
+                return false
+            }
+        }
+        if (fileType && fileType.type == FileType.Type.SEQUENCE && fileType.vbpPath == "/sequence/") {
+            if (value == null) {
+                return !isMateNumberRequired()
+            }
+            return value == 1 || value == 2
+        }
+        return true
+    }
+
+    /**
+     * The name of the read this file contains, for example 'R1' for the first mate or 'I1' for the first index read.
+     * <p>
+     * A file without {@link #mateNumber} which does not require one (see {@link #isMateNumberRequired()}) contains all
+     * reads of the lane instead of a single mate, therefore it is named after all mates of the sequencing read type,
+     * for example 'R1_2' for paired end data.
+     */
     String getReadName() {
-        return "${indexFile ? 'I' : 'R'}${mateNumber}"
+        String prefix = indexFile ? 'I' : 'R'
+        if (mateNumber != null || mateNumberRequired) {
+            return "${prefix}${mateNumber}"
+        }
+        Integer mateCount = seqTrack?.seqType?.libraryLayout?.mateCount
+        return mateCount ? "${prefix}${(1..mateCount).join('_')}" : prefix
     }
 
     static Closure mapping = {
@@ -251,4 +286,20 @@ abstract class RawSequenceFile implements CommentableWithProject, Entity {
     }
 
     abstract String getDataFormat()
+
+    /**
+     * Whether {@link #mateNumber} has to be given for this file.
+     * <p>
+     * It is {@code false} for file formats which are able to contain all reads of a lane in a single file, since such
+     * a file represents the reads of the lane instead of a single mate.
+     */
+    abstract boolean isMateNumberRequired()
+
+    /**
+     * Whether {@link #fastqMd5sum} has to be given for this file.
+     * <p>
+     * It is {@code false} for file formats which may be created from more than one FASTQ file, since then no single
+     * source md5sum exists.
+     */
+    abstract boolean isFastqMd5sumRequired()
 }

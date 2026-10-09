@@ -21,23 +21,28 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.gorm.hibernate.annotation.ManagedEntity
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
+import spock.lang.Specification
 
-@ManagedEntity
-class FastqFile extends RawSequenceFile {
-    @Override
-    @SuppressWarnings('GetterMethodCouldBeProperty') // Otherwise the database has to be adapted
-    String getDataFormat() {
-        return 'fastq'
-    }
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 
-    @Override
-    boolean isMateNumberRequired() {
-        return true
-    }
+@Rollback
+@Integration
+class SequenceCramFileIntegrationSpec extends Specification implements DomainFactoryCore {
 
-    @Override
-    boolean isFastqMd5sumRequired() {
-        return true
+    void "sourceFastqFiles, when CRAM file was converted from a read pair, then both source fastq files are persisted"() {
+        given:
+        SeqTrack seqTrack = createSeqTrack([seqType: createSeqType([libraryLayout: SequencingReadType.PAIRED])])
+        FastqFile fastqFile1 = createFastqFile([seqTrack: seqTrack, mateNumber: 1])
+        FastqFile fastqFile2 = createFastqFile([seqTrack: seqTrack, mateNumber: 2])
+        SequenceCramFile cramFile = createSequenceCramFile([seqTrack: seqTrack, sourceFastqFiles: [fastqFile1, fastqFile2] as Set])
+
+        when:
+        SequenceCramFile.withSession { it.flush(); it.clear() }
+        SequenceCramFile reloaded = SequenceCramFile.get(cramFile.id)
+
+        then:
+        reloaded.sourceFastqFiles*.id as Set == [fastqFile1.id, fastqFile2.id] as Set
     }
 }

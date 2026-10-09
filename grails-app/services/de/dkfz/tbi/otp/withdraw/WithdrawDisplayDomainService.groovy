@@ -78,7 +78,7 @@ class WithdrawDisplayDomainService {
     String rawSequenceFileInfo(RawSequenceFile rawSequenceFile, boolean includeWithdrawnColumns = false) {
         List<String> info = [
                 seqTrackInfo(rawSequenceFile.seqTrack),
-                rawSequenceFile.mateNumber.toString(),
+                rawSequenceFile.mateNumber?.toString() ?: '',
                 rawSequenceFile.fileName,
         ]
         if (includeWithdrawnColumns) {

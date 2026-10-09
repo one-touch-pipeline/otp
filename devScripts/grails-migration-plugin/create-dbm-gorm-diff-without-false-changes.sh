@@ -87,6 +87,7 @@ joinTables="\
 (seq_platform_model_label_import_alias)|\
 (seq_track_log_message)|\
 (seq_type_import_alias)|\
+(sequence_cram_file_fastq_file)|\
 (sequencing_kit_label_import_alias)|\
 (sophia_instance_roddy_execution_directory_names)|\
 (text_field_definition_allowed_text_values)|\

@@ -59,7 +59,8 @@ class DataInstallationValidationJob extends AbstractOtpClusterValidationJob impl
         SeqTrack seqTrack = getSeqTrack(workflowStep)
         seqTrack.sequenceFiles.each { RawSequenceFile rawSequenceFile ->
             if (!checksumFileService.compareMd5(rawSequenceFile)) {
-                problems.add("The md5sum of file ${rawSequenceFile.fileName} is not the expected ${(rawSequenceFile as FastqFile).fastqMd5sum}" as String)
+                String expectedMd5sum = rawSequenceFile instanceof SequenceCramFile ? rawSequenceFile.cramMd5sum : rawSequenceFile.fastqMd5sum
+                problems.add("The md5sum of file ${rawSequenceFile.fileName} is not the expected ${expectedMd5sum}" as String)
             }
         }
         if (problems) {

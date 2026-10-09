@@ -339,7 +339,8 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
             return "${RUN_PREFIX}${run.name}_${fileNameWithoutExtension}"
         }
         List<RawSequenceFile> rawSequenceFiles = sequenceFilesWhereIndexFileIsFalse
-        assert rawSequenceFiles.size() == 2
+        assert rawSequenceFiles.size() == 2: "Expected exactly two files for ${this}, one per mate, but got ${rawSequenceFiles.size()}. " +
+                "A file containing all reads of the lane, for example a CRAM converted from a read pair, is not supported here."
         // if the names of datafile1 and datafile2 of one seqTrack are the same, something strange happened -> should fail
         assert rawSequenceFiles[0].vbpFileName != rawSequenceFiles[1].vbpFileName
         String commonFastQFilePrefix = getLongestCommonPrefixBeforeLastUnderscore(rawSequenceFiles[0].vbpFileName, rawSequenceFiles[1].vbpFileName)

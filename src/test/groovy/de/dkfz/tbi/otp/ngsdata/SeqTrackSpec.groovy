@@ -42,6 +42,7 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
         return [
                 RawSequenceFile,
                 FastqFile,
+                SequenceCramFile,
                 MergingWorkPackage,
                 SeqTrack,
         ]
@@ -183,6 +184,19 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
 
         then:
         thrown(AssertionError)
+    }
+
+    void "getReadGroupName, when sequencing read type is paired and the file contains all reads of the lane, then throw AssertionError"() {
+        given:
+        SeqTrack seqTrack = createSeqTrack([seqType: createSeqType([libraryLayout: SequencingReadType.PAIRED])])
+        createSequenceCramFile([seqTrack: seqTrack])
+
+        when:
+        seqTrack.readGroupName
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains("one per mate")
     }
 
     void "getReadGroupName, when sequencing read type is paired, then return name consist of: 'run', runname, common file name till underscore"() {

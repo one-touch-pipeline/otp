@@ -428,7 +428,8 @@ class EgaSubmissionService {
                     it.rawSequenceFile.seqTrack.normalizedLibraryName,
                     runNameWithoutDate,
                     it.rawSequenceFile.seqTrack.laneId,
-                    "R${it.rawSequenceFile.mateNumber}",
+                    // without a mate number the alias stays unique, since such a file is the only one of its lane
+                    it.rawSequenceFile.mateNumber == null ? null : "R${it.rawSequenceFile.mateNumber}",
             ].findAll()
 
             String extension = getExtensionFromDataFormat(it.rawSequenceFile.dataFormat)

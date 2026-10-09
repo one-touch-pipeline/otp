@@ -43,6 +43,8 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
     Class[] getDomainClassesToMock() {
         return [
                 FastqFile,
+                SequenceCramFile,
+                ReferenceGenome,
                 FastqImportInstance,
                 Sample,
                 SampleType,
@@ -148,6 +150,33 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
         messages.each {
             assert it ==~ ("The md5sum of file .* is not the expected .*")
         }
+    }
+
+    void "test doFurtherValidation, when md5Sum of a CRAM file is incorrect, then report the expected cram md5sum"() {
+        given:
+        SeqTrack seqTrack = createSeqTrack([seqType: createSeqType([libraryLayout: SequencingReadType.PAIRED])])
+        SequenceCramFile cramFile = createSequenceCramFile([seqTrack: seqTrack])
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateDataInstallationWorkflowWorkflow(),
+                ]),
+        ])
+        DataInstallationValidationJob job = new DataInstallationValidationJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
+            0 * _
+        }
+        job.checksumFileService = Mock(ChecksumFileService)
+
+        when:
+        job.doFurtherValidation(workflowStep)
+
+        then:
+        1 * job.checksumFileService.compareMd5(cramFile) >> false
+
+        ValidationJobFailedException e = thrown()
+        e.message == "The md5sum of file ${cramFile.fileName} is not the expected ${cramFile.cramMd5sum}"
     }
 
     void "test saveResult"() {

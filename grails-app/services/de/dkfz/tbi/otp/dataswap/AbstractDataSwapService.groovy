@@ -285,7 +285,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
             it.fileName = it.vbpFileName = data.rawSequenceFileSwaps.find { swap -> swap.old == it.fileName }.new
             it.seqTrack.workflowArtefact?.producedBy?.project = data.projectSwap.new
             it.seqTrack.workflowArtefact?.producedBy?.save(flush: false)
-            if (it.mateNumber == null && it.fileWithdrawn && it.fileType &&
+            if (it.mateNumber == null && it.isMateNumberRequired() && it.fileWithdrawn && it.fileType &&
                     it.fileType.type == FileType.Type.SEQUENCE && it.fileType.vbpPath == "/sequence/") {
                 data.log << "\n====> set mate number for withdrawn data file"
                 assert it.seqTrack.seqType.libraryLayout == SequencingReadType.SINGLE: "sequencing read type is not ${SequencingReadType.SINGLE}"

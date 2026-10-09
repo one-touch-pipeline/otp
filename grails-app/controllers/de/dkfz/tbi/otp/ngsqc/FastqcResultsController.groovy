@@ -80,7 +80,7 @@ class FastqcResultsController {
                 pid       : rawSequenceFile.individual.displayName,
                 runName   : rawSequenceFile.run.name,
                 laneId    : rawSequenceFile.seqTrack.laneId,
-                mateNumber: rawSequenceFile.mateNumber,
+                readName  : rawSequenceFile.readName,
         ]
     }
 

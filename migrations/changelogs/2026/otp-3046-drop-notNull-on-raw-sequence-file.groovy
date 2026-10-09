@@ -19,25 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
 
-import grails.gorm.hibernate.annotation.ManagedEntity
-
-@ManagedEntity
-class FastqFile extends RawSequenceFile {
-    @Override
-    @SuppressWarnings('GetterMethodCouldBeProperty') // Otherwise the database has to be adapted
-    String getDataFormat() {
-        return 'fastq'
-    }
-
-    @Override
-    boolean isMateNumberRequired() {
-        return true
-    }
-
-    @Override
-    boolean isFastqMd5sumRequired() {
-        return true
+databaseChangeLog = {
+    // a SequenceCramFile converted from a read pair has no single source fastq file, its checksum is cram_md5sum
+    changeSet(author: "foued", id: "otp-3046") {
+        dropNotNullConstraint(columnDataType: "varchar(255)", columnName: "fastq_md5sum", tableName: "raw_sequence_file")
     }
 }

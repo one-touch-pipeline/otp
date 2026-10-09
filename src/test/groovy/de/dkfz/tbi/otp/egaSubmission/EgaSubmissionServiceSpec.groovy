@@ -558,6 +558,44 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         actualAlias.contains("R${rawSequenceFile.mateNumber}")
     }
 
+    void "test generate default ega aliases for a CRAM file converted from one fastq file keeps the mate part"() {
+        given:
+        SequenceCramFile rawSequenceFile = createSequenceCramFile([
+                fileName  : 'AS-12345-LR-12345_R1.unaligned.cram',
+                mateNumber: 1,
+        ])
+
+        String alias = "EGAname_sample"
+        List rawSequenceFileAndAliases = [new RawSequenceFileAndSampleAlias(rawSequenceFile, new SampleSubmissionObject(egaAliasName: alias))]
+
+        when:
+        Map defaultEgaAliasesForRawSequenceFiles = egaSubmissionService.generateDefaultEgaAliasesForRawSequenceFiles(rawSequenceFileAndAliases)
+
+        then:
+        String actualAlias = defaultEgaAliasesForRawSequenceFiles.get(rawSequenceFile.fileName + rawSequenceFile.run)
+        actualAlias.endsWith('.unaligned.cram')
+        actualAlias.contains('_R1')
+    }
+
+    void "test generate default ega aliases for a CRAM file containing all reads of the lane omits the mate part"() {
+        given:
+        SequenceCramFile rawSequenceFile = createSequenceCramFile([
+                fileName: 'AS-12345-LR-12345.unaligned.cram',
+        ])
+
+        String alias = "EGAname_sample"
+        List rawSequenceFileAndAliases = [new RawSequenceFileAndSampleAlias(rawSequenceFile, new SampleSubmissionObject(egaAliasName: alias))]
+
+        when:
+        Map defaultEgaAliasesForRawSequenceFiles = egaSubmissionService.generateDefaultEgaAliasesForRawSequenceFiles(rawSequenceFileAndAliases)
+
+        then:
+        String actualAlias = defaultEgaAliasesForRawSequenceFiles.get(rawSequenceFile.fileName + rawSequenceFile.run)
+        actualAlias.endsWith('.unaligned.cram')
+        actualAlias.contains(alias)
+        !actualAlias.contains('Rnull')
+    }
+
     void "test generate default ega aliases for various data formats"() {
         given:
         Run run = DomainFactory.createRun()

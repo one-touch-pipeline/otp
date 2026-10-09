@@ -75,6 +75,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                 AceseqQc,
                 MergingWorkPackage,
                 FastqFile,
+                SequenceCramFile,
                 FastqcProcessedFile,
         ]
     }
@@ -787,6 +788,63 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         then:
         rawSequenceFile.mateNumber == 1
         log.toString() == "\n====> set mate number for withdrawn data file\n    changed ${oldRawSequenceFileName} to ${rawSequenceFile.fileName}"
+    }
+
+    void "renameRawSequenceFiles, when old withdrawn file does not require a mate number, then keep mateNumber null"() {
+        given:
+        final String newRawSequenceFileName = 'newDataFileName.cram'
+
+        // domain
+        final SeqTrack seqTrack = createSeqTrack([seqType: createSeqType([libraryLayout: SequencingReadType.PAIRED])])
+        RawSequenceFile rawSequenceFile = createSequenceCramFile([seqTrack: seqTrack, fileWithdrawn: true])
+        rawSequenceFile.fileType.vbpPath = "/sequence/"
+        final String oldRawSequenceFileName = rawSequenceFile.fileName
+        final Path oldFile = CreateFileHelper.createFile(tempDir.resolve(rawSequenceFile.fileName))
+        final Path oldFileViewByPid = CreateFileHelper.createFile(tempDir.resolve('oldViewByPidFile'))
+        final Path newFile = Paths.get('somePath').resolve(Paths.get(newRawSequenceFileName))
+        final Path newFileViewByPid = Paths.get('linking').resolve(Paths.get('newViewByPidFile'))
+
+        // service
+        service.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            1 * getFilePath(rawSequenceFile) >> newFile
+            0 * _
+        }
+        service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            1 * getFilePath(rawSequenceFile) >> newFileViewByPid
+            0 * _
+        }
+        service.fileSystemService = Mock(FileSystemService) {
+            getRemoteFileSystem() >> FileSystems.default
+        }
+
+        // DTO
+        final List<Swap<String>> rawSequenceFileSwaps = [new Swap(rawSequenceFile.fileName, newRawSequenceFileName)]
+        StringBuilder log = new StringBuilder()
+        final Map<RawSequenceFile, Map<String, ?>> oldRawSequenceFileNameMap = [
+                (rawSequenceFile): [
+                        (AbstractDataSwapService.DIRECT_FILE_NAME): oldFile.toString(),
+                        (AbstractDataSwapService.VBP_FILE_NAME)   : oldFileViewByPid.toString(),
+                ],
+        ]
+
+        final DataSwapParameters parameters = new DataSwapParameters(
+                rawSequenceFileSwaps: rawSequenceFileSwaps,
+                log: log
+        )
+
+        final DataSwapData dataSwapData = new DataSwapData(
+                projectSwap: new Swap(rawSequenceFile.project, rawSequenceFile.project),
+                parameters: parameters,
+                rawSequenceFiles: [rawSequenceFile],
+                oldRawSequenceFileNameMap: oldRawSequenceFileNameMap
+        )
+
+        when:
+        service.renameRawSequenceFiles(dataSwapData)
+
+        then:
+        rawSequenceFile.mateNumber == null
+        log.toString() == "\n    changed ${oldRawSequenceFileName} to ${rawSequenceFile.fileName}"
     }
 
     @Unroll

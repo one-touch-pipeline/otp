@@ -24,21 +24,59 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.gorm.hibernate.annotation.ManagedEntity
 
 /**
- * unaligned or aligned single read single lane CRAM file
+ * Unaligned or aligned single lane CRAM file.
+ * <p>
+ * One instance represents the reads of one lane, not necessarily a single mate: since a CRAM file is able to contain
+ * both mates of a read pair, a CRAM converted from a read pair is represented by one instance with
+ * {@link #mateNumber} being {@code null}. {@link #mateNumber} is only given for CRAM files converted from a single
+ * FASTQ file. The converted FASTQ files are referenced by {@link #sourceFastqFiles}.
  */
 @ManagedEntity
 class SequenceCramFile extends RawSequenceFile {
     String cramMd5sum
     ReferenceGenome referenceGenome
 
+    /**
+     * The FASTQ files this CRAM file was converted from, one per mate, or empty if it was not converted by OTP,
+     * for example if it was imported directly.
+     * <p>
+     * Their {@link FastqFile#fastqMd5sum} are the source checksums of this file.
+     */
+    Set<FastqFile> sourceFastqFiles
+
+    static hasMany = [
+            sourceFastqFiles: FastqFile,
+    ]
+
     static constraints = {
-        cramMd5sum nullable: true, matches: /^[0-9a-f]{32}$/
+        // a CRAM converted from a read pair has no fastqMd5sum, so its own checksum is the only one available
+        cramMd5sum nullable: true, matches: /^[0-9a-f]{32}$/, validator: { val, obj -> val != null || obj.fastqMd5sum != null }
         referenceGenome nullable: true
+        sourceFastqFiles validator: { Set<FastqFile> val, SequenceCramFile obj ->
+            if (!val) {
+                return true
+            }
+            List<Integer> mateNumbers = val*.mateNumber
+            if (mateNumbers.unique(false).size() != mateNumbers.size()) {
+                return "duplicateMate"
+            }
+            return obj.mateNumber != null && mateNumbers != [obj.mateNumber] ? "mateNumberMismatch" : true
+        }
     }
 
     @Override
-    @SuppressWarnings('GetterMethodCouldBeProperty') // Otherwise the database has to be adapted
+    @SuppressWarnings('GetterMethodCouldBeProperty')
     String getDataFormat() {
         return 'cram'
+    }
+
+    @Override
+    boolean isMateNumberRequired() {
+        return false
+    }
+
+    @Override
+    boolean isFastqMd5sumRequired() {
+        return false
     }
 }

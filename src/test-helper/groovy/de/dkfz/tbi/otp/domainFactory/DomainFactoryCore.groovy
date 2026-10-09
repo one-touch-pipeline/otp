@@ -201,19 +201,39 @@ trait DomainFactoryCore implements DomainFactoryHelper, TaxonomyFactory {
     }
 
     FastqFile createFastqFile(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(FastqFile, rawSequenceFileProperties(properties) + [
+                fileName   : "DataFileFileName_${nextId}_R1.gz",
+                vbpFileName: "VbpDataFileFileName_${nextId}_R1.gz",
+                mateNumber : 1,
+        ], properties, saveAndValidate)
+    }
+
+    /**
+     * Creates a {@link SequenceCramFile} representing all reads of the lane, therefore without mate number and
+     * without a source fastq md5sum.
+     */
+    SequenceCramFile createSequenceCramFile(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(SequenceCramFile, rawSequenceFileProperties(properties) + [
+                fileName   : "DataFileFileName_${nextId}.cram",
+                vbpFileName: "VbpDataFileFileName_${nextId}.cram",
+                mateNumber : null,
+                fastqMd5sum: null,
+                cramMd5sum : { HelperUtils.randomMd5sum },
+        ], properties, saveAndValidate)
+    }
+
+    private Map rawSequenceFileProperties(Map properties) {
         SeqTrack seqTrack
         if (properties.containsKey('seqTrack')) {
             seqTrack = properties.seqTrack
         } else {
             seqTrack = createSeqTrack(properties.containsKey('run') ? [run: properties.run] : [:])
         }
-        return createDomainObject(FastqFile, [
+        return [
                 seqTrack           : seqTrack,
                 project            : seqTrack?.project,
                 run                : seqTrack?.run,
                 fastqImportInstance: { createFastqImportInstance() },
-                fileName           : "DataFileFileName_${nextId}_R1.gz",
-                vbpFileName        : "VbpDataFileFileName_${nextId}_R1.gz",
                 pathName           : "",
                 initialDirectory   : TestCase.uniqueNonExistentPath.path,
                 fastqMd5sum        : { HelperUtils.randomMd5sum },
@@ -227,9 +247,8 @@ trait DomainFactoryCore implements DomainFactoryHelper, TaxonomyFactory {
                 fileExists         : true,
                 fileLinked         : true,
                 fileSize           : nextId,
-                mateNumber         : 1,
                 indexFile          : false,
-        ], properties, saveAndValidate)
+        ]
     }
 
     RawSequenceFile createSequenceDataFile(final Map properties = [:]) {

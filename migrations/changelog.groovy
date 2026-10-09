@@ -249,4 +249,8 @@ databaseChangeLog = {
     include file: 'changelogs/2026/otp-2472.groovy'
 
     include file: 'changelogs/2026/otp-2945-add-workflow-selection-defaults.groovy'
+
+    include file: 'changelogs/2026/otp-3046-drop-notNull-on-raw-sequence-file.groovy'
+
+    include file: 'changelogs/2026/otp-3046-add-source-fastq-files-to-sequence-cram-file.groovy'
 }
