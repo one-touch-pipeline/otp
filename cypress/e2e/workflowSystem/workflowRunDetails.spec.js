@@ -78,6 +78,7 @@ describe('Check workflow run details page', () => {
       cy.location('pathname').should('contain', '/workflowRunDetails/index');
 
       cy.wait('@stepsData').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         const steps = interception.response.body.data;
 
         // Steps with WES runs are auto-expanded on draw — child rows are already visible.

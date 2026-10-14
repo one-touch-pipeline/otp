@@ -149,7 +149,7 @@ describe('Global system status banners', () => {
     it('hides the news banner and shows the warnings instead for an admin', () => {
       cy.loginAs('operator');
       cy.visit('/home/index');
-      cy.wait('@newsBanner');
+      cy.wait('@newsBanner').its('response.statusCode').should('eq', 200);
 
       cy.get(banner).should('have.length', 2);
       cy.get(newsBanner).should('not.be.visible');
@@ -158,7 +158,7 @@ describe('Global system status banners', () => {
     it('still shows the news banner for a non-administrative user without warnings', () => {
       cy.loginAs('user');
       cy.visit('/home/index');
-      cy.wait('@newsBanner');
+      cy.wait('@newsBanner').its('response.statusCode').should('eq', 200);
 
       cy.get(banner).should('not.exist');
       cy.contains(newsBanner, newsBannerText).should('be.visible');

@@ -54,7 +54,7 @@ describe('Check workflow defaults', {
         cy.intercept('/workflowSystemConfig/saveWorkflowDefaultGroup*').as('saveDefault');
 
         cy.visit('/workflowSystemConfig/index');
-        cy.wait('@getDefaults');
+        cy.wait('@getDefaults').its('response.statusCode').should('eq', 200);
 
         cy.get('#add-workflow-default-btn').click();
         cy.get('#workflowDefaultModal').should('be.visible');
@@ -62,7 +62,7 @@ describe('Check workflow defaults', {
         cy.checkedTyping(() => cy.get('#default-modal-name'), groupName);
         cy.get('#default-modal-seqType').select(analysisConfig.seqType, { force: true });
         cy.get('.default-entry-workflow-select').select(analysisConfig.workflow, { force: true });
-        cy.wait('@getWorkflowVersions');
+        cy.wait('@getWorkflowVersions').its('response.statusCode').should('eq', 200);
         cy.get('.default-entry-version-select').select(analysisConfig.version.id, { force: true });
 
         cy.get('#workflowDefaultModal #confirmModal').click();
@@ -71,7 +71,7 @@ describe('Check workflow defaults', {
           expect(interception.response.statusCode).to.eq(200);
         });
         checkAndDismissToast(toastSuccess, 'Workflow default saved.');
-        cy.wait('@getDefaults');
+        cy.wait('@getDefaults').its('response.statusCode').should('eq', 200);
 
         cy.contains('#analysisDefaultsTable td', groupName).as('nameCell');
         cy.get('@nameCell').siblings().should('contain.text', analysisConfig.workflow);
@@ -88,7 +88,7 @@ describe('Check workflow defaults', {
 
         cy.get('#select2-analysis-default-select-container').click();
         cy.get('.select2-container--open .select2-search__field').type(groupName);
-        cy.wait('@searchDefaults');
+        cy.wait('@searchDefaults').its('response.statusCode').should('eq', 200);
         cy.get('li.select2-results__option').contains(groupName).click({ force: true });
 
         cy.get('#add-analysis-default-btn').click();
@@ -118,7 +118,7 @@ describe('Check workflow defaults', {
         cy.intercept('/workflowSystemConfig/getWorkflowDefaultGroups*').as('getDefaultsAgain');
         cy.intercept('/workflowSystemConfig/deleteWorkflowDefaultGroup*').as('deleteDefault');
         cy.visit('/workflowSystemConfig/index');
-        cy.wait('@getDefaultsAgain');
+        cy.wait('@getDefaultsAgain').its('response.statusCode').should('eq', 200);
 
         cy.contains('#analysisDefaultsTable td', groupName).siblings()
           .find('.workflow-default-edit-btn').click();
@@ -145,31 +145,31 @@ describe('Check workflow defaults', {
         cy.intercept('/workflowSystemConfig/deleteWorkflowDefaultGroup*').as('deleteDefault');
 
         cy.visit('/workflowSystemConfig/index');
-        cy.wait('@getDefaults');
+        cy.wait('@getDefaults').its('response.statusCode').should('eq', 200);
 
         cy.get('#add-workflow-default-btn').click();
         cy.checkedTyping(() => cy.get('#default-modal-name'), groupName);
         cy.get('#default-modal-seqType').select(initialAnalysisConfig.seqType, { force: true });
         cy.get('.default-entry-workflow-select').select(initialAnalysisConfig.workflow, { force: true });
-        cy.wait('@getWorkflowVersions');
+        cy.wait('@getWorkflowVersions').its('response.statusCode').should('eq', 200);
         cy.get('.default-entry-version-select').select(initialAnalysisConfig.version.id, { force: true });
         cy.get('#workflowDefaultModal #confirmModal').click();
-        cy.wait('@saveDefault');
+        cy.wait('@saveDefault').its('response.statusCode').should('eq', 200);
         checkAndDismissToast(toastSuccess, 'Workflow default saved.');
-        cy.wait('@getDefaults');
+        cy.wait('@getDefaults').its('response.statusCode').should('eq', 200);
 
         // edit
         cy.contains('#analysisDefaultsTable td', groupName).siblings()
           .find('.workflow-default-edit-btn').click();
         // opening the modal itself triggers a getWorkflowVersions call to populate the existing entry row -
         // consume that here so the later wait (after selecting the new workflow) doesn't pick up this one instead
-        cy.wait('@getWorkflowVersions');
+        cy.wait('@getWorkflowVersions').its('response.statusCode').should('eq', 200);
         cy.get('#workflowDefaultModal').should('be.visible');
         cy.get('#workflowDefaultModal .modal-title').should('contain.text', 'Edit');
 
         cy.checkedTyping(() => cy.get('#default-modal-name'), renamedGroupName);
         cy.get('.default-entry-workflow-select').select(editedAnalysisConfig.workflow, { force: true });
-        cy.wait('@getWorkflowVersions');
+        cy.wait('@getWorkflowVersions').its('response.statusCode').should('eq', 200);
         cy.get('.default-entry-version-select').select(editedAnalysisConfig.version.id, { force: true });
         cy.get('#workflowDefaultModal #confirmModal').click();
 
@@ -177,7 +177,7 @@ describe('Check workflow defaults', {
           expect(interception.response.statusCode).to.eq(200);
         });
         checkAndDismissToast(toastSuccess, 'Workflow default saved.');
-        cy.wait('@getDefaults');
+        cy.wait('@getDefaults').its('response.statusCode').should('eq', 200);
 
         cy.contains('#analysisDefaultsTable td', new RegExp(`^${groupName}$`)).should('not.exist');
         cy.contains('#analysisDefaultsTable td', renamedGroupName).as('nameCell');
@@ -205,24 +205,24 @@ describe('Check workflow defaults', {
         cy.intercept('/workflowSystemConfig/deleteWorkflowDefaultGroup*').as('deleteDefault');
 
         cy.visit('/workflowSystemConfig/index');
-        cy.wait('@getDefaults');
+        cy.wait('@getDefaults').its('response.statusCode').should('eq', 200);
 
         cy.get('#add-workflow-default-btn').click();
         cy.checkedTyping(() => cy.get('#default-modal-name'), groupName);
         cy.get('#default-modal-seqType').select(analysisConfig.seqType, { force: true });
         cy.get('.default-entry-workflow-select').select(analysisConfig.workflow, { force: true });
-        cy.wait('@getWorkflowVersions');
+        cy.wait('@getWorkflowVersions').its('response.statusCode').should('eq', 200);
         cy.get('.default-entry-version-select').select(analysisConfig.version.id, { force: true });
         cy.get('#workflowDefaultModal #confirmModal').click();
-        cy.wait('@saveDefault');
+        cy.wait('@saveDefault').its('response.statusCode').should('eq', 200);
         checkAndDismissToast(toastSuccess, 'Workflow default saved.');
-        cy.wait('@getDefaults');
+        cy.wait('@getDefaults').its('response.statusCode').should('eq', 200);
 
         // attempt an invalid save (blank name)
         cy.contains('#analysisDefaultsTable td', groupName).siblings()
           .find('.workflow-default-edit-btn').click();
         // opening the modal itself triggers a getWorkflowVersions call to populate the existing entry row
-        cy.wait('@getWorkflowVersions');
+        cy.wait('@getWorkflowVersions').its('response.statusCode').should('eq', 200);
         cy.get('#workflowDefaultModal').should('be.visible');
 
         cy.get('#default-modal-name').clear();
@@ -258,7 +258,7 @@ describe('Check workflow defaults', {
         cy.intercept('/workflowSystemConfig/deleteWorkflowDefaultGroup*').as('deleteDefault');
 
         cy.visit('/workflowSystemConfig/index');
-        cy.wait('@getDefaults');
+        cy.wait('@getDefaults').its('response.statusCode').should('eq', 200);
 
         cy.get('#add-workflow-default-btn').click();
         cy.get('#workflowDefaultModal').should('be.visible');
@@ -272,7 +272,7 @@ describe('Check workflow defaults', {
 
         cy.get('.default-modal-entry-row').eq(0).find('.default-entry-workflow-select')
           .select(firstEntry.workflow, { force: true });
-        cy.wait('@getWorkflowVersions');
+        cy.wait('@getWorkflowVersions').its('response.statusCode').should('eq', 200);
         cy.get('.default-modal-entry-row').eq(0).find('.default-entry-version-select')
           .select(firstEntry.version.id, { force: true });
 
@@ -281,7 +281,7 @@ describe('Check workflow defaults', {
         cy.get('.default-modal-entry-row').should('have.length', 2);
         cy.get('.default-modal-entry-row').eq(1).find('.default-entry-workflow-select')
           .select(secondEntry.workflow, { force: true });
-        cy.wait('@getWorkflowVersions');
+        cy.wait('@getWorkflowVersions').its('response.statusCode').should('eq', 200);
         cy.get('.default-modal-entry-row').eq(1).find('.default-entry-version-select')
           .select(secondEntry.version.id, { force: true });
 
@@ -296,7 +296,7 @@ describe('Check workflow defaults', {
           expect(interception.response.statusCode).to.eq(200);
         });
         checkAndDismissToast(toastSuccess, 'Workflow default saved.');
-        cy.wait('@getDefaults');
+        cy.wait('@getDefaults').its('response.statusCode').should('eq', 200);
 
         // reopen and verify exactly the two intended entries were saved, not the removed throwaway one
         cy.contains('#analysisDefaultsTable td', groupName).siblings()

@@ -70,7 +70,7 @@ describe('Check workflow run overview page', () => {
       cy.intercept('POST', '**/workflowSystemConfig/updateWorkflow').as('updateWorkflow');
 
       cy.visit('/workflowRunOverview/index');
-      cy.wait('@getWorkflows', { timeout: 15000 });
+      cy.wait('@getWorkflows', { timeout: 15000 }).its('response.statusCode').should('eq', 200);
 
       cy.get('#editWorkflowModal').should('exist').and('not.be.visible');
 

@@ -207,7 +207,7 @@ describe('test for individual page', () => {
       cy.visit('/individual/list');
 
       cy.get('#searchCriteriaTable td.search input[type=button]').click();
-      cy.wait('@loadDataTable');
+      cy.wait('@loadDataTable').its('response.statusCode').should('eq', 200);
 
       cy.get('#individualTable tbody tr').first().find('td a').eq(0)
         .click();

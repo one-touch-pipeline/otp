@@ -38,7 +38,8 @@ describe('Check metadata data fields page', () => {
 
       // Create import alias
       const importAlias = Cypress._.random(0, 1e6);
-      cy.wait('@libraryPreparationKits').then(() => {
+      cy.wait('@libraryPreparationKits').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.intercept('/metaDataFields/createLibraryPreparationKitImportAlias/*').as('createImportAlias');
 
         cy.get('@tableCells').eq(2).as('importAliasCell');
@@ -54,7 +55,8 @@ describe('Check metadata data fields page', () => {
 
       // Edit adapter file
       const adapterFilePath = `/${Cypress._.random(0, 1e6)}/${Cypress._.random(0, 1e6)}`;
-      cy.wait('@libraryPreparationKits').then(() => {
+      cy.wait('@libraryPreparationKits').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.intercept('/metaDataFields/addAdapterFileToLibraryPreparationKit*').as('addAdaptFile');
 
         cy.get('@tableCells').eq(4).as('adaptFileCell');
@@ -70,7 +72,8 @@ describe('Check metadata data fields page', () => {
 
       // Edit adapter Sequence
       const adapterSequence = Cypress._.random(0, 1e6);
-      cy.wait('@libraryPreparationKits').then(() => {
+      cy.wait('@libraryPreparationKits').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.intercept('/metaDataFields/addAdapterSequenceToLibraryPreparationKit*').as('addAdapterSequence');
 
         cy.get('@tableCells').eq(6).as('adapterSequenceCell');
@@ -85,7 +88,8 @@ describe('Check metadata data fields page', () => {
       });
 
       // Change legacy state
-      cy.wait('@libraryPreparationKits').then(() => {
+      cy.wait('@libraryPreparationKits').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.intercept('/metaDataFields/changeLibPrepKitLegacyState*').as('changeLegacyState');
         cy.get('@tableCells').eq(8).find('label').click();
         cy.wait('@changeLegacyState').then((interception) => {
@@ -94,7 +98,8 @@ describe('Check metadata data fields page', () => {
       });
 
       // Check all changed values
-      cy.wait('@libraryPreparationKits').then(() => {
+      cy.wait('@libraryPreparationKits').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.get('@tableCells').eq(1).contains(importAlias);
         cy.get('@tableCells').eq(3).contains(adapterFilePath);
         cy.get('@tableCells').eq(5).contains(adapterSequence);
@@ -133,7 +138,8 @@ describe('Check metadata data fields page', () => {
         expect(interception.response.body).to.contain({ success: true });
       });
 
-      cy.wait('@libraryPreparationKits').then(() => {
+      cy.wait('@libraryPreparationKits').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.get('table#metadatafields-datatable tbody tr').contains(libPrepKit).parent('tr').find('td')
           .as('tableCells');
         cy.get('@tableCells').eq(3).contains(adapterFile);
@@ -153,7 +159,8 @@ describe('Check metadata data fields page', () => {
       // Edit import alias
       const importAlias = Cypress._.random(0, 1e6);
       cy.intercept('/metaDataFields/createAntibodyTargetImportAlias/*').as('createImportAlias');
-      cy.wait('@antibodyTargets').then(() => {
+      cy.wait('@antibodyTargets').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.get('@tableCells').eq(2).as('importAliasCell');
         cy.get('@importAliasCell').find('button.add').click();
         cy.get('@importAliasCell').find('input[name=importAlias]').type(importAlias);
@@ -166,7 +173,8 @@ describe('Check metadata data fields page', () => {
       });
 
       // Change legacy state
-      cy.wait('@antibodyTargets').then(() => {
+      cy.wait('@antibodyTargets').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.intercept('/metaDataFields/changeAntibodyTargetLegacyState*').as('changeLegacyState');
         cy.get('@tableCells').eq(3).find('label').click();
         cy.wait('@changeLegacyState').then((interception) => {
@@ -175,7 +183,8 @@ describe('Check metadata data fields page', () => {
       });
 
       // Check all changed values
-      cy.wait('@antibodyTargets').then(() => {
+      cy.wait('@antibodyTargets').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.get('@tableCells').eq(1).contains(importAlias);
         cy.get('@tableCells').eq(3).contains('true');
       });
@@ -209,7 +218,8 @@ describe('Check metadata data fields page', () => {
 
       cy.get('table#metadatafields-datatable tbody tr').as('tableRows');
 
-      cy.wait('@antibodyTargets').then(() => {
+      cy.wait('@antibodyTargets').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.get('@tableRows').contains(antibodyTargetName);
       });
     });
@@ -231,7 +241,8 @@ describe('Check metadata data fields page', () => {
         expect(interception.response.statusCode).to.eq(302);
       });
 
-      cy.wait('@seqCenters').then(() => {
+      cy.wait('@seqCenters').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.get('@tableCells').eq(4).find('span').contains('true');
       });
 
@@ -267,7 +278,8 @@ describe('Check metadata data fields page', () => {
 
       cy.get('table#metadatafields-datatable tbody tr').as('tableRows');
 
-      cy.wait('@seqCenters').then(() => {
+      cy.wait('@seqCenters').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.get('table#metadatafields-datatable tbody tr').contains(seqCenterName).parent('tr').find('td')
           .as('tableCells');
         cy.get('@tableCells').eq(1).contains(directoryName);
@@ -288,7 +300,8 @@ describe('Check metadata data fields page', () => {
 
       // create model import alias
       const modelImportAlias = Cypress._.random(0, 1e6);
-      cy.wait('@seqPlatforms').then(() => {
+      cy.wait('@seqPlatforms').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.intercept('/metaDataFields/createSeqPlatformModelLabelImportAlias/*').as('createModelImportAlias');
 
         cy.get('@tableCells').eq(3).as('importModelAliasCell');
@@ -304,7 +317,8 @@ describe('Check metadata data fields page', () => {
 
       // create SeqKitImportAlias
       const seqKitImportAlias = Cypress._.random(0, 1e6);
-      cy.wait('@seqPlatforms').then(() => {
+      cy.wait('@seqPlatforms').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.intercept('/metaDataFields/createSequencingKitLabelImportAlias/*').as('createModelImportAlias');
 
         cy.get('@tableCells').eq(6).as('importModelAliasCell');
@@ -319,7 +333,8 @@ describe('Check metadata data fields page', () => {
       });
 
       // Change legacy state
-      cy.wait('@seqPlatforms').then(() => {
+      cy.wait('@seqPlatforms').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.intercept('/metaDataFields/changeSeqPlatformLegacyState*').as('changeLegacyState');
         cy.get('@tableCells').eq(7).find('label').click();
         cy.wait('@changeLegacyState').then((interception) => {
@@ -328,7 +343,8 @@ describe('Check metadata data fields page', () => {
       });
 
       // Check all changed values
-      cy.wait('@seqPlatforms').then(() => {
+      cy.wait('@seqPlatforms').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.get('@tableCells').eq(2).contains(modelImportAlias);
         cy.get('@tableCells').eq(5).contains(seqKitImportAlias);
         cy.get('@tableCells').eq(7).contains('true');
@@ -367,7 +383,8 @@ describe('Check metadata data fields page', () => {
 
       cy.get('table#metadatafields-datatable tbody tr').as('tableRows');
 
-      cy.wait('@seqPlatforms').then(() => {
+      cy.wait('@seqPlatforms').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.get('table#metadatafields-datatable tbody tr').contains(seqPlatformName).parent('tr').find('td')
           .as('tableCells');
         cy.get('@tableCells').eq(1).contains(modelName);
@@ -386,7 +403,8 @@ describe('Check metadata data fields page', () => {
         .as('tableCells');
 
       // Toggle needs bed file setting
-      cy.wait('@seqTypes').then(() => {
+      cy.wait('@seqTypes').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.intercept('/metaDataFields/toggleNeedsBedFile*').as('toggleNeedsBedFile');
 
         cy.get('@tableCells').eq(3).as('needsBedFileCell');
@@ -415,7 +433,8 @@ describe('Check metadata data fields page', () => {
 
       // create import alias
       const importAlias = Cypress._.random(0, 1e6);
-      cy.wait('@seqTypes').then(() => {
+      cy.wait('@seqTypes').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.intercept('/metaDataFields/createSeqTypeImportAlias/*').as('createImportAlias');
 
         cy.get('@tableCells').eq(9).as('importAliasCell');
@@ -430,7 +449,8 @@ describe('Check metadata data fields page', () => {
       });
 
       // Change legacy state
-      cy.wait('@seqTypes').then(() => {
+      cy.wait('@seqTypes').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.intercept('/metaDataFields/changeSeqTypeLegacyState*').as('changeLegacyState');
         cy.get('@tableCells').eq(10).find('label').click();
         cy.wait('@changeLegacyState').then((interception) => {
@@ -439,7 +459,8 @@ describe('Check metadata data fields page', () => {
       });
 
       // Check all changes
-      cy.wait('@seqTypes').then(() => {
+      cy.wait('@seqTypes').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.get('@tableCells').eq(1).contains('false');
         cy.get('@tableCells').eq(2).contains('false');
         cy.get('@tableCells').eq(3).contains('false');
@@ -482,7 +503,8 @@ describe('Check metadata data fields page', () => {
         expect(interception.response.statusCode).to.eq(302);
       });
 
-      cy.wait('@seqTypes').then(() => {
+      cy.wait('@seqTypes').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.get('table#metadatafields-datatable tbody tr').contains(seqTypeName).parent('tr').find('td')
           .as('tableCells');
         cy.get('@tableCells').eq(1).contains('true');

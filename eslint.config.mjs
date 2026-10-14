@@ -24,6 +24,7 @@ import js from "@eslint/js";
 import globals from "globals";
 
 import requireCodeInComments from "./eslint-rules/require-code-in-comments.mjs";
+import requireCypressResponseStatus from "./eslint-rules/require-cypress-response-status.mjs";
 
 export default [
   js.configs.recommended,
@@ -32,7 +33,8 @@ export default [
     plugins: {
       local: {
         rules: {
-          "require-code-in-comments": requireCodeInComments
+          "require-code-in-comments": requireCodeInComments,
+          "require-cypress-response-status": requireCypressResponseStatus
         }
       }
     },
@@ -102,6 +104,7 @@ export default [
       }
     },
     rules: {
+      'local/require-cypress-response-status': 'error',
       // test titles and selectors are single string literals that cannot be wrapped, everything
       // around them stays within the limit
       'max-len': [

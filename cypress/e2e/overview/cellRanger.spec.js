@@ -83,7 +83,7 @@ describe('Check cell ranger page', () => {
               if (deleteButtonFound) {
                 cy.get('#confirmDeleteModal').should('be.visible');
                 cy.get('#confirmDeleteModal').find('button.confirm').click();
-                cy.wait('@deleteFinalRun');
+                cy.wait('@deleteFinalRun').its('response.statusCode').should('eq', 302);
               } else {
                 cy.log('Delete button not found - test cleanup skipped');
               }
@@ -116,7 +116,7 @@ describe('Check cell ranger page', () => {
             // First create a final run to delete
             cy.get('input#input-3').click();
             cy.get('input#save').click();
-            cy.wait('@saveRunSelection');
+            cy.wait('@saveRunSelection').its('response.statusCode').should('eq', 302);
 
             cy.get('#cell-ranger-run-table tbody tr').contains('Final run').should('exist');
             // Wait for the table to update with the new run

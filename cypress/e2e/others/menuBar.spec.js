@@ -122,8 +122,10 @@ describe('Click all menu items in the menu bar', () => {
 
       cy.get('li.menuContainerItem').contains('Logout').click({ force: true });
 
-      cy.wait('@logout').then(() => {
-        cy.wait('@postLogout').then(() => {
+      cy.wait('@logout').then((interception) => {
+        expect(interception.response.statusCode).to.eq(302);
+        cy.wait('@postLogout').then((interception) => {
+          expect(interception.response.statusCode).to.eq(302);
           cy.checkPage('');
         });
       });
@@ -381,8 +383,10 @@ function checkCommonMenuItems() {
 
     cy.get('li.menuContainerItem').contains('Logout').click({ force: true });
 
-    cy.wait('@logout').then(() => {
-      cy.wait('@postLogout').then(() => {
+    cy.wait('@logout').then((interception) => {
+      expect(interception.response.statusCode).to.eq(302);
+      cy.wait('@postLogout').then((interception) => {
+        expect(interception.response.statusCode).to.eq(302);
         cy.checkPage('');
       });
     });

@@ -49,16 +49,16 @@ describe('Check workflow selection page', () => {
 
       cy.fixture('workflowSelection.json').then((config) => {
         cy.get('#alignment-workflow-select').select(config.alignment.workflow, { force: true });
-        cy.wait('@possibleOptions');
+        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
         cy.get('#alignment-seq-type-select').select(config.alignment.seqType, { force: true });
-        cy.wait('@possibleOptions');
+        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
         cy.get('#alignment-version-select').select(config.alignment.version.id, { force: true });
-        cy.wait('@possibleOptions');
+        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
         cy.get('#alignment-ref-genome-select').select(config.alignment.refGenome, { force: true });
-        cy.wait('@possibleOptions');
+        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
         cy.get('#xenograft-checkbox').check();
         cy.get('#alignment-species-select').select(config.alignment.species, { force: true });
-        cy.wait('@possibleOptions');
+        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
 
         cy.get('button#add-alignment-config-btn').click();
         cy.wait('@createConfig').then((interception) => {
@@ -96,7 +96,7 @@ describe('Check workflow selection page', () => {
       cy.intercept('/workflowSelection/possibleAlignmentOptions*').as('possibleOptions');
 
       cy.get('h2#headingAlignment').click();
-      cy.wait('@possibleOptions');
+      cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
 
       cy.get('#xenograft-checkbox').should('exist');
       cy.get('#xenograft-checkbox').should('not.be.checked');
@@ -106,14 +106,14 @@ describe('Check workflow selection page', () => {
 
       cy.get('#alignment-species-select option:not(:disabled)').its('length').then((enabledBefore) => {
         cy.get('#xenograft-checkbox').check();
-        cy.wait('@possibleOptions');
+        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
 
         cy.get('#alignment-species-select option:disabled').should('have.length', 0);
 
         cy.get('#alignment-species-select option:not(:disabled)').should('have.length.greaterThan', enabledBefore - 1);
 
         cy.get('#xenograft-checkbox').uncheck();
-        cy.wait('@possibleOptions');
+        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
 
         cy.get('#alignment-species-select option:disabled').should('have.length.greaterThan', 0);
       });
@@ -129,11 +129,11 @@ describe('Check workflow selection page', () => {
 
       cy.fixture('workflowSelection.json').then((config) => {
         cy.get('#analysis-workflow-select').select(config.analysis[0].workflow, { force: true });
-        cy.wait('@possibleOptions');
+        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
         cy.get('#analysis-seq-type-select').select(config.analysis[0].seqType, { force: true });
-        cy.wait('@possibleOptions');
+        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
         cy.get('#analysis-version-select').select(config.analysis[0].version.id, { force: true });
-        cy.wait('@possibleOptions');
+        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
 
         cy.get('button#add-analysis-config-btn').click();
         cy.wait('@createConfig').then((interception) => {
@@ -147,11 +147,11 @@ describe('Check workflow selection page', () => {
 
         // Create a second workflowVersionSelector with the same project and seqType
         cy.get('#analysis-workflow-select').select(config.analysis[1].workflow, { force: true });
-        cy.wait('@possibleOptions');
+        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
         cy.get('#analysis-seq-type-select').select(config.analysis[1].seqType, { force: true });
-        cy.wait('@possibleOptions');
+        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
         cy.get('#analysis-version-select').select(config.analysis[1].version.id, { force: true });
-        cy.wait('@possibleOptions');
+        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
 
         cy.get('button#add-analysis-config-btn').click();
         cy.wait('@createConfig').then((interception2) => {

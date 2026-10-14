@@ -46,6 +46,7 @@ describe('test for data swap page', () => {
       cy.get('div#sequenceTable_wrapper button').contains('Options').click();
       cy.get('div.dt-button-collection').contains('Download Sample Swap Template').click();
       cy.wait('@downloadTemplate').then((res) => {
+        expect(res.response.statusCode).to.eq(200);
         cy.visit('/dataSwap');
         const filename = res.response.headers['content-disposition'].split('filename=')[1];
         const downloadsFolder = Cypress.config('downloadsFolder');

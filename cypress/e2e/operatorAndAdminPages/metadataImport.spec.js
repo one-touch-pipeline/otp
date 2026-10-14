@@ -227,7 +227,8 @@ describe('Check metadata import page', () => {
         expect(interception.response.statusCode).to.eq(200);
       });
 
-      cy.wait('@details').then(() => {
+      cy.wait('@details').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.location('pathname').should('match', /\/\/?metadataImport\/details\/\d+/);
       });
     });
@@ -266,7 +267,8 @@ describe('Check metadata import page', () => {
         expect(interception.response.statusCode).to.eq(200);
       });
 
-      cy.wait('@multiDetails').then(() => {
+      cy.wait('@multiDetails').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
         cy.location('pathname').should('match', /\/\/?metadataImport\/multiDetails/);
       });
     });

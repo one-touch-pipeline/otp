@@ -221,7 +221,9 @@ describe('Check projectUser page', () => {
       cy.get('@piEntry').find('button.remove').click();
       cy.get('@piEntry').find('button.delete').click();
 
-      cy.wait('@removeRole').its('response.body.success').should('eq', false);
+      cy.wait('@removeRole').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      }).its('response.body.success').should('eq', false);
 
       cy.get('div[name="PI"]').should('exist');
       cy.get('div[name="BIOINFORMATICIAN"]').should('exist');
@@ -236,11 +238,15 @@ describe('Check projectUser page', () => {
       cy.get('@userRow').find('select[name="newRoles"]').select('OTHER', { force: true });
       cy.get('@userRow').find('button.addRole').click();
 
-      cy.wait('@addRole').its('response.body.success').should('eq', true);
+      cy.wait('@addRole').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      }).its('response.body.success').should('eq', true);
 
       cy.get('@userRow').find('div[name="OTHER"] button.remove').click();
       cy.get('@userRow').find('div[name="OTHER"] button.delete').click();
-      cy.wait('@removeRole').its('response.body.success').should('eq', true);
+      cy.wait('@removeRole').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      }).its('response.body.success').should('eq', true);
     });
 
     after('Remove Manage User rights when not granted before', () => {

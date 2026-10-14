@@ -36,7 +36,7 @@ describe('test for keyword page', () => {
       cy.get('div#project-keywords input#value').type(keyword);
       cy.get('div#project-keywords input#Add').click();
 
-      cy.wait('@createKeyword');
+      cy.wait('@createKeyword').its('response.statusCode').should('eq', 302);
 
       cy.get('div#project-keywords').contains(keyword);
     });
@@ -46,7 +46,7 @@ describe('test for keyword page', () => {
       cy.intercept('/keyword/add*').as('addKeyword');
 
       cy.get('input#add-keyword2').click();
-      cy.wait('@addKeyword');
+      cy.wait('@addKeyword').its('response.statusCode').should('eq', 302);
 
       cy.get('div#project-keywords').contains('keyword2');
     });
@@ -59,7 +59,7 @@ describe('test for keyword page', () => {
       cy.get('div#project-keywords input#value').type(keyword);
       cy.get('div#project-keywords input#Add').click();
 
-      cy.wait('@addKeyword');
+      cy.wait('@addKeyword').its('response.statusCode').should('eq', 302);
 
       cy.get('div#project-keywords').contains(keyword);
     });
@@ -69,13 +69,13 @@ describe('test for keyword page', () => {
       cy.intercept('//keyword/remove*').as('removeKeyword');
 
       cy.get('input[id="remove-custom keyword"]').click();
-      cy.wait('@removeKeyword');
+      cy.wait('@removeKeyword').its('response.statusCode').should('eq', 302);
 
       cy.get('input[id="remove-keyword1"]').click();
-      cy.wait('@removeKeyword');
+      cy.wait('@removeKeyword').its('response.statusCode').should('eq', 302);
 
       cy.get('input[id="remove-keyword2"]').click();
-      cy.wait('@removeKeyword');
+      cy.wait('@removeKeyword').its('response.statusCode').should('eq', 302);
 
       cy.get('input[id="remove-keyword2"]').should('not.exist');
       cy.get('input[id="remove-custom keyword"]').should('not.exist');

@@ -44,7 +44,7 @@ describe('Check sampleOverview page', () => {
       cy.url().should('include', 'Example+project+1');
 
       // Wait for data table to reload after project change
-      cy.wait('@projectChangeDataTable');
+      cy.wait('@projectChangeDataTable').its('response.statusCode').should('eq', 200);
 
       cy.get('#laneOverviewId').should('not.be.empty');
       cy.get('table#laneOverviewId td.dataTables_empty').should('exist')

@@ -263,6 +263,7 @@ describe('Check autoImport endpoint', { retries: 0 }, () => {
     cy.visitProjectPage('/sampleOverview/index', project);
 
     cy.wait('@loadSampleOverview').then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
       const rows = interception.response.body.aaData;
       importedIlses.map(expectedForIlse).forEach((expected) => {
         const row = rows.find((sample) => sample[0] === expected.pid && sample[1] === 'tumor01');
@@ -290,6 +291,7 @@ describe('Check autoImport endpoint', { retries: 0 }, () => {
     cy.get('#searchCriteriaTable td.search input[type=button]').click();
 
     cy.wait('@loadSequenceTable').then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
       const rows = interception.response.body.aaData;
       expect(rows).to.have.length(importedIlses.length);
       importedIlses.map(expectedForIlse).forEach((expected) => {

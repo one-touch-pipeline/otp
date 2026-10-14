@@ -682,14 +682,14 @@ describe('Check projectRequest page', () => {
             cy.get('select[name="dropdown"]').select('REQUIRED', { force: true });
             cy.get('button.save').click();
           });
-          cy.wait('@updateField');
+          cy.wait('@updateField').its('response.statusCode').should('eq', 200);
 
           cy.contains('td', 'Required Field').closest('tr').find('td.usrManagementProject').within(() => {
             cy.get('button.edit').click();
             cy.get('select[name="dropdown"]').select('OPTIONAL', { force: true });
             cy.get('button.save').click();
           });
-          cy.wait('@updateField');
+          cy.wait('@updateField').its('response.statusCode').should('eq', 200);
         } else {
           // Field does not exist — create it
           cy.visit('/projectFields/create');
@@ -766,14 +766,14 @@ describe('Check projectRequest page', () => {
         cy.get('select[name="dropdown"]').select('NOT_AVAILABLE', { force: true });
         cy.get('button.save').click();
       });
-      cy.wait('@updateField');
+      cy.wait('@updateField').its('response.statusCode').should('eq', 200);
 
       cy.contains('td', 'Required Field').closest('tr').find('td.usrManagementProject').within(() => {
         cy.get('button.edit').click();
         cy.get('select[name="dropdown"]').select('NOT_AVAILABLE', { force: true });
         cy.get('button.save').click();
       });
-      cy.wait('@updateField');
+      cy.wait('@updateField').its('response.statusCode').should('eq', 200);
     });
   });
 });
