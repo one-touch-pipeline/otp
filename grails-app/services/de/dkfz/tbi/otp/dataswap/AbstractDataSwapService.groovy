@@ -228,7 +228,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
                               create_directories_with_group_and_permission '${newPath.parent}' '${group}' '${perm}';
                               mv '${oldPath}' \\
                                  '${newPath}';
-                              ${getFixGroupCommand(newPath)}\n
+                              ${getFixGroupCommand(newPath, group)}\n
                               """.stripIndent()
             }
         } else if (Files.exists(newPath)) {
@@ -265,8 +265,8 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
      * @param path on which the fix should be performed
      * @return command to fix the group
      */
-    String getFixGroupCommand(Path path) {
-        return "chgrp -h `stat -c '%G' ${path.parent}` ${path}"
+    String getFixGroupCommand(Path path, String unixGroup) {
+        return "chgrp -h '${unixGroup}' '${path}'"
     }
 
     /**
@@ -608,11 +608,11 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
             bashMoveDirectFile += """
                                           |mv '${oldDirectFileName}' \\
                                           |   '${newDirectPath}';
-                                          |${getFixGroupCommand(newDirectPath)}
+                                          |${getFixGroupCommand(newDirectPath, group)}
                                           |if [ -e '${oldDirectFileName}.md5sum' ]; then
                                           |  mv '${oldDirectFileName}.md5sum' \\
                                           |     '${newDirectPath}.md5sum';
-                                          |  ${getFixGroupCommand(newDirectPath.resolveSibling("${newDirectPath.fileName}.md5sum"))}
+                                          |  ${getFixGroupCommand(newDirectPath.resolveSibling("${newDirectPath.fileName}.md5sum"), group)}
                                           |fi\n""".stripMargin()
         }
         bashMoveVbpFile += """\

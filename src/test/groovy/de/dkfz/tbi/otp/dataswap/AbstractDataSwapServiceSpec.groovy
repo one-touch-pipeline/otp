@@ -489,7 +489,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                                        create_directories_with_group_and_permission '${newPath.parent}' '${newProject.unixGroup}' '${FileService.DEFAULT_DIRECTORY_PERMISSION_STRING}';
                                        mv '${oldPath}' \\
                                           '${newPath}';
-                                       chgrp -h `stat -c '%G' ${newPath.parent}` ${newPath}\n
+                                       chgrp -h '${newProject.unixGroup}' '${newPath}'\n
                                        """.stripIndent()
 
         when:
@@ -910,11 +910,11 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                                      |create_directories_with_group_and_permission '${rawSequenceFilePaths[it].newPath.parent}' '${it.project.unixGroup}' '${FileService.DEFAULT_DIRECTORY_PERMISSION_STRING}';
                                      |mv '${rawSequenceFilePaths[it].oldPath}' \\
                                      |   '${rawSequenceFilePaths[it].newPath}';
-                                     |chgrp -h `stat -c '%G' ${rawSequenceFilePaths[it].newPath.parent}` ${rawSequenceFilePaths[it].newPath}
+                                     |chgrp -h '${it.project.unixGroup}' '${rawSequenceFilePaths[it].newPath}'
                                      |if [ -e '${rawSequenceFilePaths[it].oldPath}.md5sum' ]; then
                                      |  mv '${rawSequenceFilePaths[it].oldPath}.md5sum' \\
                                      |     '${rawSequenceFilePaths[it].newPath}.md5sum';
-                                     |  chgrp -h `stat -c '%G' ${rawSequenceFilePaths[it].newPath.parent}` ${rawSequenceFilePaths[it].newPath}.md5sum
+                                     |  chgrp -h '${it.project.unixGroup}' '${rawSequenceFilePaths[it].newPath}.md5sum'
                                      |fi\n""".stripMargin()
 
             final String bashMoveVbpFile = """\
