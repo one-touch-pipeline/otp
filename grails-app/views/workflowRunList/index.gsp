@@ -102,18 +102,31 @@
         <div class="col-auto mr-auto"></div>
 
         <div class="col-auto">
+            <span id="selectionMode" class="btn-group" role="group" aria-label="${g.message(code: "workflowRun.list.mode")}">
+                <input type="radio" class="btn-check" name="selectionMode" id="selectionModeRestart" value="restart" autocomplete="off" checked>
+                <label class="btn btn-outline-primary" for="selectionModeRestart">${g.message(code: "workflowRun.list.mode.restart")}</label>
+                <input type="radio" class="btn-check" name="selectionMode" id="selectionModeKill" value="kill" autocomplete="off">
+                <label class="btn btn-outline-primary" for="selectionModeKill">${g.message(code: "workflowRun.list.mode.kill")}</label>
+            </span>
+            <span class="ml-2 mr-2"><span id="selectedCount">0</span> ${g.message(code: "workflowRun.list.selected")}</span>
+        </div>
+
+        <div class="col-auto">
             %{-- using form because attribute "id" doesn't work in g:form --}%
             <form method="POST" id="bulk">
                 <div class="btn-group">
-                    <button class="btn btn-primary" formaction="${g.createLink(action: "setFailedFinal")}"
+                    <button class="btn btn-primary restart-mode-btn" formaction="${g.createLink(action: "setFailedFinal")}"
                             title="${g.message(code: "workflowRun.list.setFailedFinal")}"><i class="bi-file-earmark-x"></i></button>
-                    <button class="btn btn-primary" formaction="${g.createLink(action: "restartStep")}"
+                    <button class="btn btn-primary restart-mode-btn" formaction="${g.createLink(action: "restartStep")}"
                             title="${g.message(code: "workflowRun.list.restartSteps")}"><i class="bi-reply"></i></button>
-                    <button class="btn btn-primary" formaction="${g.createLink(action: "restartPreviousStep")}"
+                    <button class="btn btn-primary restart-mode-btn" formaction="${g.createLink(action: "restartPreviousStep")}"
                             title="${g.message(code: "workflowRun.list.restartPreviousSteps")}"><i
                             class="bi-reply"></i> ${g.message(code: "workflowRun.list.previous")}</button>
-                    <button class="btn btn-primary" formaction="${g.createLink(action: "restartRun")}"
+                    <button class="btn btn-primary restart-mode-btn" formaction="${g.createLink(action: "restartRun")}"
                             title="${g.message(code: "workflowRun.list.restartRuns")}"><i class="bi-reply-all"></i></button>
+                    <button class="btn btn-danger kill-mode-btn" id="killRunsButton" formaction="${g.createLink(action: "killRuns")}"
+                            title="${g.message(code: "workflowRun.list.killRuns")}" disabled><i
+                            class="bi-x-octagon-fill"></i> ${g.message(code: "workflowRun.list.killRuns")}</button>
                 </div>
             </form>
         </div>

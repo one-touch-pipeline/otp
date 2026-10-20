@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.converters.JSON
 import org.springframework.security.access.prepost.PreAuthorize
 
+import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.utils.DataTablesCommand
 
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -35,9 +36,17 @@ class WorkflowRunListController extends AbstractWorkflowRunController {
 
     WorkflowStepService workflowStepService
 
+    private static final Map<BulkKillResult.FailureReason, String> FAILURE_REASON_CODES = [
+            (BulkKillResult.FailureReason.NOT_FOUND)             : 'workflowRun.list.killRuns.reason.notFound',
+            (BulkKillResult.FailureReason.PROJECT_NOT_ACCESSIBLE): 'workflowRun.list.killRuns.reason.projectNotAccessible',
+            (BulkKillResult.FailureReason.NOT_KILLABLE)          : 'workflowRun.list.killRuns.reason.notKillable',
+            (BulkKillResult.FailureReason.UNEXPECTED)            : 'workflowRun.list.killRuns.reason.unexpected',
+    ].asImmutable()
+
     static allowedMethods = [
-            index: "GET",
-            data : "GET",
+            index   : "GET",
+            data    : "GET",
+            killRuns: "POST",
     ]
 
     Map index(RunShowCommand cmd) {
@@ -72,6 +81,38 @@ class WorkflowRunListController extends AbstractWorkflowRunController {
         render(cmd.getDataToRender(result.data, result.workflowsTotal, result.workflowsFiltered, [
                 count: [result.workflowsFiltered, result.running, result.failed]
         ]) as JSON)
+    }
+
+    /**
+     * Kills the selected runs via {@link WorkflowService#killWorkflowRuns(Set)} and shows a summary with a reason per failed run.
+     * The failure lines are rendered unescaped by the flash message template, so they must only contain IDs and message texts.
+     */
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    def killRuns(BulkKillCommand cmd) {
+        String redirectUri = cmd.errors.hasFieldErrors('redirect') ? '/workflowRunList/index' : cmd.redirect
+
+        if (cmd.errors.hasFieldErrors('run')) {
+            flash.message = new FlashMessage(message(code: 'workflowRun.list.killRuns.invalid') as String,
+                    [message(code: 'workflowRun.list.killRuns.invalid') as String])
+            redirect uri: redirectUri
+            return
+        }
+
+        BulkKillResult result = workflowService.killWorkflowRuns(cmd.run)
+        int successCount = result.successCount
+        List<String> failures = result.failures.collect { Long runId, BulkKillResult.FailureReason reason ->
+            "${runId}: ${message(code: FAILURE_REASON_CODES[reason])}".toString()
+        }
+
+        if (failures.isEmpty()) {
+            flash.message = new FlashMessage(message(code: 'workflowRun.list.killRuns.allSuccess', args: [successCount]) as String)
+        } else if (successCount) {
+            flash.message = new FlashMessage(message(code: 'workflowRun.list.killRuns.partial',
+                    args: [successCount, successCount + failures.size()]) as String, failures)
+        } else {
+            flash.message = new FlashMessage(message(code: 'workflowRun.list.killRuns.failed') as String, failures)
+        }
+        redirect uri: redirectUri
     }
 }
 

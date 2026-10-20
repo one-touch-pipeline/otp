@@ -43,6 +43,14 @@ class ValidatorUtil {
         }
     }
 
+    /**
+     * Checks that a redirect target is a path on this server. Rejects "//host" and "/\host",
+     * which browsers resolve as protocol-relative URLs to another host.
+     */
+    static boolean isLocalRedirect(String val) {
+        return val != null && val.startsWith("/") && !val.startsWith("//") && !val.startsWith("/\\")
+    }
+
     @TupleConstructor
     static class ValidatorDelegate {
         Closure rejectValue

@@ -26,6 +26,7 @@ import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.utils.exceptions.WorkflowRunDoesNotExistException
 
 class WorkflowServiceSpec extends Specification implements ServiceUnitTest<WorkflowService>, WorkflowSystemDomainFactory, DataTest {
 
@@ -60,5 +61,14 @@ class WorkflowServiceSpec extends Specification implements ServiceUnitTest<Workf
 
         then:
         thrown(AssertionError)
+    }
+
+    void "killWorkflowRunById, when run ID does not exist, then throw WorkflowRunDoesNotExistException"() {
+        when:
+        service.killWorkflowRunById(123L)
+
+        then:
+        WorkflowRunDoesNotExistException e = thrown()
+        e.message.contains('WorkflowRun 123 does not exist')
     }
 }

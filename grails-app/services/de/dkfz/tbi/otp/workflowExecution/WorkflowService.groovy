@@ -21,8 +21,10 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import grails.gorm.transactions.NotTransactional
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
+import org.springframework.transaction.annotation.Propagation
 
 import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -31,6 +33,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.exceptions.FileAccessForProjectNotAllowedException
+import de.dkfz.tbi.otp.utils.exceptions.WorkflowRunDoesNotExistException
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterJobHandlingService
@@ -108,6 +111,56 @@ class WorkflowService {
         oldRun.save(flush: true)
 
         return run
+    }
+
+    /**
+     * Kills each distinct run in its own transaction (see {@link #killWorkflowRunById}) and continues after a failed run.
+     * Not transactional itself, so no transaction is held open for the whole batch.
+     * Failure details are only written to the log; the result contains a reason per failed run.
+     */
+    @NotTransactional
+    @SuppressWarnings('CatchException')
+    BulkKillResult killWorkflowRuns(Set<Long> runIds) {
+        BulkKillResult result = new BulkKillResult()
+        runIds.each { Long runId ->
+            try {
+                killWorkflowRunById(runId)
+                result.successCount++
+            } catch (Exception | AssertionError e) {
+                result.failures[runId] = classifyKillFailure(runId, e)
+            }
+        }
+        return result
+    }
+
+    private BulkKillResult.FailureReason classifyKillFailure(Long runId, Throwable e) {
+        switch (e) {
+            case WorkflowRunDoesNotExistException:
+                log.warn("Could not kill WorkflowRun ${runId}: ${e.message}")
+                return BulkKillResult.FailureReason.NOT_FOUND
+            case FileAccessForProjectNotAllowedException:
+                log.warn("Could not kill WorkflowRun ${runId}: ${e.message}")
+                return BulkKillResult.FailureReason.PROJECT_NOT_ACCESSIBLE
+            case AssertionError:
+                log.warn("Could not kill WorkflowRun ${runId}: ${e.message}")
+                return BulkKillResult.FailureReason.NOT_KILLABLE
+            default:
+                log.error("Could not kill WorkflowRun ${runId}", e)
+                return BulkKillResult.FailureReason.UNEXPECTED
+        }
+    }
+
+    /**
+     * Kills the run in its own transaction, which commits or rolls back independently of any caller's transaction.
+     * An enclosing transaction is suspended for the duration of the call, so a caller must not hold a lock on this run.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    WorkflowRun killWorkflowRunById(Long runId) {
+        WorkflowRun run = WorkflowRun.get(runId)
+        if (!run) {
+            throw new WorkflowRunDoesNotExistException("WorkflowRun ${runId} does not exist")
+        }
+        return killWorkflowRun(run)
     }
 
     /**

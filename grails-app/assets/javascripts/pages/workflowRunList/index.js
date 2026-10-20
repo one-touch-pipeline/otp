@@ -29,18 +29,22 @@ $(() => {
     stepFilter: $('#stepFilter').val()
   });
 
+  const KILLABLE_STATES = ['PENDING', 'RUNNING_OTP', 'RUNNING_WES'];
+
+  const isKillMode = () => $('input[name="selectionMode"]:checked').val() === 'kill';
+
   const runsTable = $('#runs');
   const table = runsTable.DataTable({
     dom: '<"top"i>rt<"bottom"lp><"clear">',
     columns: [
       {
+        // name, value, and disabled state depend on the selection mode and are set by applySelectionMode
         data(row, type) {
           if (type === 'sort') {
             return null;
           }
-          const buttonsDisabled = (row.state !== 'FAILED' || row.stepId === null) ? ' disabled ' : '';
-          return `<input type="checkbox" name="step" value="${row.stepId}"
-                            form="bulk" class="tableCheckbox" ${buttonsDisabled}>`;
+          return `<input type="checkbox" form="bulk" class="tableCheckbox" data-state="${row.state}"
+                         data-step-id="${row.stepId ?? ''}" data-run-id="${row.id}">`;
         },
         orderable: false
       },
@@ -140,6 +144,15 @@ $(() => {
             buttonsDisabled,
             'reply-all'
           );
+          const killRunDisabled = KILLABLE_STATES.includes(row.state) ? '' : ' disabled ';
+          const killRunLink = $.otp.createLink({
+            controller: 'workflowRunList',
+            action: 'killRun'
+          });
+          const killRunButton = `<button class="btn btn-xs btn-danger kill-run-btn" formaction="${killRunLink}"
+                                         name="run" value="${row.id}" title="Kill run" ${killRunDisabled}>
+                                   <i class="bi-x-octagon-fill"></i>
+                                 </button>`;
           const workflowRunListPageLink = $.otp.createLink({
             controller: 'workflowRunList',
             action: 'restartStep'
@@ -163,7 +176,7 @@ $(() => {
                          Restart "${row.steps[i]}" step
                        </button>`;
           }
-          result += `</div></div>${restartRunButton}</div></form>`;
+          result += `</div></div>${restartRunButton}${killRunButton}</div></form>`;
           return result;
         },
         orderable: false
@@ -192,6 +205,7 @@ $(() => {
   });
 
   table.on('draw', () => {
+    applySelectionMode();
     $('.tooltip').remove();
 
     const $els = $('#runs').find('[title], [data-bs-original-title]');
@@ -263,28 +277,66 @@ $(() => {
     }
   });
 
+  const updateSelectedCount = function () {
+    $('#selectedCount').text($('input.tableCheckbox:checked').length);
+  };
+
+  /**
+   * Restart mode selects FAILED runs by step ID, Kill mode selects unfinished runs by run ID.
+   * Clears the selection, so that no bulk action submits a selection made in the other mode or on another page.
+   */
+  const applySelectionMode = function () {
+    const killMode = isKillMode();
+    $('input.tableCheckbox').each((_, el) => {
+      const checkbox = $(el);
+      const eligible = killMode ?
+        KILLABLE_STATES.includes(checkbox.data('state')) :
+        checkbox.data('state') === 'FAILED' && checkbox.attr('data-step-id') !== '';
+      checkbox.attr('name', killMode ? 'run' : 'step')
+        .val(killMode ? checkbox.attr('data-run-id') : checkbox.attr('data-step-id'))
+        .prop('disabled', !eligible)
+        .prop('checked', false);
+    });
+    $('#selectAll').prop('checked', false);
+    $('#bulk .restart-mode-btn').prop('disabled', killMode);
+    $('#bulk .kill-mode-btn').prop('disabled', !killMode);
+    updateSelectedCount();
+  };
+
+  $('input[name="selectionMode"]').on('change', applySelectionMode);
+
   $('#selectAll').on('click', (e) => {
     const checkboxes = $('input.tableCheckbox:not([disabled])');
     checkboxes.prop('checked', e.target.checked);
+    updateSelectedCount();
   });
 
+  runsTable.on('change', 'input.tableCheckbox', updateSelectedCount);
+
   $('#bulk').on('submit', (e) => {
-    const checkboxes = $('input.tableCheckbox');
-    let anySelected = false;
-    checkboxes.each((i, el) => {
-      if (el.checked) {
-        anySelected = true;
-      }
-    });
-    if (!anySelected) {
+    const selectedCount = $('input.tableCheckbox:checked').length;
+    if (selectedCount === 0) {
       e.preventDefault();
       alert('Select at least one row');
+      return;
+    }
+    const submitter = e.originalEvent ? e.originalEvent.submitter : null;
+    if (submitter && submitter.id === 'killRunsButton' &&
+        !window.confirm(`Kill ${selectedCount} selected workflow run(s)?`)) {
+      e.preventDefault();
+      return;
     }
 
     addSelection(e.target);
   });
 
   runsTable.on('submit', '.single', (e) => {
+    const submitter = e.originalEvent ? e.originalEvent.submitter : null;
+    if (submitter && submitter.classList.contains('kill-run-btn') &&
+        !window.confirm(`Kill workflow run ${submitter.value}?`)) {
+      e.preventDefault();
+      return;
+    }
     addSelection(e.target);
   });
 

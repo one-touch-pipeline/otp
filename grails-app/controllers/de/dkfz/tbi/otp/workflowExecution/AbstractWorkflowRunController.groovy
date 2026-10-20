@@ -26,6 +26,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.utils.validation.ValidatorUtil
 
 import java.time.Duration
 import java.time.LocalDateTime
@@ -149,7 +150,7 @@ class RunUpdateCommand implements Validateable {
 
     static constraints = {
         redirect(nullable: false, validator: { String val ->
-            val.startsWith("/")
+            ValidatorUtil.isLocalRedirect(val)
         })
     }
 }
@@ -163,7 +164,25 @@ class RunKillCommand implements Validateable {
             val != null && WorkflowRun.exists(val)
         })
         redirect(nullable: false, validator: { String val ->
-            val.startsWith("/")
+            ValidatorUtil.isLocalRedirect(val)
+        })
+    }
+}
+
+/**
+ * Bulk kill of workflow runs. Existence is not validated here, so that a missing run is reported per run
+ * instead of rejecting the whole selection.
+ */
+class BulkKillCommand implements Validateable {
+    Set<Long> run = new LinkedHashSet<>()
+    String redirect
+
+    static constraints = {
+        run(minSize: 1, validator: { Set<Long> val ->
+            val.every { it != null && it > 0 }
+        })
+        redirect(nullable: false, validator: { String val ->
+            ValidatorUtil.isLocalRedirect(val) && val.split(/[?#]/, 2).first() in ['/workflowRunList', '/workflowRunList/index']
         })
     }
 }

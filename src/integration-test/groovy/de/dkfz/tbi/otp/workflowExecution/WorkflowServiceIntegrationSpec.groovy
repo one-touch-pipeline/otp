@@ -36,6 +36,8 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.DeletionService
+import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.exceptions.FileAccessForProjectNotAllowedException
 import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.roddy.rna.RnaAlignmentWorkflow
@@ -60,7 +62,138 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
     OtpWorkflowService otpWorkflowService
     JobService jobService
 
+    DeletionService deletionService
+
+    ClusterJobHandlingService clusterJobHandlingService
+
+    Map committedFixtureIds
+
     static final String WORKFLOW_NAME = "WORKFLOW"
+
+    void "killWorkflowRuns, commits successful runs independently and reports a reason per failed run"() {
+        given:
+        Map fixture = SessionUtils.withNewTransaction {
+            Project project = createProject()
+            Workflow workflow = createWorkflow()
+            WorkflowApiVersion apiVersion = createWorkflowApiVersion(workflow: workflow)
+            WorkflowVersion version = createWorkflowVersion(apiVersion: apiVersion)
+            ProcessingPriority priority = createProcessingPriority()
+            WorkflowRun first = createWorkflowRun([project: project, workflow: workflow, workflowVersion: version, priority: priority])
+            WorkflowArtefact firstOutput = createWorkflowArtefact([producedBy: first, outputRole: 'output'])
+            WorkflowRun ineligible = createWorkflowRun([project: project, workflow: workflow, workflowVersion: version, priority: priority,
+                                                        state: WorkflowRun.State.FAILED,])
+            WorkflowRun last = createWorkflowRun([project: project, workflow: workflow, workflowVersion: version, priority: priority])
+            WorkflowRun dependent = createWorkflowRun([project: project, workflow: workflow, workflowVersion: version, priority: priority])
+            createWorkflowRunInputArtefact([workflowRun: dependent, workflowArtefact: firstOutput])
+            Project archivedProject = createProject([state: Project.State.ARCHIVED])
+            WorkflowRun archivedRun = createWorkflowRun([project: archivedProject, workflow: workflow,
+                                                         workflowVersion: version, priority: priority])
+            Project deletedProject = createProject([state: Project.State.DELETED])
+            WorkflowRun deletedRun = createWorkflowRun([project: deletedProject, workflow: workflow,
+                                                        workflowVersion: version, priority: priority])
+            committedFixtureIds = [projects: [project.id, archivedProject.id, deletedProject.id],
+                                   workflow: workflow.id, apiVersion: apiVersion.id,
+                                   version: version.id, priority: priority.id,
+                                   projectPriorities: [project.processingPriority.id, archivedProject.processingPriority.id,
+                                                       deletedProject.processingPriority.id]]
+            [firstId: first.id, ineligibleId: ineligible.id, lastId: last.id, dependentId: dependent.id,
+             archivedId: archivedRun.id, deletedId: deletedRun.id]
+        }
+
+        when:
+        BulkKillResult result = workflowService.killWorkflowRuns([fixture.firstId, fixture.ineligibleId, Long.MAX_VALUE,
+                                                                 fixture.archivedId, fixture.lastId, fixture.deletedId,] as LinkedHashSet<Long>)
+
+        then:
+        result.successCount == 2
+        result.failures*.key == [fixture.ineligibleId, Long.MAX_VALUE, fixture.archivedId, fixture.deletedId]
+        result.failures == [
+                (fixture.ineligibleId): BulkKillResult.FailureReason.NOT_KILLABLE,
+                (Long.MAX_VALUE)      : BulkKillResult.FailureReason.NOT_FOUND,
+                (fixture.archivedId)  : BulkKillResult.FailureReason.PROJECT_NOT_ACCESSIBLE,
+                (fixture.deletedId)   : BulkKillResult.FailureReason.PROJECT_NOT_ACCESSIBLE,
+        ]
+        SessionUtils.withNewTransaction {
+            WorkflowRun.get(fixture.firstId).state == WorkflowRun.State.KILLED &&
+                    WorkflowRun.get(fixture.ineligibleId).state == WorkflowRun.State.FAILED &&
+                    WorkflowRun.get(fixture.lastId).state == WorkflowRun.State.KILLED &&
+                    WorkflowRun.get(fixture.dependentId).state == WorkflowRun.State.PENDING &&
+                    WorkflowRun.get(fixture.archivedId).state == WorkflowRun.State.PENDING &&
+                    WorkflowRun.get(fixture.deletedId).state == WorkflowRun.State.PENDING
+        }
+    }
+
+    void "killWorkflowRuns, continues with the next run after a failed cluster job cancellation"() {
+        given:
+        Map fixture = SessionUtils.withNewTransaction {
+            Project project = createProject()
+            Workflow workflow = createWorkflow()
+            WorkflowApiVersion apiVersion = createWorkflowApiVersion(workflow: workflow)
+            WorkflowVersion version = createWorkflowVersion(apiVersion: apiVersion)
+            ProcessingPriority priority = createProcessingPriority()
+            Closure<WorkflowStep> createRunningWesStep = {
+                WorkflowStep step = createWorkflowStep([
+                        state      : WorkflowStep.State.SUCCESS,
+                        workflowRun: createWorkflowRun([project: project, workflow: workflow, workflowVersion: version, priority: priority,
+                                                        state  : WorkflowRun.State.RUNNING_WES,]),
+                ])
+                createClusterJob([workflowStep: step])
+                return step
+            }
+            WorkflowStep cancelledStep = createRunningWesStep()
+            WorkflowStep failingStep = createRunningWesStep()
+            WorkflowRun later = createWorkflowRun([project: project, workflow: workflow, workflowVersion: version, priority: priority])
+            committedFixtureIds = [projects         : [project.id],
+                                   workflow         : workflow.id, apiVersion: apiVersion.id,
+                                   version          : version.id, priority: priority.id,
+                                   projectPriorities: [project.processingPriority.id]]
+            [cancelledRunId: cancelledStep.workflowRun.id, cancelledStepId: cancelledStep.id,
+             failingRunId  : failingStep.workflowRun.id, failingStepId: failingStep.id,
+             laterRunId    : later.id,]
+        }
+        List<Long> attemptedStepIds = []
+        workflowService.clusterJobHandlingService = Mock(ClusterJobHandlingService) {
+            2 * killClusterJobsInWorkflowStep(_) >> { WorkflowStep step ->
+                attemptedStepIds << step.id
+                if (step.id == fixture.failingStepId) {
+                    throw new IllegalStateException('Cancellation failed')
+                }
+            }
+        }
+
+        when:
+        BulkKillResult result = workflowService.killWorkflowRuns([fixture.cancelledRunId, fixture.failingRunId, fixture.laterRunId] as LinkedHashSet<Long>)
+
+        then:
+        attemptedStepIds == [fixture.cancelledStepId, fixture.failingStepId]
+        result.successCount == 2
+        result.failures == [(fixture.failingRunId): BulkKillResult.FailureReason.UNEXPECTED]
+        SessionUtils.withNewTransaction {
+            WorkflowRun.get(fixture.cancelledRunId).state == WorkflowRun.State.KILLED &&
+                    WorkflowRun.get(fixture.failingRunId).state == WorkflowRun.State.RUNNING_WES &&
+                    WorkflowRun.get(fixture.laterRunId).state == WorkflowRun.State.KILLED
+        }
+    }
+
+    void cleanup() {
+        workflowService.clusterJobHandlingService = clusterJobHandlingService
+        if (committedFixtureIds) {
+            SessionUtils.withNewTransaction {
+                committedFixtureIds.projects.each { Long projectId ->
+                    Project project = Project.get(projectId)
+                    project.state = Project.State.OPEN
+                    deletionService.deleteProject(project)
+                }
+                WorkflowVersion.get(committedFixtureIds.version).delete(flush: true)
+                WorkflowApiVersion.get(committedFixtureIds.apiVersion).delete(flush: true)
+                Workflow.get(committedFixtureIds.workflow).delete(flush: true)
+                ProcessingPriority.get(committedFixtureIds.priority).delete(flush: true)
+                committedFixtureIds.projectPriorities.each { Long priorityId ->
+                    ProcessingPriority.get(priorityId).delete(flush: true)
+                }
+            }
+        }
+    }
 
     void "createRestartedWorkflows, should create new WorkflowRun based on failed WorkflowRun"() {
         given:
