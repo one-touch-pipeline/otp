@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.Path
@@ -40,6 +41,7 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
 
     AbstractBamFileService abstractBamFileService
     ProjectService projectService
+    SecurityService securityService
 
     @Override
     protected void logSwapParameters(LaneSwapParameters parameters) {
@@ -110,8 +112,8 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
     }
 
     @Override
-    protected void createSwapComments(LaneSwapData data) {
-        individualService.createComment("Lane swap",
+    protected String createSwapInfo(LaneSwapData data) {
+        return individualService.createCommentString("Lane swap",
                 [
                         individual   : data.individualSwap.old,
                         project      : data.projectSwap.old.name,
@@ -134,7 +136,6 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
                 ],
                 "run: ${data.run.name}\nlane: ${data.lanes}"
         )
-        createCommentForSwappedRawSequenceFiles(data)
     }
 
     @CompileDynamic

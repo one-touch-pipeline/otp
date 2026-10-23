@@ -152,6 +152,25 @@
                 <td class="myValue">${rawSequenceFile.withdrawnComment ?: "-"}</td>
             </tr>
         </table>
+        <g:if test="${dataSwapInfos}">
+            <h2><g:message code="rawSequenceFiles.showDetails.dataSwapInformation"/></h2>
+            <g:each var="dataSwapInfo" in="${dataSwapInfos}">
+                <table>
+                    <tr>
+                        <td class="myKey"><g:message code="rawSequenceFiles.showDetails.dataSwapInformation.date"/></td>
+                        <td class="myValue"> ${dataSwapInfo.dateCreated}</td>
+                    </tr>
+                    <tr>
+                        <td class="myKey"><g:message code="rawSequenceFiles.showDetails.dataSwapInformation.user"/></td>
+                        <td class="myValue">${dataSwapInfo.user}</td>
+                    </tr>
+                    <tr>
+                        <td class="myKey"><g:message code="rawSequenceFiles.showDetails.dataSwapInformation.swapInformation"/></td>
+                        <td class="myValue keep-whitespace">${dataSwapInfo.swapInfo}</td>
+                    </tr>
+                </table>
+            </g:each>
+        </g:if>
         <h2><g:message code="rawSequenceFiles.showDetails.metaDataEntries"/></h2>
         <otp:annotation type="warning">${g.message(code: "rawSequenceFiles.showDetails.metaDataEntries.explanation")}</otp:annotation>
         <table>

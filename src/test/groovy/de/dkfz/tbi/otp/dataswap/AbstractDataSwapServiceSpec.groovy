@@ -50,10 +50,15 @@ import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
+import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
+import de.dkfz.tbi.otp.security.SecurityService
+import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 
 import java.nio.file.*
 
-class AbstractDataSwapServiceSpec extends Specification implements DataTest, RoddyPanCancerFactory, FastqcDomainFactory {
+class AbstractDataSwapServiceSpec extends Specification implements DataTest, RoddyPanCancerFactory, FastqcDomainFactory, UserDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -77,6 +82,9 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                 FastqFile,
                 SequenceCramFile,
                 FastqcProcessedFile,
+                DataSwapInfo,
+                Ticket,
+                User,
         ]
     }
 
@@ -114,8 +122,9 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
             }
 
             @Override
-            protected void createSwapComments(DataSwapData<DataSwapParameters> data) {
+            protected String createSwapInfo(DataSwapData<DataSwapParameters> data) {
                 // Is not functionally tested here
+                return "test swap information"
             }
 
             @Override
@@ -184,6 +193,107 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
 
         then:
         1 * service.createMoveFilesScript(_ as DataSwapData<DataSwapParameters>) >> null
+    }
+
+    @Unroll
+    void "createSwapComments, should create DataSwapInfo and link ticket to Individual, ticket exists: #ticketExists"() {
+        given:
+        final String swapInfo = "test swap information"
+        final String ticketNumber = "12345"
+
+        final User user = createUser()
+        final Ticket existingTicket = ticketExists ? createTicket([
+                ticketNumber: ticketNumber,
+        ]) : null
+
+        final Individual individual = createIndividual()
+        final List<SeqTrack> seqTracks = [
+                createSeqTrack(),
+                createSeqTrack(),
+        ]
+
+        final DataSwapParameters parameters = new DataSwapParameters(
+                ticketNumber: ticketNumber,
+        )
+
+        final DataSwapData data = new DataSwapData<DataSwapParameters>(
+                parameters: parameters,
+                seqTrackList: seqTracks,
+                individualSwap: new Swap(null, individual),
+        )
+
+        AbstractDataSwapService service =
+                new AbstractDataSwapService<DataSwapParameters, DataSwapData<DataSwapParameters>>() {
+
+                    SecurityService securityService
+
+                    @Override
+                    protected void logSwapParameters(DataSwapParameters ignored) {
+                    }
+
+                    @Override
+                    protected void completeOmittedNewSwapValuesAndLog(DataSwapParameters ignored) {
+                    }
+
+                    @Override
+                    protected DataSwapData<DataSwapParameters> buildDataDTO(DataSwapParameters ignored) {
+                        return null
+                    }
+
+                    @Override
+                    protected void performDataSwap(DataSwapData<DataSwapParameters> ignored) {
+                    }
+
+                    @Override
+                    protected String createSwapInfo(DataSwapData<DataSwapParameters> ignored) {
+                        return swapInfo
+                    }
+
+                    @Override
+                    protected void cleanupLeftOvers(DataSwapData<DataSwapParameters> ignored) {
+                    }
+                }
+
+        service.securityService = Mock(SecurityService) {
+            1 * getCurrentUser() >> user
+        }
+
+        service.ticketService = Mock(TicketService)
+
+        when:
+        service.createSwapComments(data)
+
+        then:
+        (ticketExists ? 0 : 1) * service.ticketService.createTicket(ticketNumber, null, false) >> {
+            new Ticket(ticketNumber: ticketNumber).save(flush: true, failOnError: true)
+        }
+
+        and:
+        DataSwapInfo.count() == 2
+
+        seqTracks.each { SeqTrack seqTrack ->
+            DataSwapInfo dataSwapInfo = DataSwapInfo.findBySeqTrack(seqTrack)
+
+            assert dataSwapInfo
+            assert dataSwapInfo.swapInfo == swapInfo
+            assert dataSwapInfo.user == user
+        }
+
+        and:
+        Ticket.count() == 1
+
+        Ticket savedTicket = Ticket.findByTicketNumber(ticketNumber)
+        savedTicket != null
+
+        if (ticketExists) {
+            assert savedTicket == existingTicket
+        }
+
+        individual.dataSwapTickets.contains(savedTicket)
+        individual.dataSwapTickets.size() == 1
+
+        where:
+        ticketExists << [true, false]
     }
 
     void "validateDTO, when validateable is valid should not throw an exception"() {

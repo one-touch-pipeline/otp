@@ -170,6 +170,7 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
 
     static hasMany = [
             logMessages: LogMessage,
+            dataSwapInfos: DataSwapInfo,
     ]
 
     static constraints = {

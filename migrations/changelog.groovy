@@ -253,4 +253,6 @@ databaseChangeLog = {
     include file: 'changelogs/2026/otp-3046-drop-notNull-on-raw-sequence-file.groovy'
 
     include file: 'changelogs/2026/otp-3046-add-source-fastq-files-to-sequence-cram-file.groovy'
+
+    include file: 'changelogs/2026/otp-2649.groovy'
 }

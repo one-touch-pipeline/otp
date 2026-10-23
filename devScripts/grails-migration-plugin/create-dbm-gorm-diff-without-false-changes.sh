@@ -94,6 +94,7 @@ joinTables="\
 (user_project_role_project_role)|\
 (workflow_command_log)|\
 (workflow_message_log)|\
+(individual_ticket)|\
 "
 
 #contains false positive unique constraint

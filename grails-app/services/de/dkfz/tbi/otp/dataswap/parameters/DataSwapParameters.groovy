@@ -52,6 +52,7 @@ class DataSwapParameters implements Validateable {
         bashScriptName nullable: false, blank: false
         log nullable: false
         scriptOutputDirectory nullable: false
+        ticketNumber nullable: false, blank: false
     }
 
     Swap<String> projectNameSwap
@@ -62,4 +63,5 @@ class DataSwapParameters implements Validateable {
     boolean failOnMissingFiles = false
     Path scriptOutputDirectory
     boolean linkedFilesVerified = false
+    String ticketNumber
 }

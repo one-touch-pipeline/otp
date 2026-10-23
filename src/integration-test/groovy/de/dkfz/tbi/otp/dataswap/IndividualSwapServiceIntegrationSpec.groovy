@@ -44,9 +44,11 @@ import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
 import de.dkfz.tbi.otp.utils.LocalShellHelper
+import de.dkfz.tbi.otp.security.SecurityService
 
 import java.nio.file.Path
 import java.nio.file.Files
@@ -56,6 +58,7 @@ import java.nio.file.Files
 class IndividualSwapServiceIntegrationSpec extends Specification implements UserAndRoles, IsRoddy, WorkflowSystemDomainFactory {
 
     IndividualSwapService individualSwapService
+    SecurityService securityService
     TestConfigService configService
     RawSequenceDataWorkFileService rawSequenceDataWorkFileService
     RawSequenceDataViewFileService rawSequenceDataViewFileService
@@ -123,10 +126,16 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
 
         Path cleanupPath = oldIndividual.getViewByPidPath(seqType).absoluteDataManagementPath.toPath()
 
+        final String ticketNumber = "12345"
+        Ticket ticket = createTicket([
+                ticketNumber: ticketNumber,
+        ])
+
         when:
         doWithAuth(ADMIN) {
             individualSwapService.swap(
                     new IndividualSwapParameters(
+                            ticketNumber: ticketNumber,
                             projectNameSwap: new Swap(bamFile.project.name, newProject.name),
                             pidSwap: new Swap(oldIndividual.pid, oldIndividual.pid),
                             sampleTypeSwaps: [
@@ -168,8 +177,21 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
                     "'${it.project.unixGroup}' '${FileService.DEFAULT_DIRECTORY_PERMISSION_STRING}'")
             assert copyScriptContent.contains("ln -sr '${rawSequenceDataWorkFileService.getFilePath(it)}' \\\n      '${rawSequenceDataViewFileService.getFilePath(it)}'")
             assert copyScriptContent.contains("chgrp -h '${it.project.unixGroup}' '${rawSequenceDataViewFileService.getFilePath(it)}'")
-            assert it.comment.comment == "Attention: Datafile swapped!"
         }
+
+        DataSwapInfo dataSwapInfo = CollectionUtils.exactlyOneElement(
+                DataSwapInfo.findAllBySeqTrack(seqTrack)
+        )
+
+        dataSwapInfo.swapInfo
+        dataSwapInfo.user
+
+        Individual swappedIndividual = CollectionUtils.exactlyOneElement(
+                Individual.findAllByPid(oldIndividual.pid)
+        )
+
+        swappedIndividual.dataSwapTickets.contains(ticket)
+
         copyScriptContent.contains("rm -rf ${cleanupPath}")
         CollectionUtils.exactlyOneElement(Individual.findAllByPid(oldIndividual.pid)).species == oldIndividual.species
     }

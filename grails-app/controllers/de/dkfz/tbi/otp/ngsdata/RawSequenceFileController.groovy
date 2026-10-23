@@ -55,6 +55,10 @@ class RawSequenceFileController {
             return response.sendError(404)
         }
 
+        List<DataSwapInfo> dataSwapInfos = rawSequenceFile.seqTrack?.dataSwapInfos?.sort {
+            it.dateCreated
+        } ?: []
+
         return [
                 rawSequenceFile: rawSequenceFile,
                 fileSize       : formatFileSize(rawSequenceFile.fileSize),
@@ -66,6 +70,13 @@ class RawSequenceFileController {
                 fullPath       : rawSequenceDataWorkFileService.getFilePath(rawSequenceFile).toString(),
                 vbpPath        : rawSequenceDataViewFileService.getFilePath(rawSequenceFile).toString(),
                 fastqcAvailable: fastqcResultsService.isFastqcAvailable(rawSequenceFile),
+                dataSwapInfos  : dataSwapInfos.collect {
+                    [
+                            dateCreated: TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(it.dateCreated),
+                            user       : it.user.realName,
+                            swapInfo   : it.swapInfo,
+                    ]
+                },
         ]
     }
 

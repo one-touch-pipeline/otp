@@ -39,9 +39,12 @@ import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcLinkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.DeletionService
 import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
+import de.dkfz.tbi.otp.tracking.TicketService
 
 import java.nio.file.*
 
@@ -114,6 +117,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
     RawSequenceDataAllWellFileService rawSequenceDataAllWellFileService
     ProcessingOptionService processingOptionService
     FilestoreService filestoreService
+    TicketService ticketService
 
     /**
      * Logs various arguments of DataSwapParameters in DataSwapParameters.log that can be examined later in the script output.
@@ -145,11 +149,44 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
     protected abstract void performDataSwap(D data)
 
     /**
-     * Creates comments for the data swap and save them together with the swapped entities in the database.
+     * Creates and saves information about the data swap.
      *
      * @param data build by buildDataDTO(P parameters) containing all entities necessary to perform a swap.
      */
-    protected abstract void createSwapComments(D data)
+    protected void createSwapComments(D data) {
+        String swapInfo = createSwapInfo(data)
+        User user = securityService.currentUser
+
+        data.seqTrackList.each { SeqTrack seqTrack ->
+            new DataSwapInfo(
+                    seqTrack: seqTrack,
+                    swapInfo: swapInfo,
+                    user: user,
+            ).save(flush: true)
+        }
+
+        Ticket ticket = findOrCreateTicket(data.ticketNumber)
+
+        data.individualSwap.new.addToDataSwapTickets(ticket)
+        assert data.individualSwap.new.save(flush: true)
+    }
+
+    /**
+    * Creates the swap-specific information.
+    */
+    protected abstract String createSwapInfo(D data)
+
+    /**
+     * Finds the ticket by the given ticket number.
+     *
+     * @param ticketNumber number of the ticket to find
+     * @return found ticket or null if no ticket exists with the given ticket number
+     */
+    @CompileDynamic
+    private Ticket findOrCreateTicket(String ticketNumber) {
+        return CollectionUtils.atMostOneElement(Ticket.findAllByTicketNumber(ticketNumber)) ?:
+                ticketService.createTicket(ticketNumber, null, false)
+    }
 
     /**
      * Clean up left over empty data and create bash commands for empty file structures after a swap.

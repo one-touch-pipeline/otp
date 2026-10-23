@@ -101,4 +101,8 @@ class DataSwapData<P extends DataSwapParameters> implements Validateable {
     boolean getLinkedFilesVerified() {
         return parameters.linkedFilesVerified
     }
+
+    String getTicketNumber() {
+        return parameters.ticketNumber
+    }
 }

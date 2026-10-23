@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataswap.data.SampleSwapData
 import de.dkfz.tbi.otp.dataswap.parameters.SampleSwapParameters
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.Path
@@ -37,6 +38,7 @@ import java.nio.file.Path
 class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, SampleSwapData> {
 
     AbstractBamFileService abstractBamFileService
+    SecurityService securityService
 
     @Override
     protected void logSwapParameters(SampleSwapParameters parameters) {
@@ -103,8 +105,8 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
     }
 
     @Override
-    protected void createSwapComments(SampleSwapData data) {
-        individualService.createComment("Sample swap", [
+    protected String createSwapInfo(SampleSwapData data) {
+        return individualService.createCommentString("Sample swap", [
                 individual: data.individualSwap.old,
                 project   : data.projectSwap.old.name,
                 pid       : data.individualSwap.old.pid,
@@ -114,8 +116,7 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
                 project   : data.projectSwap.new.name,
                 pid       : data.individualSwap.new.pid,
                 sampleType: data.sampleTypeSwap.new.name,
-        ])
-        createCommentForSwappedRawSequenceFiles(data)
+        ], null)
     }
 
     @Override

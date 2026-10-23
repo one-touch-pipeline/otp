@@ -41,6 +41,7 @@ import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
 import de.dkfz.tbi.otp.utils.LocalShellHelper
@@ -118,10 +119,16 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
 
         SampleType sampleType = bamFile.sampleType
 
+        final String ticketNumber = "12345"
+        Ticket ticket = createTicket([
+                ticketNumber: ticketNumber,
+        ])
+
         when:
         doWithAuth(ADMIN) {
             sampleSwapService.swap(
                     new SampleSwapParameters(
+                            ticketNumber: ticketNumber,
                             projectNameSwap: new Swap(bamFile.project.name, bamFile.project.name),
                             pidSwap: new Swap(oldIndividual.pid, individual.pid),
                             sampleTypeSwap: new Swap(sampleType.name, sampleType.name),
@@ -156,8 +163,17 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
                     "'${it.project.unixGroup}' '${FileService.DEFAULT_DIRECTORY_PERMISSION_STRING}'")
             assert copyScriptContent.contains("ln -sr '${rawSequenceDataWorkFileService.getFilePath(it)}' \\\n      '${rawSequenceDataViewFileService.getFilePath(it)}'")
             assert copyScriptContent.contains("chgrp -h '${it.project.unixGroup}' '${rawSequenceDataViewFileService.getFilePath(it)}'")
-            assert it.comment.comment == "Attention: Datafile swapped!"
         }
+
+        DataSwapInfo dataSwapInfo = CollectionUtils.exactlyOneElement(
+                DataSwapInfo.findAllBySeqTrack(seqTrack)
+        )
+
+        dataSwapInfo.swapInfo
+        dataSwapInfo.user
+
+        individual.dataSwapTickets.contains(ticket)
+
         copyScriptContent.contains("rm -rf ${cleanupPath}")
 
         individual.species == oldIndividual.species

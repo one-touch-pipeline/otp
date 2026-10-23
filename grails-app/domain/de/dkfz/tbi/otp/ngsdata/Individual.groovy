@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.CommentableWithProject
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.Entity
 
 /**
@@ -58,6 +59,10 @@ class Individual implements CommentableWithProject, Entity {
 
     static belongsTo = [
             project : Project,
+    ]
+
+    static hasMany = [
+            dataSwapTickets: Ticket,
     ]
 
     static constraints = {

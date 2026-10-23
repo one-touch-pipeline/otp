@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.dataswap.data.IndividualSwapData
 import de.dkfz.tbi.otp.dataswap.parameters.IndividualSwapParameters
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.FileSystem
@@ -39,6 +40,7 @@ import java.nio.file.Path
 class IndividualSwapService extends AbstractDataSwapService<IndividualSwapParameters, IndividualSwapData> {
 
     ProjectService projectService
+    SecurityService securityService
 
     @Override
     protected void logSwapParameters(IndividualSwapParameters parameters) {
@@ -111,8 +113,8 @@ class IndividualSwapService extends AbstractDataSwapService<IndividualSwapParame
     }
 
     @Override
-    protected void createSwapComments(IndividualSwapData data) {
-        individualService.createComment("Individual swap", [
+    protected String createSwapInfo(IndividualSwapData data) {
+        return individualService.createCommentString("Individual swap", [
                 individual: data.individualSwap.old,
                 project   : data.projectSwap.old.name,
                 pid       : data.pidSwap.old,
@@ -120,9 +122,7 @@ class IndividualSwapService extends AbstractDataSwapService<IndividualSwapParame
                 individual: data.individualSwap.new,
                 project   : data.projectSwap.new.name,
                 pid       : data.pidSwap.new,
-        ])
-
-        createCommentForSwappedRawSequenceFiles(data)
+        ], null)
     }
 
     @CompileDynamic

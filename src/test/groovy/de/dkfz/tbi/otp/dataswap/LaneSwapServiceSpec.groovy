@@ -41,6 +41,9 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.security.SecurityService
+import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.tracking.Ticket
 
 import java.nio.file.*
 
@@ -60,6 +63,9 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
                 SeqTrack,
                 ExternallyProcessedBamFile,
                 RoddyBamFile,
+                DataSwapInfo,
+                Ticket,
+                User,
         ]
     }
 
@@ -119,6 +125,16 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
             _ * findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> 'test-group'
         }
 
+        User user = new User(
+                username: "test-user",
+                password: "test-password",
+                email: "test@example.com",
+        ).save(flush: true)
+
+        service.securityService = Mock(SecurityService) {
+            1 * getCurrentUser() >> user
+        }
+
         // Domain
         SampleType newSampleType = createSampleType()
         SeqType newSeqType = createSeqType([
@@ -126,6 +142,11 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
         ])
         Individual newIndividual = createIndividual()
         Individual oldIndividual = createIndividual()
+
+        final String ticketNumber = "12345"
+        Ticket ticket = createTicket([
+                ticketNumber: ticketNumber,
+        ])
 
         // creates the sample that will be on two SeqTracks of the same run
         // the same individual will have another Sample, but this is correct
@@ -160,6 +181,7 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
         Files.createFile(service.rawSequenceDataWorkFileService.getFilePath(seqTrack2File))
 
         LaneSwapParameters parameters = new LaneSwapParameters(
+                ticketNumber: ticketNumber,
                 projectNameSwap: new Swap(falsyLabeledSample.individual.project.name, newIndividual.project.name),
                 pidSwap: new Swap(falsyLabeledSample.individual.pid, newIndividual.pid),
                 sampleTypeSwap: new Swap(falsyLabeledSample.sampleType.name, newSampleType.name),
@@ -200,7 +222,7 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
 
         and: "SeqTracks have the new attributes"
         List<SeqTrack> seqTracks = SeqTrack.findAllBySample(CollectionUtils.exactlyOneElement(Sample.findAllByIndividual(newIndividual)))
-        assert seqTracks.size() == 2
+        seqTracks.size() == 2
         List<Boolean> resultBoolList = []
         seqTracks.each {
             resultBoolList.add(it.individual == newIndividual)
@@ -209,7 +231,21 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
             resultBoolList.add(it.seqType == newSeqType)
             resultBoolList.add(it.swapped)
         }
-        assert resultBoolList.every { it }
+        resultBoolList.every { it }
+
+        and: "DataSwapInfo is created for each swapped SeqTrack"
+        DataSwapInfo.count() == 2
+
+        seqTracks.each { SeqTrack seqTrack ->
+            DataSwapInfo dataSwapInfo = DataSwapInfo.findBySeqTrack(seqTrack)
+
+            assert dataSwapInfo
+            assert dataSwapInfo.swapInfo
+            assert dataSwapInfo.user == user
+        }
+
+        and: "ticket is added to the new individual"
+        newIndividual.dataSwapTickets.contains(ticket)
 
         and: "DataFiles to the new SeqTracks have the new name"
         CollectionUtils.containSame(RawSequenceFile.findAllBySeqTrackInList(seqTracks)*.fileName, ['newFileName1', 'newFileName2'])

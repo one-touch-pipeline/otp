@@ -61,6 +61,7 @@ ProcessingOptionService processingOptionService = ctx.processingOptionService
  ********************************************************************************/
 
 swapLabel = 'OTRS-________________-something-descriptive'
+String ticketNumber = ''
 
 def swapMapDelimiter = " "
 def swapMap = """
@@ -128,6 +129,8 @@ Closure<String> newRawSequenceFileNameClosure = { RawSequenceFile rawSequenceFil
  * It should not change depending on the swap-details.
  ********************************************************************************/
 
+assert ticketNumber ==~ /^[0-9]+$/ : "A ticket number must be provided and contain only digits"
+
 int counter = 1
 List<String> files = []
 
@@ -138,6 +141,7 @@ Closure<Integer> newSampleSwapScript = { ScriptBuilder builder, Project newProje
 
     builder.addGroovyCommand("\n\tsampleSwapService.swap( \n" +
             "\t\tnew SampleSwapParameters(\n" +
+            "\t\tticketNumber: '${ticketNumber}',\n" +
             "\t\tprojectNameSwap: new Swap<String>('${oldIndividual.project.name}', '${newProject.name}'),\n" +
             "\t\tpidSwap: new Swap<String>('${oldIndividual.pid}', '${newIndividualName}'),\n" +
             "\t\tsampleTypeSwap: new Swap<String>('${oldSample.sampleType.name}', '${newSampleType.name}'),\n" +
@@ -201,7 +205,7 @@ Closure<ScriptBuilder> createScripts = { String swapLabel ->
         if (newSampleType == null && seqTypeWhiteList.empty && // only if we're moving entire, unfiltered patients...
                 (!newIndividual || newProject != oldIndividual.project) // .. either into a shiny new patient, or into another project entirely
         ) {
-            counter = renamePatient(newIndividualName, oldIndividual, newProject, samples, counter, builder, newSampleTypeClosure, newRawSequenceFileNameClosure, files)
+            counter = renamePatient(newIndividualName, oldIndividual, newProject, samples, counter, builder, newSampleTypeClosure, newRawSequenceFileNameClosure, files, ticketNumber)
         } else { // more complex case: moving partial source, or into non-empty destination
             // moving one single sample in its entirety
             if (oldSampleType || seqTypeWhiteList) {
@@ -212,7 +216,7 @@ Closure<ScriptBuilder> createScripts = { String swapLabel ->
                         newRawSequenceFileNameClosure,
                         newSampleSwapScript,
                         counter, builder, files,
-                        createdPids, createdSamples
+                        createdPids, createdSamples, ticketNumber
                 )
             } else { // moving ALL the samples for a patient (e.g. into another existing patient)
                 counter = moveAllSamples(samples,
@@ -303,7 +307,7 @@ private int moveOneSample(Project newProject,
                           Closure newSampleSwapScript,
                           int counter,
                           ScriptBuilder builder, List<String> files,
-                          Set<String> createdPids, Set<String> createdSamples
+                          Set<String> createdPids, Set<String> createdSamples, String ticketNumber
 ) {
     assert oldSampleType: "A sampletype needs to be set for \"${oldIndividual.displayName}\". " +
             "If this functionality is required please create a new Issue."
@@ -338,7 +342,7 @@ private int moveOneSample(Project newProject,
             builder.addGroovyCommand(Snippets.swapLane(seqTrack, fileName, newRawSequenceFileNameClosure,
                     newProject,
                     oldIndividual, newIndividualName,
-                    oldSampleType, newSampleType))
+                    oldSampleType, newSampleType, ticketNumber))
             files << fileName
         }
     } else {
@@ -353,12 +357,13 @@ private int renamePatient(String newIndividualName, Individual oldIndividual,
                           Project newProject,
                           List<Sample> samples, int counter, ScriptBuilder builder,
                           Closure<SampleType> newSampleTypeClosure, Closure<String> newRawSequenceFileNameClosure,
-                          List<String> files
+                          List<String> files, String ticketNumber
 ) {
     String fileName = "mv_${counter++}_${oldIndividual.pid}__to__${newIndividualName}"
 
     builder.addGroovyCommand("\n\t individualSwapService.swap(\n" +
             "\t\tnew IndividualSwapParameters(\n" +
+            "\t\tticketNumber: '${ticketNumber}',\n" +
             "\t\tprojectNameSwap : new Swap<String>('${oldIndividual.project.name}', '${newProject.name}'),\n" +
             "\t\tpidSwap: new Swap<String>('${oldIndividual.pid}', '${newIndividualName}'),\n" +
             "\t\tsampleTypeSwaps : [\n")
@@ -461,12 +466,13 @@ class Snippets {
     static String swapLane(SeqTrack seqTrack, String fileName, Closure<String> newRawSequenceFileNameClosure,
                            Project newProject,
                            Individual oldIndividual, String newIndividual,
-                           SampleType oldSampleType, SampleType newSampleType
+                           SampleType oldSampleType, SampleType newSampleType, String ticketNumber
     ) {
         StringBuilder snippet = new StringBuilder()
 
         snippet << "\n\tlaneSwapService.swap( \n" +
                 "\t\tnew LaneSwapParameters(\n" +
+                "\t\tticketNumber: '${ticketNumber}',\n" +
                 "\t\tprojectNameSwap: new Swap<String>('${oldIndividual.project.name}', '${newProject.name}'),\n" +
                 "\t\tpidSwap: new Swap<String>('${oldIndividual.pid}', '${newIndividual}'),\n" +
                 "\t\tsampleTypeSwap: new Swap<String>('${oldSampleType.name}', '${newSampleType.name}'),\n" +
