@@ -21,19 +21,26 @@
  */
 package de.dkfz.tbi.otp.workflow.alignment.roddy
 
-import com.fasterxml.jackson.core.JsonParseException
-import groovy.transform.CompileDynamic
+import com.fasterxml.jackson.core.JsonProcessingException
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.dataprocessing.AlignmentInfo
 import de.dkfz.tbi.otp.dataprocessing.RoddyAlignmentInfoService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.workflow.alignment.AlignmentWorkflowShared
 import de.dkfz.tbi.otp.workflow.jobs.AbstractCreateNotificationJob
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+/**
+ * Creates the configuration part of the notification for the Roddy alignment workflows (PanCancer, WGBS and RNA).
+ *
+ * The used tools and parameters are derived from the combined config of the workflow run by the {@link RoddyAlignmentInfoService},
+ * so the selection of the alignment and merging tool is the same as for every other alignment information shown by OTP.
+ */
 @Component
 @Slf4j
 class RoddyAlignmentCreateNotificationJob extends AbstractCreateNotificationJob implements AlignmentWorkflowShared<RoddyBamFile> {
@@ -44,57 +51,28 @@ class RoddyAlignmentCreateNotificationJob extends AbstractCreateNotificationJob 
     @Autowired
     RoddyAlignmentInfoService roddyAlignmentInfoService
 
-    @CompileDynamic
     @Override
     String createNotificationText(WorkflowStep workflowStep) {
-        if (!workflowStep.workflowRun.combinedConfig) {
-            throw new IllegalArgumentException("CombinedConfig in worflowRun ${workflowStep.workflowRun} is null")
-        }
-
-        Map<String, String> config
-        try {
-            config = roddyAlignmentInfoService.extractCValuesMapFromJsonConfigString(workflowStep.workflowRun.combinedConfig)
-        } catch (JsonParseException e) {
-            throw new IllegalArgumentException("Failed to parse combinedConfig in workflowRun ${workflowStep.workflowRun}. " +
-                    "Please ensure it is a valid JSON string.", e)
+        WorkflowRun workflowRun = workflowStep.workflowRun
+        if (!workflowRun.combinedConfig) {
+            throw new IllegalArgumentException("CombinedConfig in workflowRun ${workflowRun} is null")
         }
 
         RoddyBamFile roddyBamFile = getBamFile(workflowStep)
+        AlignmentInfo alignmentInfo
+        try {
+            alignmentInfo = roddyAlignmentInfoService.getAlignmentInfo(workflowRun, roddyBamFile)
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Failed to parse combinedConfig in workflowRun ${workflowRun}. " +
+                    "Please ensure it is a valid JSON string.", e)
+        }
 
-        StringBuilder builder = new StringBuilder()
-        builder << messageSourceService.createMessage("notification.template.alignment.processing", [
+        Map<String, Object> alignmentSpecificAttributes = alignmentInfo.alignmentSpecificMessageAttributes
+        return messageSourceService.createMessage("notification.template.alignment.processing", [
                 seqType           : roddyBamFile.seqType.displayNameWithLibraryLayout,
                 referenceGenome   : roddyBamFile.referenceGenome,
-                alignmentProgram  : getProgramVersion(config),
-                alignmentParameter: getProgramParameter(config),
-        ])
-        builder << messageSourceService.createMessage("notification.template.alignment.processing.roddy", [
-                mergingProgram    : getMergingProgramVersion(config),
-                mergingParameter  : getMergingProgramParameter(config),
-                samtoolsProgram   : getSAMToolsVersion(config),
-                programVersion    : workflowStep.workflowRun.workflowVersion.workflowVersion,
-        ])
-
-        return builder.toString()
-    }
-
-    protected String getSAMToolsVersion(Map<String, String> config) {
-        return config.get("SAMTOOLS_VERSION") ? "Version ${config.get("SAMTOOLS_VERSION")}" : ""
-    }
-
-    protected String getProgramVersion(Map<String, String> config) {
-        return config.get("BWA_VERSION") ? "BWA Version ${config.get("BWA_VERSION")}" : ""
-    }
-
-    protected String getProgramParameter(Map<String, String> config) {
-        return config.get("BWA_MEM_OPTIONS")
-    }
-
-    protected String getMergingProgramVersion(Map<String, String> config) {
-        return config.get('SAMBAMBA_MARKDUP_VERSION') ? "Sambamba Version ${config.get('SAMBAMBA_MARKDUP_VERSION')}" : ""
-    }
-
-    protected String getMergingProgramParameter(Map<String, String> config) {
-        return config.get('SAMBAMBA_MARKDUP_OPTS')
+                alignmentProgram  : alignmentInfo.alignmentProgram,
+                alignmentParameter: alignmentInfo.alignmentParameter,
+        ]) + messageSourceService.createMessage(alignmentSpecificAttributes.code as String, alignmentSpecificAttributes.params as Map)
     }
 }

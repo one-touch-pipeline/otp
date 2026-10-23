@@ -46,10 +46,8 @@ class RnaAlignmentWorkflow extends AlignmentWorkflow implements LinearWorkflow {
                 SkipForEmptyRawSequenceFileJob,
                 AlignmentFragmentJob,
                 AlignmentLinkCleanUpJob,
-//                RnaAlignmentCheckFragmentKeysJob,
-                // will be uncommented after default fragments have been adapted
-                // Keep the order, since it is important
-//                RnaAlignmentCreateNotificationJob,
+                RnaAlignmentCheckFragmentKeysJob,
+                RoddyAlignmentCreateNotificationJob,
                 RoddyAlignmentConditionalFailJob,
                 AttachUuidJob,
                 RoddyAlignmentPrepareJob,

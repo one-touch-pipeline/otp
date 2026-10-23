@@ -57,8 +57,15 @@ class RoddyAlignmentInfoService extends AbstractAlignmentInfoService {
 
     @Override
     AlignmentInfo getAlignmentInfo(WorkflowRun run) {
-        Map<String, String> config = extractCValuesMapFromJsonConfigString(run.combinedConfig)
         AbstractBamFile bamFile = run.outputArtefacts[AlignmentWorkflow.OUTPUT_BAM].artefact.get() as AbstractBamFile
+        return getAlignmentInfo(run, bamFile)
+    }
+
+    /**
+     * Same as {@link #getAlignmentInfo(WorkflowRun)}, but for callers that already know the bam file produced by the run.
+     */
+    RoddyAlignmentInfo getAlignmentInfo(WorkflowRun run, AbstractBamFile bamFile) {
+        Map<String, String> config = extractCValuesMapFromJsonConfigString(run.combinedConfig)
         return generateRoddyAlignmentInfo(config, bamFile.project, bamFile.seqType,
                 run.workflowVersion.workflowVersion)
     }

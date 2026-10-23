@@ -36,6 +36,7 @@ abstract class AbstractCreateNotificationJob extends AbstractJob {
         workflowStep.workflowRun.save(flush: true)
         logService.addSimpleLogEntry(workflowStep, "Notification has been generated")
         logService.addSimpleLogEntry(workflowStep, workflowRun.notificationText)
+        workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 
     @Override
