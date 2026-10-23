@@ -34,7 +34,7 @@ enum OtpProperty {
     LDAP_MANAGER_PASSWORD('otp.security.ldap.managerPw', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
     LDAP_SEARCH_BASE('otp.security.ldap.search.base', TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
     LDAP_SEARCH_ATTRIBUTE('otp.security.ldap.search.attribute', TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
-    TRUSTSTORE_PATH("otp.trustStore.path", TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), '/'),
+    TRUSTSTORE_PATH("otp.trustStore.path", TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), '/tmp'),
     TRUSTSTORE_PASSWORD("otp.trustStore.password", TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), 'invalid'),
     TRUSTSTORE_TYPE("otp.trustStore.type", TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), 'jks'),
 
@@ -55,7 +55,7 @@ enum OtpProperty {
     SSH_PORT('otp.ssh.port', TypeValidators.POSITIVE_NUMBER, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST), '22'),
     SSH_TIMEOUT('otp.ssh.timeout', TypeValidators.POSITIVE_NUMBER, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST), '0'),
     SSH_AUTH_METHOD('otp.ssh.authMethod', TypeValidators.SSH_AUTH_METHOD, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST),
-            SshAuthMethod.SSH_AGENT.name()),
+            SshAuthMethod.SSH_AGENT.configName),
     SSH_USER('otp.ssh.user', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST)),
     /**
      * Used for {@link SshAuthMethod#KEY_FILE}
@@ -68,9 +68,9 @@ enum OtpProperty {
     SSH_PASSWORD('otp.ssh.password', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST), "invalid"),
 
     PATH_STACK_TRACES('otp.errorLogging.stacktraces', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT),
-            "${System.getProperty("user.dir")}/logs/stacktraces/"),
+            "${System.getProperty("user.dir")}/logs/stacktraces"),
     PATH_JOB_LOGS('otp.logging.jobLogDir', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT),
-            "${System.getProperty("user.dir")}/logs/jobs/"),
+            "${System.getProperty("user.dir")}/logs/jobs"),
     PATH_PROCESSING_ROOT('otp.processing.root.path', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION)),
     PATH_PROJECT_ROOT('otp.root.path', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
     PATH_CLUSTER_LOGS_OTP('otp.logging.root.path', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
@@ -101,6 +101,45 @@ enum OtpProperty {
      * Default to 60 minutes.
      */
     DATABASE_MAX_AGE_IN_MINUTES('otp.database.max.age.in.minutes', TypeValidators.POSITIVE_NUMBER, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), "60"),
+
+    /**
+     * The maximum size of a single result set read by the JDBC driver (pgjdbc 'maxResultBuffer'), for example '2G' or
+     * '10p' (percent of the maximum heap). Protects the JVM against queries loading huge result sets.
+     * Ignored for H2. Default to 10 percent of the heap.
+     */
+    DATABASE_MAX_RESULT_BUFFER('otp.database.max.result.buffer', TypeValidators.MAX_RESULT_BUFFER, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), "10p"),
+
+    /**
+     * The maximum size of a single result set for queries of the groovy web console, see {@link #DATABASE_MAX_RESULT_BUFFER}.
+     * Default to 5 percent of the heap.
+     */
+    DATABASE_CONSOLE_MAX_RESULT_BUFFER('otp.database.console.max.result.buffer', TypeValidators.MAX_RESULT_BUFFER,
+            EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), "5p"),
+
+    /**
+     * The PostgreSQL 'statement_timeout' for queries of the groovy web console, for example '30s' or '5min'.
+     * The limit applies to each single statement, not to the whole script. Ignored for H2. Default to 30 seconds.
+     *
+     * <p>A console script that needs a longer timeout for a single statement must raise it only for its own transaction:
+     * <pre>
+     * SeqType.withTransaction {
+     *     SeqType.withSession { session ->
+     *         session.createNativeQuery("SET LOCAL statement_timeout = '10min'").executeUpdate()
+     *         // long running statement here
+     *     }
+     * }
+     * </pre>
+     * Never use a plain {@code SET statement_timeout}: the setting stays on the pooled connection until it is borrowed
+     * again.</p>
+     */
+    DATABASE_CONSOLE_STATEMENT_TIMEOUT('otp.database.console.statement.timeout', TypeValidators.POSTGRES_DURATION,
+            EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), "30s"),
+
+    /**
+     * The count of maximum active connections to the database for the groovy web console. Default to 5.
+     */
+    DATABASE_CONSOLE_MAX_ACTIVE_CONNECTION('otp.database.console.max.active.connection', TypeValidators.POSITIVE_NUMBER,
+            EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), "5"),
 
     CONFIG_EMAIL_ENABLED('otp.mail.allowOtpToSendMails', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION), 'false'),
     CONFIG_EMAIL_SERVER('otp.mail.server', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION), 'localhost'),

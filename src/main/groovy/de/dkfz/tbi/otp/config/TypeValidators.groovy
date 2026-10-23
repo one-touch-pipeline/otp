@@ -50,6 +50,17 @@ enum TypeValidators {
 
     FLOAT({ it ==~ /^[\+\-]?\d+\.?\d*$/ }, null),
 
+    /**
+     * A size as accepted by the pgjdbc property 'maxResultBuffer': bytes, optionally with K/M/G/T, or a percentage of
+     * the maximum heap (p/pct/percent).
+     */
+    MAX_RESULT_BUFFER({ it ==~ /^\d+([KMGT]|p|pct|percent)?$/ }, null),
+
+    /**
+     * A duration as accepted by PostgreSQL time settings like 'statement_timeout' (default unit: milliseconds).
+     */
+    POSTGRES_DURATION({ it ==~ /^\d+(us|ms|s|min|h|d)?$/ }, null),
+
     SINGLE_WORD_TEXT({ it ==~ /\S+/ }, null),
 
     SINGLE_WORD_TEXT_OPTIONAL({ it ==~ /\S*/ }, null),

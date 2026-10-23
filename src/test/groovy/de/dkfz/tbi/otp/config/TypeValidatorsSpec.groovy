@@ -107,6 +107,32 @@ class TypeValidatorsSpec extends Specification implements DataTest {
         TypeValidators.FLOAT                         | ''                                                                 | EMPTY_INIT                      || false
         TypeValidators.FLOAT                         | 'text'                                                             | EMPTY_INIT                      || false
 
+        TypeValidators.MAX_RESULT_BUFFER             | '1024'                                                             | EMPTY_INIT                      || true
+        TypeValidators.MAX_RESULT_BUFFER             | '500K'                                                             | EMPTY_INIT                      || true
+        TypeValidators.MAX_RESULT_BUFFER             | '500M'                                                             | EMPTY_INIT                      || true
+        TypeValidators.MAX_RESULT_BUFFER             | '2G'                                                               | EMPTY_INIT                      || true
+        TypeValidators.MAX_RESULT_BUFFER             | '10p'                                                              | EMPTY_INIT                      || true
+        TypeValidators.MAX_RESULT_BUFFER             | '10pct'                                                            | EMPTY_INIT                      || true
+        TypeValidators.MAX_RESULT_BUFFER             | '10percent'                                                        | EMPTY_INIT                      || true
+        TypeValidators.MAX_RESULT_BUFFER             | '-1'                                                               | EMPTY_INIT                      || false
+        TypeValidators.MAX_RESULT_BUFFER             | '1.5G'                                                             | EMPTY_INIT                      || false
+        TypeValidators.MAX_RESULT_BUFFER             | '10 p'                                                             | EMPTY_INIT                      || false
+        TypeValidators.MAX_RESULT_BUFFER             | '10X'                                                              | EMPTY_INIT                      || false
+        TypeValidators.MAX_RESULT_BUFFER             | ''                                                                 | EMPTY_INIT                      || false
+        TypeValidators.MAX_RESULT_BUFFER             | null                                                               | EMPTY_INIT                      || false
+
+        TypeValidators.POSTGRES_DURATION             | '30000'                                                            | EMPTY_INIT                      || true
+        TypeValidators.POSTGRES_DURATION             | '30s'                                                              | EMPTY_INIT                      || true
+        TypeValidators.POSTGRES_DURATION             | '500ms'                                                            | EMPTY_INIT                      || true
+        TypeValidators.POSTGRES_DURATION             | '5min'                                                             | EMPTY_INIT                      || true
+        TypeValidators.POSTGRES_DURATION             | '1h'                                                               | EMPTY_INIT                      || true
+        TypeValidators.POSTGRES_DURATION             | '30 s'                                                             | EMPTY_INIT                      || false
+        TypeValidators.POSTGRES_DURATION             | "30s'; drop table x; --"                                           | EMPTY_INIT                      || false
+        TypeValidators.POSTGRES_DURATION             | '-1'                                                               | EMPTY_INIT                      || false
+        TypeValidators.POSTGRES_DURATION             | 's'                                                                | EMPTY_INIT                      || false
+        TypeValidators.POSTGRES_DURATION             | ''                                                                 | EMPTY_INIT                      || false
+        TypeValidators.POSTGRES_DURATION             | null                                                               | EMPTY_INIT                      || false
+
         TypeValidators.SINGLE_WORD_TEXT              | 'one_word'                                                         | EMPTY_INIT                      || true
         TypeValidators.SINGLE_WORD_TEXT              | 'long_word_' * 10                                                  | EMPTY_INIT                      || true
         TypeValidators.SINGLE_WORD_TEXT              | null                                                               | EMPTY_INIT                      || false

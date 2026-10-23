@@ -22,10 +22,13 @@
 import grails.util.Environment
 import io.micrometer.core.instrument.Tag
 import io.micrometer.core.instrument.binder.jpa.HibernateMetrics
+import org.springframework.boot.web.servlet.FilterRegistrationBean
 
 import de.dkfz.tbi.otp.ProjectLinkGenerator
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.config.datasource.ConsoleDataSourceFilter
+import de.dkfz.tbi.otp.config.datasource.OtpDataSourceRegistrar
 import de.dkfz.tbi.otp.handler.CustomExceptionResolver
 import de.dkfz.tbi.otp.testing.PinningDataSourceRegistrar
 import de.dkfz.tbi.otp.testing.TestTransactionService
@@ -55,6 +58,7 @@ beans = {
     // when 'otp.testing.endpoints.enabled=true' do we replace GORM's data source connection source factory (so a spec
     // file's writes can be rolled back) and register the TestTransactionService bean. Never registered in production or
     // when the flag is off, so it has zero effect there. See TestingController / PinningDataSource.
+    boolean pinningDataSourceInstalled = false
     if (Environment.current == Environment.DEVELOPMENT) {
         boolean testingEndpointsEnabled = false
         try {
@@ -66,6 +70,18 @@ beans = {
         if (testingEndpointsEnabled) {
             pinningDataSourceRegistrar(PinningDataSourceRegistrar)
             testTransactionService(TestTransactionService)
+            pinningDataSourceInstalled = true
         }
+    }
+    // Restricted pool for the groovy web console (see OtpDataSourceConnectionSourceFactory). Skipped when the pinning
+    // registrar is installed: its factory extends OtpDataSourceConnectionSourceFactory and two registrars would race.
+    if (!pinningDataSourceInstalled) {
+        otpDataSourceRegistrar(OtpDataSourceRegistrar)
+    }
+    // marks requests of the groovy web console before Spring Security runs, so they use the restricted pool
+    consoleDataSourceFilterRegistration(FilterRegistrationBean) {
+        filter = new ConsoleDataSourceFilter()
+        urlPatterns = [ConsoleDataSourceFilter.CONSOLE_URL_PATTERN]
+        order = ConsoleDataSourceFilter.ORDER
     }
 }

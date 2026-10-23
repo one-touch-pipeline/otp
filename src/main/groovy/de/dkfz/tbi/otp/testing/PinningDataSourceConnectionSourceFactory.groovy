@@ -22,11 +22,12 @@
 package de.dkfz.tbi.otp.testing
 
 import groovy.util.logging.Slf4j
-import org.grails.datastore.gorm.jdbc.connections.CachedDataSourceConnectionSourceFactory
 import org.grails.datastore.gorm.jdbc.connections.DataSourceConnectionSource
 import org.grails.datastore.gorm.jdbc.connections.DataSourceSettings
 import org.grails.datastore.mapping.core.connections.ConnectionSource
 import org.springframework.core.env.PropertyResolver
+
+import de.dkfz.tbi.otp.config.datasource.OtpDataSourceConnectionSourceFactory
 
 import javax.sql.DataSource
 
@@ -39,9 +40,12 @@ import javax.sql.DataSource
  * connection source are BOTH resolved from {@code dataSourceConnectionSourceFactory.create(...).source}, so wrapping the
  * source here pins every database consumer uniformly. (Wrapping the {@code dataSource} bean alone does not, because
  * Hibernate holds the connection source's {@code source} directly, bypassing the bean.)</p>
+ *
+ * <p>It extends {@link OtpDataSourceConnectionSourceFactory}, so the pinned data source wraps the console routing data
+ * source. While a test transaction is active, console requests use the pinned connection of the default pool too.</p>
  */
 @Slf4j
-class PinningDataSourceConnectionSourceFactory extends CachedDataSourceConnectionSourceFactory {
+class PinningDataSourceConnectionSourceFactory extends OtpDataSourceConnectionSourceFactory {
 
     private final Object cacheLock = new Object()
     private final Map<String, ConnectionSource<DataSource, DataSourceSettings>> pinnedConnectionSources = [:]

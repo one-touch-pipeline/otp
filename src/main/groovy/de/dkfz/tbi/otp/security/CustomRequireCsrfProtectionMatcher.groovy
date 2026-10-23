@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.security
 import org.apache.http.entity.ContentType
 import org.springframework.security.web.util.matcher.RequestMatcher
 
+import de.dkfz.tbi.otp.config.datasource.ConsoleDataSourceFilter
+
 import javax.servlet.http.HttpServletRequest
 
 /***
@@ -41,6 +43,6 @@ class CustomRequireCsrfProtectionMatcher implements RequestMatcher {
         if (request.contentType?.contains(ContentType.MULTIPART_FORM_DATA.mimeType)) {
             return false
         }
-        return (request.forwardURI - request.contextPath) != "/console/execute"
+        return (request.forwardURI - request.contextPath) != ConsoleDataSourceFilter.CONSOLE_EXECUTE_PATH
     }
 }

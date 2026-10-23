@@ -29,4 +29,14 @@ class OtpPropertySpec extends Specification {
         expect:
         OtpProperty.values()*.key == OtpProperty.values()*.key.unique()
     }
+
+    void "default value of #otpProperty is valid for its validator"() {
+        expect:
+        otpProperty.validator.validate(otpProperty.defaultValue)
+
+        where:
+        otpProperty << OtpProperty.values().findAll {
+            it.defaultValue
+        }
+    }
 }

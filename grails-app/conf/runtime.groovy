@@ -48,6 +48,16 @@ String databasePassword = otpProperties.getProperty(OtpProperty.DATABASE_PASSWOR
 long databaseMaxConnection = (otpProperties.getProperty(OtpProperty.DATABASE_MAX_ACTIVE_CONNECTION.key) ?: OtpProperty.DATABASE_MAX_ACTIVE_CONNECTION.defaultValue) as long
 long databaseMaxWaitForConnection = (otpProperties.getProperty(OtpProperty.DATABASE_MAX_WAIT_FOR_CONNECTION.key) ?: OtpProperty.DATABASE_MAX_WAIT_FOR_CONNECTION.defaultValue) as long
 long databaseMaxAgeInMinutes = (otpProperties.getProperty(OtpProperty.DATABASE_MAX_AGE_IN_MINUTES.key) ?: OtpProperty.DATABASE_MAX_AGE_IN_MINUTES.defaultValue) as long
+String databaseMaxResultBuffer = otpProperties.getProperty(OtpProperty.DATABASE_MAX_RESULT_BUFFER.key) ?: OtpProperty.DATABASE_MAX_RESULT_BUFFER.defaultValue
+String databaseConsoleMaxResultBuffer = otpProperties.getProperty(OtpProperty.DATABASE_CONSOLE_MAX_RESULT_BUFFER.key) ?:
+        OtpProperty.DATABASE_CONSOLE_MAX_RESULT_BUFFER.defaultValue
+String databaseConsoleStatementTimeout = otpProperties.getProperty(OtpProperty.DATABASE_CONSOLE_STATEMENT_TIMEOUT.key) ?:
+        OtpProperty.DATABASE_CONSOLE_STATEMENT_TIMEOUT.defaultValue
+long databaseConsoleMaxConnection = (otpProperties.getProperty(OtpProperty.DATABASE_CONSOLE_MAX_ACTIVE_CONNECTION.key) ?:
+        OtpProperty.DATABASE_CONSOLE_MAX_ACTIVE_CONNECTION.defaultValue) as long
+// pgjdbc connection properties, see https://jdbc.postgresql.org/documentation/use/
+String databaseConnectionProperties = "maxResultBuffer=${databaseMaxResultBuffer}"
+String databaseConsoleConnectionProperties = "maxResultBuffer=${databaseConsoleMaxResultBuffer};options=-c statement_timeout=${databaseConsoleStatementTimeout}"
 
 // set per-environment serverURL stem for creating absolute links
 environments {
@@ -82,44 +92,71 @@ hibernate {
     flush.mode = 'manual' // OSIV session flush mode outside of transactional context
 }
 
+// Pool properties of the default dataSource for PostgreSQL (production, development)
+// the properties are described on http://tomcat.apache.org/tomcat-7.0-doc/jdbc-pool.html
+Map<String, Object> dataSourcePoolProperties = [
+        maxActive                    : databaseMaxConnection,                           // max parallel connection
+        maxIdle                      : 50,                                              // max parallel idle connection
+        minIdle                      : 25,                                              // min idle connection
+        maxAge                       : MINUTES.toMillis(databaseMaxAgeInMinutes),       // the time after which a connection will be closed
+        minEvictableIdleTimeMillis   : MINUTES.toMillis(5),                             // minimum time a connection need to be idle before remove
+
+        maxWait                      : SECONDS.toMillis(databaseMaxWaitForConnection),  // max time a request wait for a free connection
+
+        testWhileIdle                : true,                                            // test idle connection
+        timeBetweenEvictionRunsMillis: MINUTES.toMillis(1),                             // how often idle connections are checked
+
+        testOnBorrow                 : true,                                            // validate connection before return
+        validationInterval           : SECONDS.toMillis(10),                            // min interval of check a connection on borrow
+
+        validationQuery              : "SELECT 1",                                      // validation query
+        // comment out because 9.1.21 does not support the option
+        // validationQueryTimeout    : SECONDS.toSeconds(5),                            // timeout in seconds for validation query
+
+        logValidationErrors          : true,                                            // log errors during validation
+
+        connectionProperties         : databaseConnectionProperties,                    // limits of the JDBC driver, e.g. maxResultBuffer
+]
+
+// Validates every borrowed connection of the console pool by resetting the statement_timeout to the value of the
+// connection properties, so a plain 'SET statement_timeout' of a console script does not leak into later console requests.
+Map<String, Object> consoleConnectionResetProperties = [
+        testOnBorrow      : true,
+        validationInterval: 0,
+        validationQuery   : "RESET statement_timeout",
+]
+
+// Overrides of the dataSource pool properties for the restricted pool used by the groovy web console, see
+// OtpDataSourceConnectionSourceFactory. Only set for PostgreSQL (production, development); ignored for H2.
+Map<String, Object> consoleDataSourceProperties = [
+        maxActive           : databaseConsoleMaxConnection,
+        maxIdle             : 2,
+        minIdle             : 0,
+        initialSize         : 0,
+        connectionProperties: databaseConsoleConnectionProperties,
+] + consoleConnectionResetProperties
+
 // environment specific settings
 environments {
     // Everything is set in general data source
     production {
-        // noinspection GroovyAssignabilityCheck
-        dataSource {
-            // the properties are described on http://tomcat.apache.org/tomcat-7.0-doc/jdbc-pool.html
-            properties {
-                maxActive = databaseMaxConnection                                         // max parallel connection
-                maxIdle = 50                                            // max parallel idle connection
-                minIdle = 25                                            // min idle connection
-                maxAge = MINUTES.toMillis(databaseMaxAgeInMinutes)      // the time after which a connection will be closed
-                minEvictableIdleTimeMillis = MINUTES.toMillis(5)        // minimum time a connection need to be idle before remove
-
-                maxWait = SECONDS.toMillis(databaseMaxWaitForConnection)                          // max time a request wait for a free connection
-
-                testWhileIdle = true                                    // test idle connection
-                timeBetweenEvictionRunsMillis = MINUTES.toMillis(1)     // how often idle connections are checked
-
-                testOnBorrow = true                                     // validate connection before return
-                validationInterval = SECONDS.toMillis(10)               // min interval of check a connection on borrow
-
-                validationQuery = "SELECT 1"                            // validation query
-                // comment out because 9.1.21 does not support the option
-                // validationQueryTimeout = SECONDS.toSeconds(5)           // timeout in seconds for validation query
-
-                logValidationErrors = true                              // log errors during validation
-            }
-        }
+        dataSource.properties = dataSourcePoolProperties
+        consoleDataSource.poolProperties = consoleDataSourceProperties
     }
     // Everything is set in general data source
     development {
         dataSource {
             // logSql = true
             // formatSql = true
+            properties = dataSourcePoolProperties
         }
+        consoleDataSource.poolProperties = consoleDataSourceProperties
     }
     test {
+        String databaseForIntegrationTest = System.properties['databaseForIntegrationTest']
+        boolean useDockerCi = "DOCKER_CI".equalsIgnoreCase(databaseForIntegrationTest)
+        boolean useDocker = "DOCKER".equalsIgnoreCase(databaseForIntegrationTest) || useDockerCi
+
         hibernate {
             cache.use_second_level_cache = false
             cache.use_query_cache = false
@@ -127,9 +164,6 @@ environments {
         dataSource {
             logSql = false
             jmxExport = true
-            String databaseForIntegrationTest = System.properties['databaseForIntegrationTest']
-            boolean useDockerCi = "DOCKER_CI".equalsIgnoreCase(databaseForIntegrationTest)
-            boolean useDocker = "DOCKER".equalsIgnoreCase(databaseForIntegrationTest) || useDockerCi
 
             if (useDocker) {
                 driverClassName = 'org.postgresql.Driver'
@@ -154,6 +188,13 @@ environments {
                 dbCreate = 'update'
                 url = 'jdbc:h2:mem:testDb;MODE=PostgreSQL;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE'
             }
+        }
+        if (useDocker) {
+            // short timeout, so ConsoleRoutingDataSourceIntegrationSpec can verify that the console overrides reach pgjdbc;
+            // not for H2, which does not understand pgjdbc's options
+            consoleDataSource.poolProperties = [
+                    connectionProperties: "options=-c statement_timeout=1s",
+            ] + consoleConnectionResetProperties
         }
     }
     WORKFLOW_TEST {
