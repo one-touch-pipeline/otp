@@ -30,7 +30,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.SqlUtil
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
+
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
@@ -58,8 +58,6 @@ class BamMetadataImportService {
     ApplicationContext applicationContext
 
     LibraryPreparationKitService libraryPreparationKitService
-
-    SamplePairDeciderService samplePairDeciderService
 
     FileSystemService fileSystemService
 
@@ -214,10 +212,6 @@ class BamMetadataImportService {
             }
 
             assert importInstance.save(flush: true)
-
-            if (importInstance.triggerAnalysis) {
-                samplePairDeciderService.findOrCreateSamplePairs(importInstance.externallyProcessedBamFiles*.workPackage)
-            }
 
             outputProject = importInstance.externallyProcessedBamFiles.first().project
         } catch (MetadataFileImportException e) {

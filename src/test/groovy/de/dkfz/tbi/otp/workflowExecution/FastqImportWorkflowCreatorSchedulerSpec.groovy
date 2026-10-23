@@ -22,10 +22,8 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import spock.lang.Unroll
-
 import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.ngsdata.*
@@ -33,7 +31,6 @@ import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.MessageSourceService
-import de.dkfz.tbi.otp.utils.SystemUserService
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
@@ -122,9 +119,8 @@ class FastqImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSch
         DeciderResult deciderResult = new DeciderResult()
         deciderResult.newArtefacts.addAll(workflowArtefacts)
 
-        List<AbstractBamFile> expectedListForSnv = []
         if (artefactType == ArtefactType.BAM) {
-            RoddyBamFile roddyBamFile = createBamFile([
+            createBamFile([
                     workflowArtefact: workflowArtefacts.first(),
                     workPackage     : createMergingWorkPackage([
                             seqType: analysableSeqType ? seqTypes.first() : createSeqType([
@@ -134,9 +130,6 @@ class FastqImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSch
                             ])
                     ]),
             ])
-            if (analysableSeqType) {
-                expectedListForSnv << roddyBamFile.workPackage
-            }
         }
 
         applicationContext // initialize the applicationContext
@@ -153,8 +146,6 @@ class FastqImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSch
         1 * scheduler.dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance) >> runs
         0 * scheduler.dataInstallationInitializationService._
         1 * scheduler.allDecider.decide(_) >> deciderResult
-        1 * scheduler.samplePairDeciderService.findOrCreateSamplePairs(expectedListForSnv)
-        0 * scheduler.samplePairDeciderService._
         1 * scheduler.notificationCreator.sendWorkflowCreateSuccessMail(_, _, _)
 
         where:
@@ -249,7 +240,6 @@ class FastqImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSch
         1 * scheduler.dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance) >> runs
         0 * scheduler.dataInstallationInitializationService._
         1 * scheduler.allDecider.decide(_) >> { throw otpRuntimeException }
-        0 * scheduler.samplePairDeciderService.findOrCreateSamplePairs(_)
         1 * scheduler.notificationCreator.sendWorkflowCreateErrorMail(metaDataFile, otpRuntimeException)
     }
 
@@ -292,17 +282,10 @@ class FastqImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSch
                 messageSourceService                 : Mock(MessageSourceService),
                 metaDataFileService                  : new MetaDataFileService(),
                 notificationCreator                  : Mock(NotificationCreator),
-                samplePairDeciderService             : Mock(SamplePairDeciderService),
                 workflowSystemService                : Mock(WorkflowSystemService),
                 ticketService                        : Mock(TicketService),
                 mailHelperService                    : Mock(MailHelperService),
                 processingOptionService              : Mock(ProcessingOptionService),
-                systemUserService                    : Mock(SystemUserService) {
-                    _ * useSystemUserAsOperator(_) >> { Closure closure ->
-                        return closure.call()
-                    }
-                    0 * _
-                },
         ])
     }
 }

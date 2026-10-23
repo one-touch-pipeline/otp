@@ -24,14 +24,13 @@ package de.dkfz.tbi.otp.workflowExecution
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
+
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryBam
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.utils.MessageSourceService
-import de.dkfz.tbi.otp.utils.SystemUserService
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 import de.dkfz.tbi.otp.workflow.bamImport.BamImportInitializationService
@@ -121,8 +120,6 @@ class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSched
         DeciderResult deciderResult = new DeciderResult()
         deciderResult.newArtefacts.addAll(workflowArtefacts)
 
-        List<AbstractBamFile> expectedListForSnv = []
-
         importInstance.triggerAnalysis = createAnalysis
         importInstance.save(flush: true)
         ExternallyProcessedBamFile bamFile = importInstance.externallyProcessedBamFiles[0]
@@ -132,9 +129,6 @@ class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSched
                         name: "OtherName",
                 ])
         ])
-        if (analysableSeqType && createAnalysis) {
-            expectedListForSnv << bamFile.workPackage
-        }
 
         applicationContext // initialize the applicationContext
 
@@ -150,8 +144,6 @@ class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSched
         1 * scheduler.bamImportInitializationService.createWorkflowRuns(importInstance) >> runs
         0 * scheduler.bamImportInitializationService._
         countDecider * scheduler.allDecider.decide(_) >> deciderResult
-        countDecider * scheduler.samplePairDeciderService.findOrCreateSamplePairs(expectedListForSnv)
-        0 * scheduler.samplePairDeciderService._
         1 * scheduler.notificationCreator.sendBamImportWorkflowCreateSuccessMail(_, importId, _, _, _)
 
         where:
@@ -183,7 +175,6 @@ class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSched
         1 * scheduler.bamImportInitializationService.createWorkflowRuns(importInstance) >> runs
         0 * scheduler.bamImportInitializationService._
         1 * scheduler.allDecider.decide(_) >> { throw otpRuntimeException }
-        0 * scheduler.samplePairDeciderService.findOrCreateSamplePairs(_)
         1 * scheduler.notificationCreator.sendBamImportWorkflowCreateErrorMail(_, importId, _, otpRuntimeException)
     }
 
@@ -196,13 +187,6 @@ class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSched
                 bamImportInitializationService: Mock(BamImportInitializationService),
                 notificationCreator           : Mock(NotificationCreator),
                 workflowSystemService         : Mock(WorkflowSystemService),
-                samplePairDeciderService      : Mock(SamplePairDeciderService),
-                systemUserService             : Mock(SystemUserService) {
-                    _ * useSystemUserAsOperator(_) >> { Closure closure ->
-                        return closure.call()
-                    }
-                    0 * _
-                },
         ])
     }
 }

@@ -28,14 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.utils.MessageSourceService
-import de.dkfz.tbi.otp.utils.SystemUserService
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 import de.dkfz.tbi.otp.workflowExecution.decider.DeciderResult
@@ -60,12 +54,6 @@ abstract class AbstractWorkflowCreatorScheduler {
 
     @Autowired
     NotificationCreator notificationCreator
-
-    @Autowired
-    SamplePairDeciderService samplePairDeciderService
-
-    @Autowired
-    SystemUserService systemUserService
 
     @Autowired
     WorkflowSystemService workflowSystemService
@@ -136,30 +124,6 @@ abstract class AbstractWorkflowCreatorScheduler {
     @Transactional
     private void createErrorMailInTransaction(Long importId, Throwable throwable) {
         createErrorMail(importId, getExecutionTimestamp(importId), throwable)
-    }
-
-    /**
-     * Creates the sample pairs for the alignments.
-     * Needed, as long not all analysis workflows are migrated.
-     *
-     * @deprecated old workflow system
-     */
-    @Deprecated
-    protected void createSamplePairs(Collection<WorkflowArtefact> workflowArtefacts, int count) {
-        Long timeSamplePairs = System.currentTimeMillis()
-        log.debug("  sample pair creation started")
-        List<SeqType> seqTypes = SeqTypeService.allAnalysableSeqTypes
-        Collection<AbstractMergingWorkPackage> mergingWorkPackages = workflowArtefacts.findAll {
-            it.artefactType == ArtefactType.BAM
-        }.collect {
-            return (it.artefact.get() as AbstractBamFile).workPackage
-        }.findAll {
-            it.seqType in seqTypes
-        }
-        systemUserService.useSystemUserAsOperator {
-            samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)
-        }
-        log.debug("  sample pair creation finished for ${count} datafiles after: ${System.currentTimeMillis() - timeSamplePairs}ms")
     }
 
     /**

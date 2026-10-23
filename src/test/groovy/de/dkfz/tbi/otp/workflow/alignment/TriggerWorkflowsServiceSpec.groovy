@@ -26,7 +26,7 @@ import grails.web.mapping.LinkGenerator
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
+
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.SnvDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryInstance
@@ -113,7 +113,6 @@ class TriggerWorkflowsServiceSpec extends HibernateSpec implements IsRoddy, Work
             assert artefacts.size() == 2  // Only 2 BAM artefacts, no seqTrack artefacts
         }
         setupTicketServiceMock([])
-        setupSamplePairDeciderServiceMock([])
         setupRoddyBamFileWithdrawServiceMock()
 
         when:
@@ -145,7 +144,6 @@ class TriggerWorkflowsServiceSpec extends HibernateSpec implements IsRoddy, Work
             assert artefacts.size() == 2
         }
         setupTicketServiceMock([])
-        setupSamplePairDeciderServiceMock(expectedMergingWorkPackages ? [workPackage] : [])
         setupRoddyBamFileWithdrawServiceMock()
 
         when:
@@ -1029,16 +1027,6 @@ class TriggerWorkflowsServiceSpec extends HibernateSpec implements IsRoddy, Work
                 actual.containsAll(expectedSeqTracks) && expectedSeqTracks.containsAll(actual)
             } >> tickets
             tickets.size() * resetAlignmentAndAnalysisNotification(_)
-        }
-    }
-
-    private void setupSamplePairDeciderServiceMock(List<MergingWorkPackage> workPackages) {
-        service.samplePairDeciderService = Mock(SamplePairDeciderService) {
-            if (workPackages.isEmpty()) {
-                0 * findOrCreateSamplePairs(_)
-            } else {
-                1 * findOrCreateSamplePairs(workPackages)
-            }
         }
     }
 

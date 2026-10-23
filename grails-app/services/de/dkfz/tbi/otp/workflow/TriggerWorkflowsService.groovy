@@ -29,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
 import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
@@ -66,7 +65,6 @@ class TriggerWorkflowsService {
     AbstractBamFileService abstractBamFileService
     AllDecider allDecider
     SeqTrackService seqTrackService
-    SamplePairDeciderService samplePairDeciderService
     TicketService ticketService
     RoddyBamFileWithdrawService roddyBamFileWithdrawService
     MergingCriteriaService mergingCriteriaService
@@ -221,16 +219,6 @@ class TriggerWorkflowsService {
         DeciderResult deciderResult = allDecider.decide(allArtefacts, [
                 ignoreSeqPlatformGroup: ignoreSeqPlatformGroup.toString()
         ], deciderAction)
-
-        Collection<MergingWorkPackage> mergingWorkPackages = deciderResult.newArtefacts.findAll {
-            it.artefactType == ArtefactType.BAM
-        }*.artefact*.get()*.workPackage
-
-        if (mergingWorkPackages) {
-            LogUsedTimeUtils.logUsedTimeStartEnd(log, "create analyses") {
-                samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)
-            }
-        }
 
         log.debug(deciderResult.toString())
 

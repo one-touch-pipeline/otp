@@ -99,8 +99,6 @@ class FastqImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorSchedul
                 allDecider.decide(workflowArtefacts)
             }
 
-            createSamplePairs(deciderResult.newArtefacts, count)
-
             fastqImportInstanceService.updateState(fastqImportInstanceDb, WorkflowCreateState.SUCCESS)
 
             if (fastqImportInstanceDb.ticket) {

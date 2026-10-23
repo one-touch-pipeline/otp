@@ -25,7 +25,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.ProjectSelectionService
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
+
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.workflow.TriggerWorkflowsService
@@ -39,7 +39,6 @@ class SampleCategoryController {
     ]
 
     ProjectSelectionService projectSelectionService
-    SamplePairDeciderService samplePairDeciderService
     SampleTypePerProjectService sampleTypePerProjectService
     SampleTypeService sampleTypeService
     SecurityService securityService
@@ -90,8 +89,6 @@ class SampleCategoryController {
             }
         }
 
-        // Sample pairs are created only if their sample types have been changed. Has to stay until snv, indel and sophia are created in new system
-        samplePairDeciderService.createSamplePairs(project, sampleTypesChanged)
         triggerWorkflowsService.triggerWorkflowByProjectAndSampleTypes(project, sampleTypesChanged)
 
         flash.message = new FlashMessage(g.message(code: "sampleCategory.edit.success") as String)

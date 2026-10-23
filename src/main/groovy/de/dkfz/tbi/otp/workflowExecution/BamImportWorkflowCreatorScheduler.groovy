@@ -78,8 +78,6 @@ class BamImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorScheduler
                 deciderResult = LogUsedTimeUtils.logUsedTimeStartEnd(log, "  decider for ${count} bamfiles") {
                     allDecider.decide(workflowArtefacts)
                 }
-
-                createSamplePairs(workflowArtefacts, count)
             } else {
                 deciderResult = new DeciderResult()
                 deciderResult.infos = ["Analysis was not triggered"]
