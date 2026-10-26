@@ -38,24 +38,33 @@
 
         <div class="table">
             <div class="otpDataTables">
+                <g:set var="tableHeaders" value="${[
+                    'projectOverview.index.PID',
+                    'analysis.sampleTypes',
+                    'analysis.seqType',
+                    'analysis.libPrepKits',
+                    'analysis.plots',
+                    'analysis.programVersion',
+                    'analysis.processingDate',
+                    'analysis.progress',
+                    'analysis.configFile',
+                ]}" />
+
+                <g:set var="showWorkflowRun" value="${false}" />
+
+                <sec:ifAllGranted roles="ROLE_OPERATOR">
+                    <g:set var="showWorkflowRun" value="${true}" />
+                    <% tableHeaders.add('analysis.workflowRun') %>
+                </sec:ifAllGranted>
+
                 <otp:dataTable
-                    codes="${[
-                        'projectOverview.index.PID',
-                        'analysis.sampleTypes',
-                        'analysis.seqType',
-                        'analysis.libPrepKits',
-                        'analysis.plots',
-                        'analysis.programVersion',
-                        'analysis.processingDate',
-                        'analysis.progress',
-                        'analysis.configFile',
-                    ]}"
+                    codes="${tableHeaders}"
                     id="resultsTable" />
             </div>
         </div>
     <asset:script>
         $(function() {
-            $.otp.resultsTable.registerSnv();
+            $.otp.resultsTable.registerSnv(${showWorkflowRun}, ${tableHeaders.indexOf('analysis.workflowRun')});
         });
     </asset:script>
     </div>

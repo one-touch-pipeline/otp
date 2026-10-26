@@ -36,29 +36,38 @@
 
     <g:render template="/templates/bootstrap/noPlot" model="[project: selectedProject]"/>
 
+    <g:set var="tableHeaders" value="${[
+            'projectOverview.index.PID',
+            'analysis.sampleTypes',
+            'analysis.seqType',
+            'sophia.controlMassiveInvPrefilteringLevel',
+            'sophia.tumorMassiveInvFilteringLevel',
+            'sophia.rnaContaminatedGenesCount',
+            'sophia.rnaDecontaminationApplied',
+            'sophia.rnaContaminatedGenesMoreThanTwoIntron',
+            'analysis.plots',
+            'analysis.programVersion',
+            'analysis.processingDate',
+            'analysis.progress',
+            'analysis.configFile',
+    ]}" />
+
+    <g:set var="showWorkflowRun" value="${false}" />
+    <sec:ifAllGranted roles="ROLE_OPERATOR">
+        <g:set var="showWorkflowRun" value="${true}" />
+        <% tableHeaders.add('analysis.workflowRun') %>
+    </sec:ifAllGranted>
+
     <div class="table">
         <div class="otpDataTables">
             <otp:dataTable
-                    codes="${[
-                            'projectOverview.index.PID',
-                            'analysis.sampleTypes',
-                            'analysis.seqType',
-                            'sophia.controlMassiveInvPrefilteringLevel',
-                            'sophia.tumorMassiveInvFilteringLevel',
-                            'sophia.rnaContaminatedGenesCount',
-                            'sophia.rnaDecontaminationApplied',
-                            'sophia.rnaContaminatedGenesMoreThanTwoIntron',
-                            'analysis.plots',
-                            'analysis.programVersion',
-                            'analysis.processingDate',
-                            'analysis.progress',
-                            'analysis.configFile',
-                    ]}" id="resultsTable" />
+                    codes="${tableHeaders}"
+                    id="resultsTable" />
         </div>
     </div>
     <asset:script>
         $(function() {
-            $.otp.resultsTable.registerSophia();
+            $.otp.resultsTable.registerSophia(${showWorkflowRun}, ${tableHeaders.indexOf('analysis.workflowRun')});
         });
     </asset:script>
 </div>

@@ -14,7 +14,8 @@
     "Link to Plots",
     "Created with Version",
     "Processing Date",
-    "Progress"
+    "Progress",
+    "Config File"
   ],
   "data": [
     [
@@ -29,7 +30,8 @@
       "Plots",
       "Aceseq:1.2.8-4",
       "2022-08-26 11:36",
-      "FINISHED"
+      "FINISHED",
+      "N/A"
     ],
     [
       "example_2",
@@ -43,7 +45,8 @@
       "Plots",
       "Aceseq:1.2.8-4",
       "2022-08-26 11:36",
-      "FINISHED"
+      "FINISHED",
+      "N/A"
     ]
   ]
 }

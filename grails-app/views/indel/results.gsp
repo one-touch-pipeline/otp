@@ -34,6 +34,11 @@
         <g:render template="/templates/projectSelection"/>
         <h1><g:message code="otp.menu.indel.results"/></h1>
 
+        <g:set var="showWorkflowRun" value="${false}" />
+        <sec:ifAllGranted roles="ROLE_OPERATOR">
+            <g:set var="showWorkflowRun" value="${true}" />
+        </sec:ifAllGranted>
+
         <div class="table">
             <div class="otpDataTables">
                 <table id="resultsTable">
@@ -44,6 +49,9 @@
                         <th colspan="7"><g:message code="analysis.indel.swapChecker"/></th>
                         <th colspan="3"><g:message code="analysis.indel.tinda"/></th>
                         <th colspan="4"></th>
+                        <sec:ifAllGranted roles="ROLE_OPERATOR">
+                            <th></th>
+                        </sec:ifAllGranted>
                     </tr>
                     <tr class="indel-table">
                         <th><g:message code="projectOverview.index.PID"/></th>
@@ -74,6 +82,11 @@
                         <th><g:message code="analysis.processingDate"/></th>
                         <th><g:message code="analysis.progress"/></th>
                         <th><g:message code="analysis.configFile"/></th>
+                        <sec:ifAllGranted roles="ROLE_OPERATOR">
+                            <th class="no_csv_export">
+                                <g:message code="analysis.workflowRun"/>
+                            </th>
+                        </sec:ifAllGranted>
                     </tr>
                     </thead>
                     <tbody class="indel-table"></tbody>
@@ -84,7 +97,7 @@
         </div>
     <asset:script>
         $(function() {
-            $.otp.resultsTable.registerIndel();
+            $.otp.resultsTable.registerIndel(${showWorkflowRun});
         });
     </asset:script>
     </div>

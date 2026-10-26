@@ -26,13 +26,21 @@ $.otp.resultsTable = {
   projectArchived: false,
   projectDeleted: false,
 
-  registerDataTable(tableElement, source, columnDefs, convertRowData) {
+  registerDataTable(tableElement, source, columnDefs, convertRowData, workflowRunColumnIndex) {
     'use strict';
 
     const fileName = `${document.title.replaceAll(' ', '_')}-${$('.selected-project-value strong').text()}`;
+
+    if (workflowRunColumnIndex !== undefined && workflowRunColumnIndex >= 0) {
+      columnDefs.push({
+        targets: workflowRunColumnIndex,
+        className: 'no_csv_export'
+      });
+    }
+
     const oTable = tableElement.dataTable({
       sDom: '<i> B rt<"clear">',
-      buttons: $.otp.getDownloadButton('', fileName),
+      buttons: $.otp.getDownloadButton(':visible:not(.no_csv_export)', fileName),
       columnDefs,
       bFilter: true,
       bProcessing: true,
@@ -125,7 +133,7 @@ $.otp.resultsTable = {
     }) : '';
   },
 
-  registerAceseq() {
+  registerAceseq(showWorkflowRun, workflowRunColumnIndex) {
     'use strict';
 
     $.otp.resultsTable.registerDataTable(
@@ -154,11 +162,21 @@ $.otp.resultsTable = {
         row.dateCreated,
         row.processingState,
         this.prepareLinkArray(row.configFile)
-      ]
+      ].concat(showWorkflowRun ? [
+        row.workflowRunId ?
+          $.otp.createLinkMarkup({
+            controller: 'workflowRunDetails',
+            action: 'index',
+            id: row.workflowRunId,
+            text: 'Details'
+          }) :
+          '-'
+      ] : []),
+      workflowRunColumnIndex
     );
   },
 
-  registerIndel() {
+  registerIndel(showWorkflowRun, workflowRunColumnIndex) {
     'use strict';
 
     $.otp.resultsTable.registerDataTable(
@@ -202,11 +220,21 @@ $.otp.resultsTable = {
         row.dateCreated,
         row.processingState,
         this.prepareLinkArray(row.configFile)
-      ]
+      ].concat(showWorkflowRun ? [
+        row.workflowRunId ?
+          $.otp.createLinkMarkup({
+            controller: 'workflowRunDetails',
+            action: 'index',
+            id: row.workflowRunId,
+            text: 'Details'
+          }) :
+          '-'
+      ] : []),
+      workflowRunColumnIndex
     );
   },
 
-  registerSophia() {
+  registerSophia(showWorkflowRun, workflowRunColumnIndex) {
     'use strict';
 
     $.otp.resultsTable.registerDataTable(
@@ -238,11 +266,21 @@ $.otp.resultsTable = {
         row.dateCreated,
         row.processingState,
         this.prepareLinkArray(row.configFile)
-      ]
+      ].concat(showWorkflowRun ? [
+        row.workflowRunId ?
+          $.otp.createLinkMarkup({
+            controller: 'workflowRunDetails',
+            action: 'index',
+            id: row.workflowRunId,
+            text: 'Details'
+          }) :
+          '-'
+      ] : []),
+      workflowRunColumnIndex
     );
   },
 
-  registerSnv() {
+  registerSnv(showWorkflowRun, workflowRunColumnIndex) {
     'use strict';
 
     $.otp.resultsTable.registerDataTable(
@@ -267,7 +305,17 @@ $.otp.resultsTable = {
         row.dateCreated,
         row.processingState,
         this.prepareLinkArray(row.configFile)
-      ]
+      ].concat(showWorkflowRun ? [
+        row.workflowRunId ?
+          $.otp.createLinkMarkup({
+            controller: 'workflowRunDetails',
+            action: 'index',
+            id: row.workflowRunId,
+            text: 'Details'
+          }) :
+          '-'
+      ] : []),
+      workflowRunColumnIndex
     );
   },
   registerRunYapsa() {

@@ -66,7 +66,16 @@
 
     <g:render template="/templates/bootstrap/noContentFromFilesystem" model="[project: selectedProject]"/>
 
-    <table id="overviewTableProcessedMergedBMF" class="table table-sm table-striped">
+    <g:set var="showWorkflowRun" value="${false}" />
+    <sec:ifAllGranted roles="ROLE_OPERATOR">
+        <g:set var="showWorkflowRun" value="${true}" />
+    </sec:ifAllGranted>
+
+    <g:if test="${showWorkflowRun && seqType}">
+        <% header = header + ['analysis.workflowRun'] %>
+    </g:if>
+
+    <table id="overviewTableProcessedMergedBMF" class="table table-sm table-striped" data-show-workflow-run="${showWorkflowRun && seqType != null}">
         <thead>
         <tr>
             <g:each in="${header}" var="it" status="i">

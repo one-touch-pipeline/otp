@@ -37,29 +37,42 @@
 
     <g:render template="/templates/bootstrap/noPlot" model="[project: selectedProject]"/>
 
+    <g:set var="tableHeaders" value="${[
+            'projectOverview.index.PID',
+            'analysis.sampleTypes',
+            'aceseq.tcc',
+            'aceseq.ploidy',
+            'aceseq.ploidyFactor',
+            'aceseq.goodnessOfFit',
+            'aceseq.gender',
+            'aceseq.solutionPossible',
+            'analysis.plots',
+            'analysis.programVersion',
+            'analysis.processingDate',
+            'analysis.progress',
+            'analysis.configFile'
+    ]}" />
+
+    <g:set var="showWorkflowRun" value="${false}" />
+    <sec:ifAllGranted roles="ROLE_OPERATOR">
+        <g:set var="showWorkflowRun" value="${true}" />
+        <% tableHeaders.add('analysis.workflowRun') %>
+    </sec:ifAllGranted>
+
     <div class="table">
         <div class="otpDataTables">
             <otp:dataTable
-                    codes="${[
-                            'projectOverview.index.PID',
-                            'analysis.sampleTypes',
-                            'aceseq.tcc',
-                            'aceseq.ploidy',
-                            'aceseq.ploidyFactor',
-                            'aceseq.goodnessOfFit',
-                            'aceseq.gender',
-                            'aceseq.solutionPossible',
-                            'analysis.plots',
-                            'analysis.programVersion',
-                            'analysis.processingDate',
-                            'analysis.progress',
-                    ]}"
+                    codes="${tableHeaders}"
                     id="resultsTable"/>
         </div>
     </div>
     <asset:script>
         $(function() {
-            $.otp.resultsTable.registerAceseq();
+            if (${showWorkflowRun}) {
+                $('#resultsTable thead th').last().addClass('no_csv_export');
+            }
+
+            $.otp.resultsTable.registerAceseq(${showWorkflowRun});
         });
     </asset:script>
 </div>

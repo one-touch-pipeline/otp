@@ -56,6 +56,9 @@
                 <th>${g.message(code: "cellRanger.selection.header.version")}</th>
                 <th>${g.message(code: "cellRanger.selection.header.reference")}</th>
                 <th>${g.message(code: "cellRanger.selection.header.runs")}</th>
+                <sec:ifAllGranted roles="ROLE_OPERATOR">
+                    <th><g:message code="analysis.workflowRun"/></th>
+                </sec:ifAllGranted>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -105,6 +108,22 @@
                             </g:if>
                         </g:if>
                     </td>
+
+                    <sec:ifAllGranted roles="ROLE_OPERATOR">
+                        <td>
+                            <g:each in="${mwps.mwps}" var="mwp">
+                                <g:set var="workflowRun" value="${mwp.bamFileInProjectFolder?.workflowArtefact?.producedBy}"/>
+                                <g:if test="${workflowRun}">
+                                    <g:link controller="workflowRunDetails" action="index" id="${workflowRun.id}">Details</g:link>
+                                </g:if>
+                                <g:else>
+                                    -
+                                </g:else>
+                                <br>
+                            </g:each>
+                        </td>
+                    </sec:ifAllGranted>
+
                     <td>
                         <g:if test="${mwps.anyFinal}">
                             <g:link controller="alignmentQualityOverview" action="index" params="${[seqType: mwps.seqType.id, sample: mwps.sample.id]}">
@@ -129,7 +148,14 @@
                 </tr>
             </g:each>
             <g:if test="${!groupedMwps}">
-                <tr><td colspan="10">${g.message(code: "cellRanger.selection.noRuns")}</td></tr>
+                <tr>
+                    <sec:ifAllGranted roles="ROLE_OPERATOR">
+                        <td colspan="10">${g.message(code: "cellRanger.selection.noRuns")}</td>
+                    </sec:ifAllGranted>
+                    <sec:ifNotGranted roles="ROLE_OPERATOR">
+                        <td colspan="9">${g.message(code: "cellRanger.selection.noRuns")}</td>
+                    </sec:ifNotGranted>
+                </tr>
             </g:if>
         </table>
         <g:submitButton class="btn btn-primary float-end" name="save" value="${g.message(code: "cellRanger.selection.saveRuns")}"/>

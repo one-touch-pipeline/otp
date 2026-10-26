@@ -92,6 +92,7 @@ abstract class AbstractQaOverviewService {
             new PropertyColumnDefinition('toolName', 'name', 'toolNameName'),
             new PropertyColumnDefinition('referenceGenomeIndex', 'indexToolVersion', 'indexToolVersion'),
             new PropertyColumnDefinition('run', 'state', 'state'),
+            new PropertyColumnDefinition('run', 'id', 'workflowRunId'),
     ].asImmutable()
 
     final static List<String> KEY_BASE = [
@@ -102,6 +103,7 @@ abstract class AbstractQaOverviewService {
             'qcComment',
             'qcAuthor',
             'dbVersion',
+            'workflowRunId',
     ].asImmutable()
 
     final static List<String> QC_KEY_BASE = [

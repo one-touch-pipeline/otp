@@ -40,10 +40,12 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaResultsService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
 @Rollback
 @Integration
-class AbstractAnalysisResultsServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {
+class AbstractAnalysisResultsServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore, WorkflowSystemDomainFactory {
 
     AbstractAnalysisResultsService abstractAnalysisResultsService
 
@@ -125,5 +127,42 @@ class AbstractAnalysisResultsServiceIntegrationSpec extends Specification implem
         "Aceseq"       | AceseqInstance          | PlotType.ACESEQ_ALL
         "Aceseq"       | AceseqInstance          | PlotType.ACESEQ_WG_COVERAGE
         "Sophia"       | SophiaInstance          | PlotType.SOPHIA
+    }
+
+    @Unroll
+    void "getCallingInstancesForProject returns workflowRunId for #analysis"() {
+        given:
+        setupData()
+
+        BamFilePairAnalysis analysisInstance =
+                DomainFactory."create${analysis}InstanceWithRoddyBamFiles"()
+
+        WorkflowRun workflowRun = createWorkflowRun(project: analysisInstance.samplePair.project)
+
+        analysisInstance.workflowArtefact = createWorkflowArtefact(
+                producedBy: workflowRun
+        )
+        analysisInstance.save(flush: true)
+
+        abstractAnalysisResultsService = service.newInstance()
+        abstractAnalysisResultsService.grailsLinkGenerator = Mock(LinkGenerator)
+
+        when:
+        List<Map> callingInstances = doWithAuth(OPERATOR) {
+            abstractAnalysisResultsService.getCallingInstancesForProject(
+                    analysisInstance.samplePair.project
+            )
+        }
+
+        then:
+        callingInstances.size() == 1
+        callingInstances.first().workflowRunId == workflowRun.id
+
+        where:
+        service              | analysis
+        SnvResultsService    | "Snv"
+        IndelResultsService  | "IndelCalling"
+        AceseqResultsService | "Aceseq"
+        SophiaResultsService | "Sophia"
     }
 }

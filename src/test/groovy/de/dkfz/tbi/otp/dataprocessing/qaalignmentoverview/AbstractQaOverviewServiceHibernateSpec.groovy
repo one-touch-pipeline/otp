@@ -81,7 +81,8 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |        referenceGenome.name as referenceGenomeName,
             |        toolName.name as toolNameName,
             |        referenceGenomeIndex.indexToolVersion as indexToolVersion,
-            |        run.state as state
+            |        run.state as state,
+            |        run.id as workflowRunId
             |    )
             |from
             |    ${AbstractQualityAssessment.name} qa
@@ -151,6 +152,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |        toolName.name as toolNameName,
             |        referenceGenomeIndex.indexToolVersion as indexToolVersion,
             |        run.state as state,
+            |        run.id as workflowRunId,
             |        domain1.property1 as alias1,
             |        domain2.property2 as alias2
             |    )
@@ -229,6 +231,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |        toolName.name as toolNameName,
             |        referenceGenomeIndex.indexToolVersion as indexToolVersion,
             |        run.state as state,
+            |        run.id as workflowRunId,
             |        domain1.property1 as alias1,
             |        domain2.property2 as alias2
             |    )
@@ -384,6 +387,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
         final long individualId = nextId
         final long bamId = nextId
         final double readLength = nextId
+        final long workflowRunId = nextId
 
         Map pidLinkMap = [
                 controller: 'individual',
@@ -403,6 +407,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
                 qcComment                     : 'qcComment',
                 qcAuthor                      : 'qcAuthor',
                 bamId                         : bamId,
+                workflowRunId                 : workflowRunId,
 
                 // QC_KEY_BASE
                 percentMappedReads            : 101,
@@ -493,6 +498,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
         resultEntry.percentSingletons == 105
 
         resultEntry.insertSizeMedian == 301
+        resultEntry.workflowRunId == workflowRunId
     }
 
     void "createList, when subclass extend query, then creates extended result"() {
@@ -501,6 +507,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
         final long individualId = nextId
         final long bamId = nextId
         final double readLength = nextId
+        final long workflowRunId = nextId
 
         Map pidLinkMap = [
                 controller: 'individual',
@@ -520,6 +527,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
                 qcComment                     : 'qcComment',
                 qcAuthor                      : 'qcAuthor',
                 bamId                         : bamId,
+                workflowRunId                 : workflowRunId,
 
                 // QC_KEY_BASE
                 percentMappedReads            : 101,
@@ -639,6 +647,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
 
         resultEntry.extract1 == "extract1"
         resultEntry.extract2 == "extract2"
+        resultEntry.workflowRunId == workflowRunId
     }
 
     static class TestAbstractQaOverviewServiceWithoutExtension extends AbstractQaOverviewService {

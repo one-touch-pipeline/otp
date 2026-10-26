@@ -85,6 +85,7 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
                 appendQcProjectionCriteria(delegate)
                 workflowArtefact(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
                     producedBy(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
+                        property('id', 'workflowRunId')
                         property('state', 'runState')
                         workflowVersion(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
                             property('workflowVersion', 'workflowVersion')

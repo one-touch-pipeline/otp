@@ -43,6 +43,11 @@ $(() => {
       });
       resultTableRow = withdrawnRows;
     }
+
+    if (columnNames.some((column) => column.data === 'workflowRunId')) {
+      resultTableRow.workflowRunId = row.workflowRunId || null;
+    }
+
     return resultTableRow;
   };
 
@@ -254,6 +259,20 @@ $(() => {
       columnNames = columnNames.concat([
         { data: 'configFile' }
       ]);
+    }
+    if ($('#overviewTableProcessedMergedBMF').data('show-workflow-run')) {
+      columnNames.push({
+        data: 'workflowRunId',
+        className: 'no_csv_export',
+        render: (data) => data ?
+          $.otp.createLinkMarkup({
+            controller: 'workflowRunDetails',
+            action: 'index',
+            id: data,
+            text: 'Details'
+          }) :
+          '-'
+      });
     }
     return columnNames;
   };
