@@ -36,6 +36,9 @@ import javax.servlet.http.HttpServletResponse
 import java.nio.file.AccessDeniedException
 import java.nio.file.NoSuchFileException
 
+import java.nio.file.Path
+import java.nio.file.Paths
+
 class WesRunControllerSpec extends Specification implements ControllerUnitTest<WesRunController>, DataTest, UserAndRoles, WorkflowSystemDomainFactory {
 
     @Override
@@ -60,7 +63,8 @@ class WesRunControllerSpec extends Specification implements ControllerUnitTest<W
     void "show, when WesRun exists, renders show view with correct data"() {
         given:
         setupData()
-        WesRun wesRun = createWesRun()
+        WesRunLog wesRunLog = createWesRunLog([runRequest: '{"test":"log","number":42}',])
+        WesRun wesRun = createWesRun([wesRunLog: wesRunLog])
         controller.params.id = wesRun.id.toString()
 
         when:
@@ -70,6 +74,9 @@ class WesRunControllerSpec extends Specification implements ControllerUnitTest<W
         result.wesRun == wesRun
         result.nav != null
         result.NA == WesRunController.NOT_AVAILABLE
+        result.formattedRunRequest.contains('"test": "log"')
+        result.formattedRunRequest.contains('"number": 42')
+        result.formattedRunRequest.contains('\n')
     }
 
 // Turn it on after the bug described in otp-2807 is resolved
@@ -90,6 +97,81 @@ class WesRunControllerSpec extends Specification implements ControllerUnitTest<W
 //        result.nav != null
 //        result.NA == WesRunController.NOT_AVAILABLE
 //    }
+
+    void "showStdout, when called, returns stdout log data"() {
+        given:
+        setupData()
+
+        WesLog runLog = createWesLog([stdout: "/path/to/stdout"])
+        WesRunLog wesRunLog = createWesRunLog([runLog: runLog])
+        WesRun wesRun = createWesRun([wesRunLog: wesRunLog])
+
+        controller.wesRunService.getById(wesRun.id) >> wesRun
+        controller.wesRunService.getStdoutFileContent(wesRun) >> "stdout content"
+
+        WesRunReportCommand command = new WesRunReportCommand(id: wesRun.id)
+
+        when:
+        controller.showStdout(command, new NavigationCommand())
+
+        then:
+        view == '/wesRun/showLog'
+        model.wesRun == wesRun
+        model.filePath == "/path/to/stdout"
+        model.content == "stdout content"
+        model.title != null
+        model.nav != null
+    }
+
+    void "showStderr, when called, returns stderr log data"() {
+        given:
+        setupData()
+
+        WesLog runLog = createWesLog([stderr: "/path/to/stderr"])
+        WesRunLog wesRunLog = createWesRunLog([runLog: runLog])
+        WesRun wesRun = createWesRun([wesRunLog: wesRunLog])
+
+        controller.wesRunService.getById(wesRun.id) >> wesRun
+        controller.wesRunService.getStderrFileContent(wesRun) >> "stderr content"
+
+        WesRunReportCommand command = new WesRunReportCommand(id: wesRun.id)
+
+        when:
+        controller.showStderr(command, new NavigationCommand())
+
+        then:
+        view == '/wesRun/showLog'
+        model.wesRun == wesRun
+        model.filePath == "/path/to/stderr"
+        model.content == "stderr content"
+        model.title != null
+        model.nav != null
+    }
+
+    void "showWeskitLog, when called, returns WESkit log data"() {
+        given:
+        setupData()
+
+        WesRun wesRun = createWesRun()
+        Path logPath = Paths.get("/path/to/log.json")
+
+        controller.wesRunService.getById(wesRun.id) >> wesRun
+        controller.wesRunService.getWeskitLogPath(wesRun) >> logPath
+        controller.wesRunService.getWeskitLogFileContent(wesRun) >> '{"test":"log"}'
+
+        WesRunReportCommand command = new WesRunReportCommand(id: wesRun.id)
+
+        when:
+        controller.showWeskitLog(command, new NavigationCommand())
+
+        then:
+        view == '/wesRun/showLog'
+        model.wesRun == wesRun
+        model.filePath == logPath
+        model.content == '{"test":"log"}'
+        model.title != null
+        model.nav != null
+    }
 
     @Unroll
     void "showReport, #scenario"() {

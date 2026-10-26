@@ -31,6 +31,8 @@ import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.utils.MessageSourceService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 
 import java.nio.file.*
 
@@ -41,9 +43,13 @@ class WesRunService {
     FilestoreService filestoreService
     WeskitAccessService weskitAccessService
     LogService logService
+    MessageSourceService messageSourceService
+    FileSystemService fileSystemService
 
     // regex to find the report file (starting with 'report' and ending with '.html'. e.g. report-20252034.html)
     static final String MATCHER_REPORT_FILE = /report.*\.html/
+    // regex to find the nextflow log file (ending with 'nextflow.log')
+    static final String NEXTFLOW_LOG_FILE = '.nextflow.log'
 
     // mapping to determine the highest priority of Weskit run check states
     static final Map<WesRun.MonitorState, Integer> MAPPING_CHECK_STATES = [
@@ -100,6 +106,21 @@ class WesRunService {
     }
 
     /**
+     * Get the Nextflow log file path of the given WesRun.
+     *
+     * @param wesRun the given WesRun
+     * @return the path to the Nextflow log file
+     */
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    Path getNextflowLogPath(WesRun wesRun) {
+        assert wesRun: "WesRun must not be null"
+        Path workFolder = filestoreService.getWorkFolderPath(wesRun.workflowStep.workflowRun.workFolder)
+        Path subPath = workFolder.resolve(wesRun.subPath)
+
+        return subPath.resolve(NEXTFLOW_LOG_FILE)
+    }
+
+    /**
      * Get the report file content of the given WesRun.
      * The user must have read access as an operator only.
      *
@@ -121,6 +142,73 @@ class WesRunService {
             throw new AccessDeniedException("Report file for ${wesRun.id} found but not readable: ${reportPath}")
         }
         return Files.readAllBytes(reportPath)
+    }
+
+    /**
+     * Get the Nextflow log file content of the given WesRun.
+     *
+     * @param wesRun WesRun which the Nextflow log file belongs to
+     * @return byte array of the Nextflow log file
+     * @throws NoSuchFileException if the log file does not exist
+     * @throws AccessDeniedException if the log file is not readable
+     */
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    byte[] getNextflowLogFileContent(WesRun wesRun) throws NoSuchFileException, AccessDeniedException {
+        Path nextflowLogPath = getNextflowLogPath(wesRun)
+        log.debug("Reading Nextflow log file at path ${nextflowLogPath} for WesRun ${wesRun}")
+
+        if (!Files.exists(nextflowLogPath)) {
+            log.error("Nextflow log file for ${wesRun.id} not found: ${nextflowLogPath}")
+            throw new NoSuchFileException("Nextflow log file for ${wesRun.id} not found: ${nextflowLogPath}")
+        }
+
+        if (!fileService.fileIsReadable(nextflowLogPath)) {
+            log.error("Nextflow log file not readable at path ${nextflowLogPath.toAbsolutePath()}")
+            throw new AccessDeniedException("Nextflow log file for ${wesRun.id} found but not readable: ${nextflowLogPath}")
+        }
+
+        return Files.readAllBytes(nextflowLogPath)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    String getStdoutFileContent(WesRun wesRun) {
+        String stdout = wesRun.wesRunLog?.runLog?.stdout
+        return getFileContent(stdout ? fileSystemService.remoteFileSystem.getPath(stdout) : null)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    String getStderrFileContent(WesRun wesRun) {
+        String stderr = wesRun.wesRunLog?.runLog?.stderr
+        return getFileContent(stderr ? fileSystemService.remoteFileSystem.getPath(stderr) : null)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    String getWeskitLogFileContent(WesRun wesRun) {
+        return getFileContent(getWeskitLogPath(wesRun))
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    Path getWeskitLogPath(WesRun wesRun) {
+        String stdout = wesRun.wesRunLog?.runLog?.stdout
+        return stdout ? fileSystemService.remoteFileSystem.getPath(stdout).parent?.resolve('log.json') : null
+    }
+
+    private String getFileContent(Path logPath) {
+        if (!logPath) {
+            return messageSourceService.createMessage("wesRunService.path_to_log_not_set")
+        }
+
+        if (!logPath.absolute) {
+            return messageSourceService.createMessage("baseFolder.path.not.absolute")
+        }
+
+        if (!fileService.fileIsReadable(logPath)) {
+            return fileService.fileExists(logPath) ?
+                    messageSourceService.createMessage("wesRunService.unreadable_file") :
+                    messageSourceService.createMessage("wesRunService.non_existing_file")
+        }
+
+        return Files.readString(logPath)
     }
 
     /**
@@ -151,6 +239,14 @@ class WesRunService {
         return !wesRun.workflowStep.obsolete && (
                 wesRun.wesRunLog?.state == State.COMPLETE || wesRun.wesRunLog?.state == State.EXECUTOR_ERROR || wesRun.wesRunLog?.state == State.SYSTEM_ERROR
         )
+    }
+
+    boolean hasNextflowLog(WesRun wesRun) {
+        if (!wesRun.workflowStep.workflowRun.workFolder) {
+            return false
+        }
+
+        return Files.exists(getNextflowLogPath(wesRun))
     }
 
     /**

@@ -89,13 +89,13 @@ describe('Check workflow run details page', () => {
         // Obsolete step: WES run COMPLETE but hasReport=false → no WESkit Report link
         cy.contains('table#steps tbody td', obsoleteStep.id.toString())
           .closest('tr').next()
-          .contains('a', 'Nextflow Report').should('not.exist');
+          .contains('a', 'NextFlow Report').should('not.exist');
 
         // Restarted step: WES run COMPLETE and hasReport=true → WESkit Report link present
         // Fetch the report and compare its content against the source file in the SSH init script
         cy.contains('table#steps tbody td', restartedStep.id.toString())
           .closest('tr').next()
-          .contains('a', 'Nextflow Report').should('exist')
+          .contains('a', 'NextFlow Report').should('exist')
           .invoke('attr', 'href')
           .then((href) => {
             cy.readFile('docker/ssh/30-create-wes-restart-report.sh').then((script) => {
@@ -108,6 +108,35 @@ describe('Check workflow run details page', () => {
               });
             });
           });
+      });
+    });
+
+    it('should show a link to the WES run output', () => {
+      cy.intercept('/workflowRunDetails/data*').as('stepsData');
+
+      cy.visit('/workflowRunList/index?state=FAILED');
+      cy.get('table#runs tbody').should('not.be.empty');
+
+      cy.contains('table#runs tbody a', 'WES Restart Scenario (OTP-2980)').click();
+      cy.location('pathname').should('contain', '/workflowRunDetails/index');
+
+      cy.wait('@stepsData').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+
+        const steps = interception.response.body.data;
+        const restartedStep = steps.find((s) => !s.obsolete && s.wesRuns.length > 0);
+        const wesRun = restartedStep.wesRuns[0];
+
+        cy.contains(
+          'a',
+          `WorkflowExecutionSystem run: ${wesRun.wesIdentifier}`
+        ).click();
+
+        cy.location('pathname').should('contain', '/wesRun/show');
+
+        cy.contains('h2', 'Output')
+          .next()
+          .should('have.prop', 'tagName', 'A');
       });
     });
 

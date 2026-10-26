@@ -121,6 +121,7 @@ $(() => {
         <th>WorkflowExecutionSystem identifier</th>
         <th>State</th>
         <th>Report</th>
+        <th>Log</th>
         <th>Exit code</th>
       </tr>
     </thead>
@@ -142,9 +143,16 @@ $(() => {
                        </td>
                        <td>${wesRun.state}</td>
                        <td>${wesRun.hasReport ? $.otp.createLinkMarkup({
-    text: 'Nextflow Report',
+    text: `${wesRun.wesWorkflowType} Report`,
     controller: 'wesRun',
     action: 'showReport',
+    id: wesRun.id
+  }) : ''}
+                       </td>
+                       <td>${wesRun.hasNextflowLog ? $.otp.createLinkMarkup({
+    text: 'Nextflow Log',
+    controller: 'wesRun',
+    action: 'showNextflowLog',
     id: wesRun.id
   }) : ''}
                        </td>

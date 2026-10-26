@@ -34,6 +34,8 @@ import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.utils.MessageSourceService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 
 import java.nio.file.*
 
@@ -60,6 +62,12 @@ class WesRunServiceSpec extends Specification implements ServiceUnitTest<WesRunS
 
     @Shared
     Path otherFilePath
+
+    void setup() {
+        service.fileSystemService = Mock(FileSystemService) {
+            getRemoteFileSystem() >> FileSystems.default
+        }
+    }
 
     void "monitoredRuns, when called, return all WesRun in monitor state checking"() {
         given:
@@ -183,6 +191,280 @@ class WesRunServiceSpec extends Specification implements ServiceUnitTest<WesRunS
         "report file not found"        || NoSuchFileException   | true     | { null }           | { "not found: test-subdir" }
         "wrong file found"             || NoSuchFileException   | true     | { otherFilePath }  | { "not found: ${otherFilePath}" }
         "file exists but not readable" || AccessDeniedException | false    | { reportFilePath } | { "found but not readable: ${reportFilePath}" }
+    }
+
+    void "getNextflowLogPath, when called, returns Nextflow log path"() {
+        given:
+        WesRun wesRun = createWesRun([
+                workflowStep: createWorkflowStep([
+                        workflowRun: createWorkflowRun([
+                                workFolder: createWorkFolder(),
+                        ]),
+                ]),
+                subPath: "subdir",
+        ])
+        Path workFolder = Paths.get("/work/folder")
+
+        service.filestoreService = Mock(FilestoreService) {
+            getWorkFolderPath(_) >> workFolder
+        }
+
+        expect:
+        service.getNextflowLogPath(wesRun) == workFolder.resolve("subdir/.nextflow.log")
+    }
+
+    void "getNextflowLogFileContent, when file is readable, returns expected content"() {
+        given:
+        WesRun wesRun = createWesRun([
+                workflowStep: createWorkflowStep([
+                        workflowRun: createWorkflowRun([
+                                workFolder: createWorkFolder(),
+                        ]),
+                ]),
+                subPath: "subdir",
+        ])
+
+        Path workFolder = tempDir.resolve("workFolder")
+        Path nextflowLog = workFolder.resolve("subdir/.nextflow.log")
+        String expectedContent = "Nextflow log content"
+        CreateFileHelper.createFile(nextflowLog, expectedContent)
+
+        service.filestoreService = Mock(FilestoreService) {
+            getWorkFolderPath(_) >> workFolder
+        }
+        service.fileService = Mock(FileService) {
+            fileIsReadable(nextflowLog) >> true
+        }
+
+        when:
+        byte[] result = service.getNextflowLogFileContent(wesRun)
+
+        then:
+        result == expectedContent.bytes
+    }
+
+    @Unroll
+    void "getNextflowLogFileContent, when #scenario, throws #exceptionClass.simpleName"() {
+        given:
+        WesRun wesRun = createWesRun([
+                workflowStep: createWorkflowStep([
+                        workflowRun: createWorkflowRun([
+                                workFolder: createWorkFolder(),
+                        ]),
+                ]),
+                subPath: "subdir",
+        ])
+
+        Path workFolder = tempDir.resolve("workFolder")
+        Path nextflowLog = workFolder.resolve("subdir/.nextflow.log")
+
+        if (fileExists) {
+            CreateFileHelper.createFile(nextflowLog)
+        }
+
+        service.filestoreService = Mock(FilestoreService) {
+            getWorkFolderPath(_) >> workFolder
+        }
+        service.fileService = Mock(FileService) {
+            (0..1) * fileIsReadable(nextflowLog) >> readable
+        }
+
+        when:
+        service.getNextflowLogFileContent(wesRun)
+
+        then:
+        thrown(exceptionClass)
+
+        where:
+        scenario               | fileExists | readable || exceptionClass
+        "file does not exist"  | false      | false    || NoSuchFileException
+        "file is not readable" | true       | false    || AccessDeniedException
+    }
+
+    void "hasNextflowLog, when work folder is null, returns false"() {
+        given:
+        WorkflowRun workflowRun = createWorkflowRun([workFolder: null])
+        WorkflowStep workflowStep = createWorkflowStep([workflowRun: workflowRun])
+        WesRun wesRun = createWesRun([workflowStep: workflowStep])
+
+        expect:
+        !service.hasNextflowLog(wesRun)
+    }
+
+    void "getWeskitLogPath, returns log.json next to stdout"() {
+        given:
+        Path directory = tempDir.resolve("weskit")
+        Path stdout = directory.resolve("stdout")
+
+        WesLog runLog = createWesLog([stdout: stdout.toString()])
+        WesRunLog wesRunLog = createWesRunLog([runLog: runLog])
+        WesRun wesRun = createWesRun([wesRunLog: wesRunLog])
+
+        expect:
+        service.getWeskitLogPath(wesRun) == directory.resolve("log.json")
+    }
+
+    void "getWeskitLogPath, when stdout path has no parent, returns null"() {
+        given:
+        WesLog runLog = createWesLog([stdout: "stdout.log"])
+        WesRunLog wesRunLog = createWesRunLog([runLog: runLog])
+        WesRun wesRun = createWesRun([wesRunLog: wesRunLog])
+
+        expect:
+        service.getWeskitLogPath(wesRun) == null
+    }
+
+    void "getWeskitLogFileContent, when log.json is readable, returns its content"() {
+        given:
+        Path directory = tempDir.resolve("weskit")
+        Path stdout = directory.resolve("stdout")
+        Path logJson = directory.resolve("log.json")
+        String expectedContent = '{"foo":"bar"}'
+
+        CreateFileHelper.createFile(logJson, expectedContent)
+
+        WesLog runLog = createWesLog([stdout: stdout.toString()])
+        WesRunLog wesRunLog = createWesRunLog([runLog: runLog])
+        WesRun wesRun = createWesRun([wesRunLog: wesRunLog])
+
+        service.fileService = Mock(FileService) {
+            fileIsReadable(logJson) >> true
+        }
+
+        expect:
+        service.getWeskitLogFileContent(wesRun) == expectedContent
+    }
+
+    void "getWeskitLogFileContent, when stdout path has no parent, returns path not set message"() {
+        given:
+        WesLog runLog = createWesLog([stdout: "stdout.log"])
+        WesRunLog wesRunLog = createWesRunLog([runLog: runLog])
+        WesRun wesRun = createWesRun([wesRunLog: wesRunLog])
+
+        service.messageSourceService = Mock(MessageSourceService) {
+            createMessage("wesRunService.path_to_log_not_set") >> "Path to log not set"
+        }
+
+        expect:
+        service.getWeskitLogFileContent(wesRun) == "Path to log not set"
+    }
+
+    void "getStdoutFileContent, when file is readable, returns its content"() {
+        given:
+        Path stdout = tempDir.resolve("stdout")
+        String expectedContent = "stdout content"
+        CreateFileHelper.createFile(stdout, expectedContent)
+
+        WesLog runLog = createWesLog([stdout: stdout.toString()])
+        WesRunLog wesRunLog = createWesRunLog([runLog: runLog])
+        WesRun wesRun = createWesRun([wesRunLog: wesRunLog])
+
+        service.fileService = Mock(FileService) {
+            fileIsReadable(stdout) >> true
+        }
+
+        expect:
+        service.getStdoutFileContent(wesRun) == expectedContent
+    }
+
+    void "getStderrFileContent, when file is readable, returns its content"() {
+        given:
+        Path stderr = tempDir.resolve("stderr")
+        String expectedContent = "stderr content"
+        CreateFileHelper.createFile(stderr, expectedContent)
+
+        WesLog runLog = createWesLog([stderr: stderr.toString()])
+        WesRunLog wesRunLog = createWesRunLog([runLog: runLog])
+        WesRun wesRun = createWesRun([wesRunLog: wesRunLog])
+
+        service.fileService = Mock(FileService) {
+            fileIsReadable(stderr) >> true
+        }
+
+        expect:
+        service.getStderrFileContent(wesRun) == expectedContent
+    }
+
+    void "getStdoutFileContent, when path is not set, returns message"() {
+        given:
+        WesLog runLog = createWesLog([stdout: null])
+        WesRunLog wesRunLog = createWesRunLog([runLog: runLog])
+        WesRun wesRun = createWesRun([wesRunLog: wesRunLog])
+
+        service.messageSourceService = Mock(MessageSourceService) {
+            createMessage("wesRunService.path_to_log_not_set") >> "Path to log not set"
+        }
+
+        expect:
+        service.getStdoutFileContent(wesRun) == "Path to log not set"
+    }
+
+    void "getStdoutFileContent, when file does not exist, returns message"() {
+        given:
+        Path stdout = tempDir.resolve("non-existing-stdout")
+
+        WesLog runLog = createWesLog([stdout: stdout.toString()])
+        WesRunLog wesRunLog = createWesRunLog([runLog: runLog])
+        WesRun wesRun = createWesRun([wesRunLog: wesRunLog])
+
+        service.fileService = Mock(FileService) {
+            fileIsReadable(stdout) >> false
+            fileExists(stdout) >> false
+        }
+        service.messageSourceService = Mock(MessageSourceService) {
+            createMessage("wesRunService.non_existing_file") >> "File doesn't exist"
+        }
+
+        expect:
+        service.getStdoutFileContent(wesRun) == "File doesn't exist"
+    }
+
+    void "getStdoutFileContent, when file is not readable, returns message"() {
+        given:
+        Path stdout = tempDir.resolve("stdout")
+
+        WesLog runLog = createWesLog([stdout: stdout.toString()])
+        WesRunLog wesRunLog = createWesRunLog([runLog: runLog])
+        WesRun wesRun = createWesRun([wesRunLog: wesRunLog])
+
+        service.fileService = Mock(FileService) {
+            fileIsReadable(stdout) >> false
+            fileExists(stdout) >> true
+        }
+        service.messageSourceService = Mock(MessageSourceService) {
+            createMessage("wesRunService.unreadable_file") >> "File is not readable"
+        }
+
+        expect:
+        service.getStdoutFileContent(wesRun) == "File is not readable"
+    }
+
+    @Unroll
+    void "get log file content for #logType, when path is relative, returns invalid path message"() {
+        given:
+        WesLog runLog = createWesLog([
+                stdout: "relative/stdout.log",
+                stderr: "relative/stderr.log",
+        ])
+        WesRunLog wesRunLog = createWesRunLog([runLog: runLog])
+        WesRun wesRun = createWesRun([wesRunLog: wesRunLog])
+
+        service.messageSourceService = Mock(MessageSourceService) {
+            createMessage("baseFolder.path.not.absolute") >> "Path specified is not an absolute path"
+        }
+        service.fileService = Mock(FileService)
+
+        when:
+        String result = service."get${logType}FileContent"(wesRun)
+
+        then:
+        result == "Path specified is not an absolute path"
+        0 * service.fileService._
+
+        where:
+        logType  | _
+        "Stdout" | _
+        "Stderr" | _
     }
 
     void "getById, when WesRun exists, returns correct WesRun"() {

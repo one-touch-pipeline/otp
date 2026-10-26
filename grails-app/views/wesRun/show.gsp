@@ -60,7 +60,7 @@
                     </tr>
                     <tr>
                         <td class="pl-4"><g:message code="wesRun.runRequest"/></td>
-                        <td>${wesRun.wesRunLog?.runRequest ?: NA}</td>
+                        <td><pre>${formattedRunRequest ?: NA}</pre></td>
                     </tr>
                     <g:if test="${wesRun.wesRunLog?.runLog}">
                         <tr>
@@ -148,15 +148,36 @@
 
             <h2>${g.message(code: "wesLog.stdout")}</h2>
             <g:if test="${wesRun.wesRunLog?.runLog?.stdout}">
-                <pre>${wesRun.wesRunLog.runLog.stdout}</pre>
+                <g:link action="showStdout"
+                        id="${wesRun.id}"
+                        params="['workflow.id': nav.workflow?.id, 'workflowRun.id': nav.workflowRun?.id,
+                                 state: nav.states?.join(','), name: nav.name]">
+                    ${wesRun.wesRunLog.runLog.stdout}
+                </g:link>
             </g:if>
             <g:else>
                 <i>${NA}</i>
             </g:else>
-
             <h2>${g.message(code: "wesLog.stderr")}</h2>
             <g:if test="${wesRun.wesRunLog?.runLog?.stderr}">
-                <pre>${wesRun.wesRunLog.runLog.stderr}</pre>
+                <g:link action="showStderr"
+                        id="${wesRun.id}"
+                        params="['workflow.id': nav.workflow?.id, 'workflowRun.id': nav.workflowRun?.id,
+                                 state: nav.states?.join(','), name: nav.name]">
+                    ${wesRun.wesRunLog.runLog.stderr}
+                </g:link>
+            </g:if>
+            <g:else>
+                <i>${NA}</i>
+            </g:else>
+            <h2>${g.message(code: "wesRun.weskitLog")}</h2>
+            <g:if test="${wesRun.wesRunLog?.runLog?.stdout}">
+                <g:link action="showWeskitLog"
+                        id="${wesRun.id}"
+                        params="['workflow.id': nav.workflow?.id, 'workflowRun.id': nav.workflowRun?.id,
+                                 state: nav.states?.join(','), name: nav.name]">
+                    log.json
+                </g:link>
             </g:if>
             <g:else>
                 <i>${NA}</i>

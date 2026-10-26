@@ -510,7 +510,9 @@ class WorkflowRunService {
                     wesIdentifier: wesRun.wesIdentifier,
                     state        : wesRun.wesRunLog?.state ?: State.UNKNOWN,
                     hasReport    : wesRunService.hasReports(wesRun),
+                    wesWorkflowType: WesWorkflowType.NEXTFLOW.displayText,
                     exitCode     : wesRun.wesRunLog?.runLog?.exitCode ?: "-",
+                    hasNextflowLog: wesRunService.hasNextflowLog(wesRun),
             ]
         } as List<Map<String, Object>>
     }

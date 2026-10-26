@@ -33,6 +33,9 @@ import de.dkfz.tbi.otp.workflowExecution.wes.*
 import javax.servlet.http.HttpServletResponse
 import java.nio.file.AccessDeniedException
 import java.nio.file.NoSuchFileException
+import grails.converters.JSON
+import org.grails.web.json.JSONObject
+import java.nio.file.Path
 
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
 class WesRunController {
@@ -45,15 +48,24 @@ class WesRunController {
             show      : "GET",
             showTask  : "GET",
             showReport: "GET",
+            showNextflowLog: "GET",
+            showStdout     : "GET",
+            showStderr     : "GET",
+            showWeskitLog  : "GET",
     ]
 
     def show(NavigationCommand navigationCommand) {
         WesRun wesRun = WesRun.get(params.id as long)
 
+        String unFormattedJson = wesRun?.wesRunLog?.runRequest ?: '{}'
+        JSONObject jsonObject = JSON.parse(unFormattedJson) as JSONObject
+        String formattedRunRequest = jsonObject.toString(4)
+
         return [
                 'wesRun': wesRun,
                 'nav'   : navigationCommand,
                 'NA'    : NOT_AVAILABLE,
+                'formattedRunRequest': formattedRunRequest,
         ]
     }
 
@@ -94,6 +106,66 @@ class WesRunController {
         } catch (AccessDeniedException e) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied to show report file")
         }
+    }
+
+    /**
+     * Render the Nextflow log file of a WES run.
+     * @param reportCommand the command object containing the WES run ID
+     * @return the content of the Nextflow log file
+     */
+    def showNextflowLog(WesRunReportCommand reportCommand) {
+        WesRun wesRun = wesRunService.getById(reportCommand.id)
+        if (!wesRun) {
+            log.error("WesRun with id ${reportCommand.id} not found")
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "WesRun not found")
+            return
+        }
+
+        try {
+            byte[] content = wesRunService.getNextflowLogFileContent(wesRun)
+            render(file: content, contentType: ContentType.TEXT_PLAIN.mimeType, encoding: Consts.UTF_8)
+        } catch (NoSuchFileException e) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Nextflow log file not found")
+        } catch (AccessDeniedException e) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied to show Nextflow log file")
+        }
+    }
+
+    def showStdout(WesRunReportCommand cmd, NavigationCommand navigationCommand) {
+        WesRun wesRun = wesRunService.getById(cmd.id)
+
+        render view: 'showLog', model: [
+                wesRun  : wesRun,
+                nav     : navigationCommand,
+                filePath: wesRun.wesRunLog?.runLog?.stdout,
+                content : wesRunService.getStdoutFileContent(wesRun),
+                title   : message(code: 'wesLog.stdout'),
+        ]
+    }
+
+    def showStderr(WesRunReportCommand cmd, NavigationCommand navigationCommand) {
+        WesRun wesRun = wesRunService.getById(cmd.id)
+
+        render view: 'showLog', model: [
+                wesRun  : wesRun,
+                nav     : navigationCommand,
+                filePath: wesRun.wesRunLog?.runLog?.stderr,
+                content : wesRunService.getStderrFileContent(wesRun),
+                title   : message(code: 'wesLog.stderr'),
+        ]
+    }
+
+    def showWeskitLog(WesRunReportCommand cmd, NavigationCommand navigationCommand) {
+        WesRun wesRun = wesRunService.getById(cmd.id)
+        Path logPath = wesRunService.getWeskitLogPath(wesRun)
+
+        render view: 'showLog', model: [
+                wesRun  : wesRun,
+                nav     : navigationCommand,
+                filePath: logPath,
+                content : wesRunService.getWeskitLogFileContent(wesRun),
+                title   : message(code: 'wesRun.weskitLog'),
+        ]
     }
 }
 
