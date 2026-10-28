@@ -74,6 +74,8 @@ module.exports = defineConfig({
     toConsole: true
   },
   responseTimeout: 30000,
+  // the default of 5s is too short when the CI runner stalls for some seconds, the request is then noticed too late
+  requestTimeout: 15000,
   viewportHeight: 900,
   viewportWidth: 1440,
   video: false,

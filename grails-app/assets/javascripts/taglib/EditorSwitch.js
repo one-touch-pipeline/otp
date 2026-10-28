@@ -421,6 +421,9 @@ $(() => {
       success() {
         success('Success', 'Data stored successfully');
         $('p.edit-switch-label span', outerContainer).text($('input:text[name=value]', container).val());
+        // reload only after the value is stored, a reload before would cancel the request. The short delay lets the
+        // success toast be seen before the page is reloaded.
+        window.setTimeout(() => { window.location.reload(); }, 300);
       },
       error(jqXHR, textStatus, errorThrown) {
         error(jqXHR, textStatus, errorThrown);
@@ -429,7 +432,6 @@ $(() => {
     });
     $('p.edit-switch-editor', outerContainer).hide();
     $('p.edit-switch-label', outerContainer).show();
-    window.setTimeout(() => { window.location.reload(); }, 300); // reloads page after 0.3 seconds
   });
 
   $('div.edit-switch-new-free-text-value p.edit-switch-editor button.save').on('click', function () {
@@ -443,6 +445,9 @@ $(() => {
       success() {
         success('Success', 'Data stored successfully');
         $('p.edit-switch-label span', outerContainer).text($('input:text[name=value]', container).val());
+        // reload only after the value is stored, a reload before would cancel the request. The short delay lets the
+        // success toast be seen before the page is reloaded.
+        window.setTimeout(() => { window.location.reload(); }, 300);
       },
       error(jqXHR, textStatus, errorThrown) {
         error(jqXHR, textStatus, errorThrown);
@@ -451,7 +456,6 @@ $(() => {
     });
     $('p.edit-switch-editor', outerContainer).hide();
     $('p.edit-switch-label', outerContainer).show();
-    window.setTimeout(() => { window.location.reload(); }, 300); // reloads page after 0.3 seconds
   });
 
   $('div.edit-switch-new-free-text-values span.edit-switch-editor button.save').on('click', function () {

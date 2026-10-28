@@ -118,8 +118,11 @@ describe('Check sampleOverview page', () => {
         expect(interception.response.statusCode).to.eq(200);
       });
 
-      // Verify table has rows
-      cy.get('table#laneOverviewId').find('tbody tr').should('have.length.at.least', 1);
+      // Verify that the table has rows,
+      // the response arrives before DataTables has drawn them and the CSV button exports only what is drawn
+      cy.fixture('downloadChecks/sampleOverview.json').then((config) => {
+        cy.get('table#laneOverviewId tbody').should('contain', config.data[0][0]);
+      });
 
       // Download CSV file via Button
       cy.get('button.buttons-csv').should('be.visible').click();

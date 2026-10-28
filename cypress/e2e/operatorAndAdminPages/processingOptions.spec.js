@@ -52,12 +52,16 @@ describe('Check processingOptions page', () => {
       const toasterSuc = '#otpToastBox .otpSuccessToast';
       const toasterErr = '#otpToastBox .otpErrorToast';
 
-      // random postfix to avoid duplication so the test become idempotent
-      const postfix = (Math.random() * 100).toFixed(0);
+      // random postfix to avoid duplication so the test become idempotent. It always has two digits, since the page
+      // does not save an unchanged value and the dev database already contains single digit values, e.g. `1` and `2`
+      // for the cellranger cleanup options, and `0` is no positive number.
+      const postfix = String(10 + Math.floor(Math.random() * 90));
 
       for (const [name, validator] of Object.entries(this.validators)) {
         const wrong = validator.test.wrong;
         const right = validator.test.right.replace(new RegExp(validator.test.regex), postfix);
+        // the value in the input field, `{{}` is the escape of `type` for a `{`
+        const rightValue = right.replaceAll('{{}', '{');
 
         validator.options.forEach((option) => {
           cy.log('Testing option: ' + option + ' with validator ' + name + ' with wrong value: ' + wrong + ' and right value: ' + right);
@@ -68,9 +72,13 @@ describe('Check processingOptions page', () => {
           });
           cy.get(toasterErr).should('exist').and('contain.text', 'Saving failed')
             .and('contain.text', option);
-          cy.get(toasterErr).get('button.close').click();
+          // wait until the toast is gone, otherwise the next check could still find it
+          cy.get(toasterErr).find('button.close').click();
+          cy.get(toasterErr).should('not.exist');
 
           cy.contains(option).parent().within(() => {
+            // an unchanged value is not sent to the server and no toast is shown, so fail here with a clear message
+            cy.get(selector).should('not.have.value', rightValue);
             cy.get('i.bi-pencil').parent().click();
             cy.get(selector).clear().type(right);
             cy.get('i.bi-save').parent().click();
@@ -79,7 +87,8 @@ describe('Check processingOptions page', () => {
           cy.get(toasterSuc).should('exist').and('contain.text', 'successfully been saved')
             .and('contain.text', option);
           // close the toast popup
-          cy.get(toasterSuc).get('button.close').click();
+          cy.get(toasterSuc).find('button.close').click();
+          cy.get(toasterSuc).should('not.exist');
         });
       }
     });

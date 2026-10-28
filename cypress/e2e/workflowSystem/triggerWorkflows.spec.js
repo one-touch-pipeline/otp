@@ -62,7 +62,7 @@ describe('Check trigger Workflows page', () => {
           expect(interception.response.statusCode).to.eq(200);
         });
 
-        cy.get('#infos li').should('not.be.empty');
+        cy.get('#resultInfo li').should('have.length.at.least', 1);
         cy.get('#resultWarning li').should('have.length', 6)
           .each((row) => {
             cy.wrap(row).contains('recreate').contains('since action is CREATE_ALWAYS');
@@ -106,7 +106,7 @@ describe('Check trigger Workflows page', () => {
           expect(interception.response.statusCode).to.eq(200);
         });
 
-        cy.get('#infos li').should('not.be.empty');
+        cy.get('#resultInfo li').should('have.length.at.least', 1);
         cy.get('#resultWarning li').should('have.length', 6)
           .each((row) => {
             cy.wrap(row).contains('recreate').contains('since action is CREATE_ALWAYS');
@@ -145,7 +145,7 @@ describe('Check trigger Workflows page', () => {
       });
 
       cy.get('#warnAreaAccordion > div').should('not.be.visible'); // reactivate once underlying problem is fixed
-      cy.get('#infos li').should('not.be.empty');
+      cy.get('#resultInfo li').should('have.length.at.least', 1);
       cy.get('#resultWarning li').should('have.length', 2)
         .each((row) => {
           cy.wrap(row).contains('recreate').contains('since action is CREATE_ALWAYS');
@@ -182,7 +182,7 @@ describe('Check trigger Workflows page', () => {
 
         cy.get('#warnAreaAccordion > div').should('not.be.visible');
         cy.get('div.otpWarningToast').should('be.visible').contains('No workflows were started');
-        cy.get('#infos li').should('not.be.empty');
+        cy.get('#resultInfo li').should('have.length.at.least', 1);
         cy.get('#resultWarning li').should('have.length', 1).should('have.text', 'none');
         cy.get('#resultWorkPackageList li').should('have.length', 1).should('have.text', 'none');
       });
@@ -232,7 +232,7 @@ describe('Check trigger Workflows page', () => {
           expect(interception.response.statusCode).to.eq(200);
         });
 
-        cy.get('#infos li').should('not.be.empty');
+        cy.get('#resultInfo li').should('have.length.at.least', 1);
         cy.get('#resultWarning li').should('have.length', 3)
           .each((row) => {
             cy.wrap(row).contains('recreate').contains('since action is CREATE_ALWAYS');
@@ -273,7 +273,7 @@ describe('Check trigger Workflows page', () => {
         });
 
         cy.get('#warnAreaAccordion > div').should('not.be.visible');
-        cy.get('#infos li').should('not.be.empty');
+        cy.get('#resultInfo li').should('have.length.at.least', 1);
         cy.get('#resultWarning li').should('have.length', 1)
           .each((row) => {
             cy.wrap(row).contains('recreate').contains('since action is CREATE_ALWAYS');
@@ -310,7 +310,7 @@ describe('Check trigger Workflows page', () => {
         });
 
         // Verify appropriate response for skipped workflows
-        cy.get('#infos li').should('not.be.empty');
+        cy.get('#resultInfo li').should('have.length.at.least', 1);
       });
     });
 

@@ -81,10 +81,20 @@ describe('Check projectSeqPlatformGroup page', () => {
 
       cy.wait('@projectSeqPlatformGroupIndex').its('response.statusCode').should('eq', 200);
 
-      cy.get('select#useSeqPlatformGroup').select('USE_PROJECT_SEQ_TYPE_SPECIFIC', { force: true });
+      // Changing the merging criteria submits the form, and the copy selection has to wait for the reloaded page.
+      // Selecting the value that is already set doesn't trigger a reload, so no new request would be sent.
+      cy.get('select#useSeqPlatformGroup').then(($select) => {
+        if ($select.val() !== 'USE_PROJECT_SEQ_TYPE_SPECIFIC') {
+          cy.get('select#useSeqPlatformGroup').select('USE_PROJECT_SEQ_TYPE_SPECIFIC', { force: true });
+          cy.wait('@updateProjectSeqPlatformGroup').its('response.statusCode').should('eq', 302);
+        }
+      });
+      cy.get('select#useSeqPlatformGroup').should('have.value', 'USE_PROJECT_SEQ_TYPE_SPECIFIC');
 
       cy.get('select#selectedProjectToCopyFrom').select('ExampleProject', { force: true });
-      cy.get('select#selectedSeqTypeToCopyFrom').select('ChIP PAIRED bulk', { force: true });
+      // the seq. type selection is only enabled after the project is selected
+      cy.get('select#selectedSeqTypeToCopyFrom').should('not.be.disabled')
+        .select('ChIP PAIRED bulk', { force: true });
 
       cy.wait('@searchForSeqPlatformGroups').its('response.statusCode').should('eq', 302);
 
@@ -141,20 +151,50 @@ describe('Check projectSeqPlatformGroup page', () => {
 
 
     it('should change seq platform version back to default', () => {
-      cy.intercept('/projectSeqPlatformGroup/index*').as('projectSeqPlatformGroupIndex');
-      cy.get('select#useSeqPlatformGroup').select('USE_OTP_DEFAULT', { force: true });
+      cy.intercept('/projectSeqPlatformGroup/emptySeqPlatformGroup*').as('emptySeqPlatformGroup');
 
-      cy.wait('@updateProjectSeqPlatformGroup').its('response.statusCode').should('eq', 302);
-      cy.get('input#libPrepKit').check();
+      setMergingCriteriaToDefault();
+      checkLibPrepKit();
 
       cy.visit('/workflowSelection/index');
       cy.get('#headingCriteria').click();
+      // registered just before the navigation, the changes above reload the index page as well
+      cy.intercept('/projectSeqPlatformGroup/index*').as('projectSeqPlatformGroupIndex');
       cy.get('table#mergingCriteriaTable tbody tr').last().find('a').click();
 
       cy.wait('@projectSeqPlatformGroupIndex').its('response.statusCode').should('eq', 200);
 
       cy.get('.seqPlatformGroupSelector button[type=submit].btn-danger').click();
-      cy.get('select#useSeqPlatformGroup').select('USE_OTP_DEFAULT', { force: true });
+      cy.wait('@emptySeqPlatformGroup').its('response.statusCode').should('eq', 302);
+      setMergingCriteriaToDefault();
     });
   });
 });
+
+/*
+ * Every change of the merging criteria submits the form, so each one has to be saved before the next one or a
+ * navigation. A value that is already set sends no request.
+ */
+const setMergingCriteriaToDefault = () => {
+  'use strict';
+
+  cy.get('select#useSeqPlatformGroup').then(($select) => {
+    if ($select.val() !== 'USE_OTP_DEFAULT') {
+      cy.get('select#useSeqPlatformGroup').select('USE_OTP_DEFAULT', { force: true });
+      cy.wait('@updateProjectSeqPlatformGroup').its('response.statusCode').should('eq', 302);
+    }
+  });
+  cy.get('select#useSeqPlatformGroup').should('have.value', 'USE_OTP_DEFAULT');
+};
+
+const checkLibPrepKit = () => {
+  'use strict';
+
+  cy.get('input#libPrepKit').then(($checkbox) => {
+    if (!$checkbox.is(':checked')) {
+      cy.get('input#libPrepKit').check();
+      cy.wait('@updateProjectSeqPlatformGroup').its('response.statusCode').should('eq', 302);
+    }
+  });
+  cy.get('input#libPrepKit').should('be.checked');
+};

@@ -67,7 +67,7 @@ describe('Check workflow run overview page', () => {
 
     it('should open edit workflow modal when clicking a workflow status dot', () => {
       cy.intercept('GET', '**/workflowSystemConfig/getWorkflows*').as('getWorkflows');
-      cy.intercept('POST', '**/workflowSystemConfig/updateWorkflow').as('updateWorkflow');
+      cy.intercept('POST', '**/workflowSystemConfig/updateWorkflow*').as('updateWorkflow');
 
       cy.visit('/workflowRunOverview/index');
       cy.wait('@getWorkflows', { timeout: 15000 }).its('response.statusCode').should('eq', 200);
@@ -93,6 +93,8 @@ describe('Check workflow run overview page', () => {
       cy.get('#editWorkflowModal #confirmModal')
         .should('be.visible')
         .click();
+      // the update must not run into the next test
+      cy.wait('@updateWorkflow').its('response.statusCode').should('eq', 200);
     });
 
   });

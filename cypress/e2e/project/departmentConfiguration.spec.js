@@ -32,9 +32,9 @@ describe('test for department configuration page', {
 
     it('should redirect to index when deputy username doesnt exist and show errors message', () => {
       cy.intercept('/departmentConfiguration/addDeputy*').as('addDeputy');
-      cy.intercept('/departmentConfiguration/index*').as('loadIndex');
-
       cy.visit('/departmentConfiguration/index');
+      // registered after the visit, so that the intercept waits for the page to be reloaded after the changes
+      cy.intercept('/departmentConfiguration/index*').as('loadIndex');
 
       cy.get('input#deputyUsername').type('nonExistentUser');
       cy.get('button#addDeputyBtn').click();
@@ -49,9 +49,10 @@ describe('test for department configuration page', {
 
     it('should add deputy and delete it afterwards', () => {
       cy.intercept('/departmentConfiguration/addDeputy*').as('addDeputy');
-      cy.intercept('/departmentConfiguration/index*').as('loadIndex');
       cy.intercept('/departmentConfiguration/removeDeputy*').as('removeDeputy');
       cy.visit('/departmentConfiguration/index');
+      // registered after the visit, so that the intercept waits for the page to be reloaded after the changes
+      cy.intercept('/departmentConfiguration/index*').as('loadIndex');
 
       cy.get('input#deputyUsername').type('dave');
       cy.get('button#addDeputyBtn').click();

@@ -331,15 +331,13 @@ describe('Check workflow run list page', () => {
     });
 
     it('should reject POST requests to kill runs', () => {
-      // a denied POST is forwarded to the GET-only ErrorController#error403 and therefore answered with 405,
-      // the same as for the other POST-only operator actions (e.g. restartRun, killRun)
       cy.request({
         method: 'POST',
         url: '/workflowRunList/killRuns',
         form: true,
         body: { run: '1' },
         failOnStatusCode: false
-      }).its('status').should('eq', 405);
+      }).its('status').should('eq', 403);
     });
   });
 });

@@ -47,9 +47,12 @@ describe('test for data swap page', () => {
       cy.get('div.dt-button-collection').contains('Download Sample Swap Template').click();
       cy.wait('@downloadTemplate').then((res) => {
         expect(res.response.statusCode).to.eq(200);
-        cy.visit('/dataSwap');
         const filename = res.response.headers['content-disposition'].split('filename=')[1];
         const downloadsFolder = Cypress.config('downloadsFolder');
+
+        // the browser writes the file after the response has arrived, leaving the page before would cut it off
+        cy.readFile(`${downloadsFolder}/${filename}`).should('exist');
+        cy.visit('/dataSwap');
 
         cy.get('#data-swap-file').selectFile(`${downloadsFolder}/${filename}`);
       });

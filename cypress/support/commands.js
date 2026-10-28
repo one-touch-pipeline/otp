@@ -69,7 +69,8 @@ Cypress.Commands.add('loginAs', (type) => {
 
   const username = Cypress.expose(`${type}_username`);
 
-  cy.env([`${type}_password`]).then((env) => {
+  // `cy.env` does not use the `defaultCommandTimeout` but a fixed 4s, which a short stall of the CI runner exceeds
+  cy.env([`${type}_password`], { timeout: Cypress.config('defaultCommandTimeout') }).then((env) => {
     login(username, env[`${type}_password`]);
   });
 });
@@ -253,10 +254,11 @@ Cypress.Commands.add(
   'checkDownloadByContent',
   (filename, fileEnding, headerList, contentListList, quote = '"', wildcardFilename = false) => {
   const downloadsFolder = Cypress.config('downloadsFolder');
+  // the date in the file name is the UTC date: the CSV buttons build it in UTC and the server runs in UTC
   const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
+  const year = today.getUTCFullYear();
+  const month = String(today.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(today.getUTCDate()).padStart(2, '0');
   const date = `${year}-${month}-${day}`;
 
   const headerLineExpected = `${quote}${headerList.join(`${quote},${quote}`)}${quote}`;
@@ -398,6 +400,20 @@ Cypress.Commands.add('checkNotFound', (url) => {
 });
 
 /**
+ * Waits until a Bootstrap modal has finished its fade-in transition, not just until it is visible.
+ *
+ * While the transition is running, Bootstrap ignores `hide()` (and therefore any `data-bs-dismiss` button), so a
+ * confirm/close click right after `be.visible` can leave the modal open and covering the page. At the end of the
+ * transition Bootstrap focuses the modal and only then clears its transitioning state, so the focus marks the point
+ * from which the modal can be dismissed (and from which typing into its inputs no longer loses focus).
+ */
+Cypress.Commands.add('waitForModalShown', (modalSelector) => {
+  'use strict';
+
+  cy.get(modalSelector).should('be.visible').and('have.focus');
+});
+
+/**
  * Command to check the input for correctness, to prevent flaky inputs
  */
 Cypress.Commands.add('checkedTyping', (commandFn, input) => {
@@ -426,7 +442,11 @@ Cypress.Commands.add('setProcessingOption', (optionName, value) => {
       if (element.get(0).tagName === 'SELECT') {
         cy.wrap(element).select(value, { force: true });
       } else {
-        cy.wrap(element).type(value, { force: true });
+        // replace the current value, `type` alone would append to it and fail for an empty value
+        cy.wrap(element).clear({ force: true });
+        if (value !== '') {
+          cy.wrap(element).type(value, { force: true });
+        }
       }
 
       cy.get('@optionRow').contains('Save').click({ force: true });
@@ -536,8 +556,9 @@ Cypress.Commands.add('toggleButton', (buttonText, expectedSelector, assertionCal
  */
 
 Cypress.Commands.add('selectAvailableOptionFromDropdown', (selectName, optionIndex = 1) => {
-  cy.get(`select[name="${selectName}"]`).then(($select) => {
-    const option = $select.find('option').eq(optionIndex).val();
-    cy.get(`select[name="${selectName}"]`).select(option, { force: true });
-  });
+  // the options can be filled after the page is loaded, so wait for the requested one instead of reading them once
+  cy.get(`select[name="${selectName}"] option`).eq(optionIndex).should('exist').invoke('val')
+    .then((option) => {
+      cy.get(`select[name="${selectName}"]`).select(option, { force: true });
+    });
 });

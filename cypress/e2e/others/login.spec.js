@@ -31,7 +31,7 @@ describe('check login', () => {
     it('should redirect to requested page', () => {
       const username = Cypress.expose('user_username');
 
-      cy.env(['user_password']).then((env) => {
+      cy.env(['user_password'], { timeout: Cypress.config('defaultCommandTimeout') }).then((env) => {
         cy.visit('/individual/list');
         cy.url().should('contain', '/login?target=');
         cy.get('#account').type(username);
@@ -47,7 +47,7 @@ describe('check login', () => {
       cy.clearCookies();
       const username = Cypress.expose('nonAsciiPassword_username');
 
-      cy.env(['nonAsciiPassword_password']).then((env) => {
+      cy.env(['nonAsciiPassword_password'], { timeout: Cypress.config('defaultCommandTimeout') }).then((env) => {
         cy.visit('/individual/list');
         cy.url().should('contain', '/login?target=');
         cy.get('#account').type(username);

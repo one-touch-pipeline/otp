@@ -111,7 +111,7 @@ describe('test for individual page', () => {
 
     it('should add a new sample type', () => {
       cy.fixture('individual.json').then((fixture) => {
-        cy.intercept('/individual/updateField*').as('updateField');
+        cy.intercept('/individual/newSampleType*').as('newSampleType');
         cy.visit(`/individual/show/${fixture.individualId}`);
 
         cy.get('#individualSampleTbl .new-sample-type button.insert').click();
@@ -119,7 +119,10 @@ describe('test for individual page', () => {
           const addedSampleType = textbox.text();
           cy.get('#individualSampleTbl .new-sample-type button.save').click();
 
-          cy.get('#individualSampleTbl').contains(addedSampleType).should('exist');
+          cy.wait('@newSampleType').its('response.statusCode').should('eq', 200);
+          // the selection of the new sample type contains the name as well, only the samples of the reloaded page
+          // show whether it was added
+          cy.get('#individualSampleTbl td.myKey').should('contain', addedSampleType);
         });
       });
     });
@@ -144,7 +147,8 @@ describe('test for individual page', () => {
           // revisit page to check, if update was successfully and change value back.
           cy.visit(`/individual/show/${fixture.individualId}`);
 
-          cy.get('.typeDropDown').contains(newType).should('exist');
+          // the options of the editor contain the new type as well, only the label shows the stored one
+          cy.get('.typeDropDown .edit-switch-label span').should('contain', newType);
 
           cy.get(fixture.individualEditTypeButtonSelector).click();
           cy.get('.typeDropDown select').select(oldType, { force: true });

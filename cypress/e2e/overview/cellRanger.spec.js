@@ -117,6 +117,8 @@ describe('Check cell ranger page', () => {
             cy.get('input#input-3').click();
             cy.get('input#save').click();
             cy.wait('@saveRunSelection').its('response.statusCode').should('eq', 302);
+            // the save is a form submit, the toast shows that the reloaded page is loaded
+            cy.get('#otpToastBox .otpSuccessToast').should('be.visible').and('contain.text', 'successfully');
 
             cy.get('#cell-ranger-run-table tbody tr').contains('Final run').should('exist');
             // Wait for the table to update with the new run

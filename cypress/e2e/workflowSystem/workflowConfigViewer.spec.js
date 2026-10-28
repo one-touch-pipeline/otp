@@ -69,8 +69,11 @@ describe('Check workflow config viewer page', () => {
       cy.intercept('/workflowConfigViewer/build*').as('buildConfig');
 
       cy.get('#otpToastBox').should('not.exist');
+      // every selection sends its own request, waiting for each one makes sure the last one is checked
       cy.get('.selector').find('#workflowSelector').select('Bash FastQC', { force: true });
+      cy.wait('@buildConfig').its('response.statusCode').should('eq', 200);
       cy.get('.selector').find('#refGenSelector').select('1KGRef_PhiX', { force: true });
+      cy.wait('@buildConfig').its('response.statusCode').should('eq', 200);
       cy.get('.selector').find('#libPrepKitSelector').select('NEBNext Methyl-seq Kit', { force: true });
 
       cy.wait('@buildConfig').then((interception) => {

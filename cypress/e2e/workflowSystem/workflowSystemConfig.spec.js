@@ -55,10 +55,12 @@ describe('Check workflow system configuration page', {
 
       cy.wait('@updateWorkflow').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
-        cy.get('td').contains('Cell Ranger').siblings().contains(priority);
-        cy.get('td').contains('Cell Ranger').siblings().contains(maxRuns);
-        cy.get('td').contains('Cell Ranger').siblings().contains(supportedSeqType);
-        cy.get('td').contains('Cell Ranger').siblings().contains(defaultRefGen);
+        // the random numbers are short and could be found in other cells as well, so check the cells of their columns
+        cy.get('td').contains('Cell Ranger').closest('tr').find('td').as('workflowCells');
+        cy.get('@workflowCells').eq(2).should('have.text', priority.toString());
+        cy.get('@workflowCells').eq(4).should('have.text', maxRuns.toString());
+        cy.get('@workflowCells').eq(6).should('contain', supportedSeqType);
+        cy.get('@workflowCells').eq(7).should('contain', defaultRefGen);
       });
     });
 

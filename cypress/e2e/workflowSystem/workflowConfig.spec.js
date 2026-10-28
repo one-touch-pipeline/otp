@@ -89,6 +89,7 @@ describe('Check workflow config page', () => {
 
         cy.get('div.modal-content').should('be.visible');
         cy.get('div.modal-content input[name="selectorName"]').should('have.value', config[0].selectorName);
+        shouldShowConfigValue(config[0].value);
 
         cy.checkedTyping(() => cy.get('div.modal-content').find('input[name="selectorName"]'), config[2].selectorName);
 
@@ -140,6 +141,7 @@ describe('Check workflow config page', () => {
         });
         cy.get('div.modal-content').should('be.visible');
         cy.get('div.modal-content input[name="selectorName"]').should('have.value', config[2].selectorName);
+        shouldShowConfigValue(config[2].value);
 
         cy.checkedTyping(() => cy.get('div.modal-content input[name="selectorName"]'), config[3].selectorName);
         cy.get('div.modal-content').find('select[name="projects"]').select(config[3].projects, { force: true });
@@ -278,3 +280,15 @@ describe('Check workflow config page', () => {
     });
   });
 });
+
+/**
+ * The selector name is set when the modal opens, the config value only after the fragments are loaded. Saving before
+ * that would send an empty value, so wait until the modal shows the expected one.
+ */
+const shouldShowConfigValue = (value) => {
+  'use strict';
+
+  cy.get('div.modal-content textarea[name="value"]').should(($textarea) => {
+    expect(JSON.parse($textarea.val() || 'null'), 'config value shown in the modal').to.deep.equal(JSON.parse(value));
+  });
+};

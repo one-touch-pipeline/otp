@@ -124,7 +124,7 @@ describe('Check projectRequest page', () => {
         });
 
         it('should fail to add project request as draft when users are duplicated across PI and user sections', () => {
-          cy.intercept('/projectRequest/index*').as('saveProjectRequest');
+          cy.intercept('POST', '/projectRequest/index*').as('saveProjectRequest');
           cy.visit('/projectRequest/index');
 
           cy.fixture('projectRequest.json').then((requests) => {
@@ -147,7 +147,7 @@ describe('Check projectRequest page', () => {
             cy.get('input[name=_action_saveIndex]').click();
 
             cy.wait('@saveProjectRequest').then((interception) => {
-              expect(interception.response.statusCode).to.eq(200);
+              expect(interception.response.statusCode).to.eq(302);
               cy.get('#otpToastBox .otpErrorToast').should('exist');
               cy.get('#otpToastBox .otpErrorToast').should('contain', 'The project request could not be stored');
               cy.get('#otpToastBox .otpErrorToast')
@@ -157,7 +157,7 @@ describe('Check projectRequest page', () => {
         });
 
         it('should add project request as draft', () => {
-          cy.intercept('/projectRequest/index*').as('saveProjectRequest');
+          cy.intercept('POST', '/projectRequest/index*').as('saveProjectRequest');
           cy.visit('/projectRequest/index');
 
           cy.fixture('projectRequest.json').then((requests) => {
@@ -180,7 +180,7 @@ describe('Check projectRequest page', () => {
             cy.get('input[name=_action_saveIndex]').click();
 
             cy.wait('@saveProjectRequest').then((interception) => {
-              expect(interception.response.statusCode).to.eq(200);
+              expect(interception.response.statusCode).to.eq(302);
               cy.location('pathname').should('match', /^\/projectRequest\/view\//);
               cy.get('#otpToastBox .otpSuccessToast').should('exist').and('contain', 'stored successfully');
               cy.get('h3').should('contain', `${request.projectName} ${randomProject}`);
@@ -190,7 +190,7 @@ describe('Check projectRequest page', () => {
 
         it('should find, edit and save unresolved project request', () => {
           cy.intercept('/projectRequest/unresolved*').as('routeToUnresolved');
-          cy.intercept('/projectRequest/index*').as('projectRequestIndex');
+          cy.intercept('POST', '/projectRequest/index*').as('projectRequestIndex');
           cy.visit('/projectRequest/index');
 
           // navigate to the unresolved tab
@@ -207,7 +207,7 @@ describe('Check projectRequest page', () => {
             // edit a field of the project request
             cy.get('input[value=Edit]').click();
             cy.wait('@projectRequestIndex').then((intcpt) => {
-              expect(intcpt.response.statusCode).to.eq(200);
+              expect(intcpt.response.statusCode).to.eq(302);
               cy.location('pathname').should('eq', '/projectRequest/index');
               cy.get('textarea#requesterComment').type('hello world');
               cy.get('input#saveIndex-request-btn').click();
@@ -218,7 +218,7 @@ describe('Check projectRequest page', () => {
         });
 
         it('should submit an unresolved project request', () => {
-          cy.intercept('/projectRequest/index*').as('projectRequestIndex');
+          cy.intercept('POST', '/projectRequest/index*').as('projectRequestIndex');
           cy.visit('/projectRequest/unresolved');
 
           // select the project request in the table
@@ -246,7 +246,7 @@ describe('Check projectRequest page', () => {
         });
 
         it('should pass on the project request', () => {
-          cy.intercept('/projectRequest/index*').as('projectRequestIndex');
+          cy.intercept('POST', '/projectRequest/index*').as('projectRequestIndex');
           cy.visit('/projectRequest/unresolved');
           selectProjectRequest(draftIdx);
 
@@ -268,7 +268,7 @@ describe('Check projectRequest page', () => {
         });
 
         it('should edit and save the project request', () => {
-          cy.intercept('/projectRequest/index*').as('projectRequestIndex');
+          cy.intercept('POST', '/projectRequest/index*').as('projectRequestIndex');
           cy.visit('/projectRequest/unresolved');
 
           // select the project request in the table
@@ -297,6 +297,8 @@ describe('Check projectRequest page', () => {
           selectProjectRequest(draftIdx);
 
           cy.get('input#edit-request-btn').click();
+          // the edit is submitted as a form, the visit below would cut it off
+          cy.location('pathname').should('match', /^\/projectRequest\/index/);
 
           cy.visit('/projectRequest/unresolved');
           selectProjectRequest(draftIdx);
@@ -328,7 +330,7 @@ describe('Check projectRequest page', () => {
         });
 
         it('should submit a project request', () => {
-          cy.intercept('/projectRequest/index*').as('saveProjectRequest');
+          cy.intercept('POST', '/projectRequest/index*').as('saveProjectRequest');
           cy.visit('/projectRequest/index');
 
           cy.fixture('projectRequest.json').then((requests) => {
@@ -351,7 +353,7 @@ describe('Check projectRequest page', () => {
             cy.get('input#submitIndex-request-btn').click();
 
             cy.wait('@saveProjectRequest').then((interception) => {
-              expect(interception.response.statusCode).to.eq(200);
+              expect(interception.response.statusCode).to.eq(302);
               cy.location('pathname').should('match', /^\/projectRequest\/unresolved/);
               cy.get('#otpToastBox .otpSuccessToast').should('exist').and('contain', 'stored successfully');
               cy.get('table tbody tr')
@@ -368,7 +370,7 @@ describe('Check projectRequest page', () => {
         });
 
         it('should pass on the project request', () => {
-          cy.intercept('/projectRequest/index*').as('projectRequestIndex');
+          cy.intercept('POST', '/projectRequest/index*').as('projectRequestIndex');
           cy.visit('/projectRequest/unresolved');
           selectProjectRequest(submitIdx);
 
@@ -390,7 +392,7 @@ describe('Check projectRequest page', () => {
         });
 
         it('should approve the project request', () => {
-          cy.intercept('/projectRequest/index*').as('projectRequestIndex');
+          cy.intercept('POST', '/projectRequest/index*').as('projectRequestIndex');
           cy.visit('/projectRequest/unresolved');
           selectProjectRequest(submitIdx);
 
@@ -408,7 +410,7 @@ describe('Check projectRequest page', () => {
 
           // second PI (goofy) approves
           cy.loginAs('departmentHead');
-          cy.intercept('/projectRequest/index*').as('projectRequestIndex2');
+          cy.intercept('POST', '/projectRequest/index*').as('projectRequestIndex2');
           cy.visit('/projectRequest/unresolved');
           selectProjectRequest(submitIdx);
 
@@ -451,10 +453,40 @@ describe('Check projectRequest page', () => {
       cy.wait('@createProjectField').its('response.statusCode').should('eq', 302);
     });
 
+    it('should list each PI once, when the PIs are loaded again before the previous answer arrived', () => {
+      cy.loginAs('user');
+
+      // delay the first answer, so that it arrives only after the PIs are requested again
+      let firstRequest = true;
+      cy.intercept('/projectRequest/getPIs*', (req) => {
+        if (firstRequest) {
+          firstRequest = false;
+          req.on('response', (res) => res.setDelay(2000));
+        }
+      }).as('getPIs');
+
+      cy.visit('/projectRequest/index');
+
+      cy.fixture('projectRequest.json').then((request) => {
+        cy.get('select#projectType').select(request[3].projectType, { force: true });
+        // confirming the organizational unit loads the PIs, leaving the field loads them again
+        cy.get('input#organizationalunit').type(request[3].organizationalUnit);
+        cy.get('a#pi-tab').click();
+
+        // the first request is aborted by the second one, so it never gets an answer that
+        // `cy.wait('@getPIs')` could wait for; wait longer than its delay instead, so that a stale
+        // first answer would not have added the PIs a second time already
+        cy.wait(3000);
+        cy.get('.pi-user-form select.pi-selector').first()
+          .find('option:contains("margarett (Margarett Mclaughin)")')
+          .should('have.length', 1);
+      });
+    });
+
     it('should submit project request with department deputy as a normal user', () => {
       cy.loginAs('user');
 
-      cy.intercept('/projectRequest/index*').as('projectRequestIndex');
+      cy.intercept('POST', '/projectRequest/index*').as('projectRequestIndex');
       cy.intercept('/projectRequest/getPIs*').as('getPIs');
       cy.intercept('/projectRequest/unresolved*').as('routeToUnresolved');
 
@@ -486,7 +518,7 @@ describe('Check projectRequest page', () => {
 
         // save as draft
         cy.wait('@projectRequestIndex').then((interception) => {
-          expect(interception.response.statusCode).to.eq(200);
+          expect(interception.response.statusCode).to.eq(302);
           cy.location('pathname').should('match', /^\/projectRequest\/view\//);
         });
 
@@ -515,7 +547,7 @@ describe('Check projectRequest page', () => {
         cy.get('input[value="Submit"]').click();
 
         cy.wait('@projectRequestIndex').then((interception) => {
-          expect(interception.response.statusCode).to.eq(200);
+          expect(interception.response.statusCode).to.eq(302);
           cy.location('pathname').should('match', /^\/projectRequest\/unresolved/);
           cy.get('#otpToastBox .otpSuccessToast').should('exist').and('contain', 'stored successfully');
           cy.get('table tbody tr')
@@ -527,7 +559,7 @@ describe('Check projectRequest page', () => {
 
     it('should pass on the request as operator', () => {
       cy.loginAs('operator');
-      cy.intercept('/projectRequest/index*').as('projectRequestIndex');
+      cy.intercept('POST', '/projectRequest/index*').as('projectRequestIndex');
       cy.visit('/projectRequest/unresolved');
       selectProjectRequest(3);
 
@@ -553,7 +585,7 @@ describe('Check projectRequest page', () => {
 
     it('should approve the request as department deputy', () => {
       cy.loginAs('departmentDeputy');
-      cy.intercept('/projectRequest/index*').as('projectRequestIndex');
+      cy.intercept('POST', '/projectRequest/index*').as('projectRequestIndex');
       cy.visit('/projectRequest/unresolved');
       selectProjectRequest(3);
 
@@ -600,7 +632,7 @@ describe('Check projectRequest page', () => {
     });
 
     it('should save USER_MANAGEMENT request without species and approximate number of samples', () => {
-      cy.intercept('/projectRequest/index*').as('saveProjectRequest');
+      cy.intercept('POST', '/projectRequest/index*').as('saveProjectRequest');
       cy.visit('/projectRequest/index');
 
       cy.get('select#projectType').select('USER_MANAGEMENT', { force: true });
@@ -614,7 +646,7 @@ describe('Check projectRequest page', () => {
       cy.get('input[name=_action_saveIndex]').click();
 
       cy.wait('@saveProjectRequest').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
+        expect(interception.response.statusCode).to.eq(302);
         cy.location('pathname').should('match', /^\/projectRequest\/view\//);
         cy.get('#otpToastBox .otpSuccessToast').should('exist').and('contain', 'stored successfully');
         cy.get('#otpToastBox .otpErrorToast').should('not.exist');
@@ -622,7 +654,7 @@ describe('Check projectRequest page', () => {
     });
 
     it('should require storage end date when USER_DEFINED storage period is selected', () => {
-      cy.intercept('/projectRequest/index*').as('saveProjectRequest');
+      cy.intercept('POST', '/projectRequest/index*').as('saveProjectRequest');
       cy.visit('/projectRequest/index');
 
       cy.get('select#projectType').select('USER_MANAGEMENT', { force: true });
@@ -636,14 +668,14 @@ describe('Check projectRequest page', () => {
       cy.get('input[name=_action_saveIndex]').click();
 
       cy.wait('@saveProjectRequest').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
+        expect(interception.response.statusCode).to.eq(302);
         cy.get('#otpToastBox .otpErrorToast').should('exist').and('contain', 'The project request could not be stored');
         cy.get('#otpToastBox .otpErrorToast').should('contain', 'Storage end date must be filled in');
       });
     });
 
     it('should reject a past storage end date', () => {
-      cy.intercept('/projectRequest/index*').as('saveProjectRequest');
+      cy.intercept('POST', '/projectRequest/index*').as('saveProjectRequest');
       cy.visit('/projectRequest/index');
 
       cy.get('select#projectType').select('USER_MANAGEMENT', { force: true });
@@ -658,7 +690,7 @@ describe('Check projectRequest page', () => {
       cy.get('input[name=_action_saveIndex]').click();
 
       cy.wait('@saveProjectRequest').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
+        expect(interception.response.statusCode).to.eq(302);
         cy.get('#otpToastBox .otpErrorToast').should('exist').and('contain', 'The project request could not be stored');
         cy.get('#otpToastBox .otpErrorToast').should('contain', 'The selected date for Storage Until is in the past');
       });
@@ -719,7 +751,7 @@ describe('Check projectRequest page', () => {
 
     it('should save SEQUENCING request with required custom field filled', () => {
       cy.loginAs('user');
-      cy.intercept('/projectRequest/index*').as('saveProjectRequest');
+      cy.intercept('POST', '/projectRequest/index*').as('saveProjectRequest');
       cy.intercept('/projectRequest/delete*').as('deleteProjectRequest');
       cy.visit('/projectRequest/index');
 
@@ -734,7 +766,9 @@ describe('Check projectRequest page', () => {
       cy.get('select#seqTypesList').select(0, { force: true });
       addPiClearUserTab();
 
-      // attempt to save without filling the required custom field — browser should prevent submission
+      // attempt to save without filling the required custom field — browser should prevent submission.
+      // The field is rendered by the answer to the selection of the project type, so wait for it first.
+      cy.get('input#requiredfield').should('have.attr', 'required');
       cy.get('input[name=_action_saveIndex]').click();
       cy.location('pathname').should('eq', '/projectRequest/index');
 
@@ -743,7 +777,7 @@ describe('Check projectRequest page', () => {
       cy.get('input[name=_action_saveIndex]').click();
 
       cy.wait('@saveProjectRequest').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
+        expect(interception.response.statusCode).to.eq(302);
         cy.location('pathname').should('match', /^\/projectRequest\/view\//);
         cy.get('#otpToastBox .otpSuccessToast').should('exist').and('contain', 'stored successfully');
         cy.get('table td').should('contain', 'custom value');
@@ -753,6 +787,9 @@ describe('Check projectRequest page', () => {
       cy.get('a#delete-request-btn').click();
       cy.get('div#confirmationModal').should('be.visible').find('button#confirmModal').click();
       cy.wait('@deleteProjectRequest').its('response.statusCode').should('eq', 200);
+      // after the deletion the page redirects to the unresolved requests, wait for it so that the redirect cannot
+      // interrupt the visit in the `after()` hook
+      cy.location('pathname').should('eq', '/projectRequest/unresolved');
     });
 
     after(() => {

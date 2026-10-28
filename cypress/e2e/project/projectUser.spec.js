@@ -73,6 +73,8 @@ describe('Check projectUser page', () => {
       cy.wait('@setEnabled').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
       });
+      // the page is reloaded after the change, which must not run into the next test
+      getProjectMemberRow('dori').find('button.changeProjectAccess').should('contain', 'Deactivate');
     });
 
     it('should update users mail address', () => {
@@ -209,8 +211,7 @@ describe('Check projectUser page', () => {
       cy.get('@userRow').find('td.manageUsers').then((userRow) => {
         if (userRow.find('.icon-false').length) {
           manageUserRightsWhereGranted = false;
-          cy.get('@userRow').find('td.manageUsers button.edit').click();
-          cy.get('@userRow').find('td.manageUsers button.toggle').click();
+          toggleManageUsers('@userRow');
         }
       });
     });
@@ -264,8 +265,7 @@ describe('Check projectUser page', () => {
         cy.visit('/projectUser/index');
 
         getProjectMemberRow('dave').as('userRow');
-        cy.get('@userRow').find('td.manageUsers button.edit').click();
-        cy.get('@userRow').find('td.manageUsers button.toggle').click();
+        toggleManageUsers('@userRow');
       }
     });
   });
@@ -343,17 +343,37 @@ describe('Check projectUser page', () => {
 
       getProjectMemberRow(user).find('td.receivesNotifications').as('notificationCell');
 
-      cy.get('@notificationCell').find('button.edit').click();
-      cy.get('@notificationCell').find('button.toggle').click();
-      cy.wait('@setReceivesNotifications').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-      });
+      // The toggle sends the inverse of the stored value, which is updated only after the answer arrived. Toggling it
+      // again before the answer would send the same value twice.
+      cy.get('@notificationCell').find('input:hidden[name=value]').invoke('val').then((valueBefore) => {
+        const toggledValue = valueBefore === 'true' ? 'false' : 'true';
 
-      cy.get('@notificationCell').find('button.edit').click();
-      cy.get('@notificationCell').find('button.toggle').click();
-      cy.wait('@setReceivesNotifications').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
+        cy.get('@notificationCell').find('button.edit').click();
+        cy.get('@notificationCell').find('button.toggle').click();
+        cy.wait('@setReceivesNotifications').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+        });
+        cy.get('@notificationCell').find('input:hidden[name=value]').should('have.value', toggledValue);
+
+        cy.get('@notificationCell').find('button.edit').click();
+        cy.get('@notificationCell').find('button.toggle').click();
+        cy.wait('@setReceivesNotifications').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+        });
+        cy.get('@notificationCell').find('input:hidden[name=value]').should('have.value', valueBefore);
       });
     });
   }
 });
+
+/**
+ * The toggle only sends an ajax request. The next login would cut it off, so wait until the change is saved.
+ */
+const toggleManageUsers = (userRowAlias) => {
+  'use strict';
+
+  cy.intercept({ pathname: '/projectUser/setManageUsers' }).as('setManageUsers');
+  cy.get(userRowAlias).find('td.manageUsers button.edit').click();
+  cy.get(userRowAlias).find('td.manageUsers button.toggle').click();
+  cy.wait('@setManageUsers').its('response.statusCode').should('eq', 200);
+};

@@ -45,8 +45,11 @@ import java.sql.*
  * once (e.g. {@code parallelStream()} in validators), and serializing borrows here would deadlock (the request thread
  * would hold the lock while waiting for its own worker threads). Instead we rely on the JDBC driver, which already
  * serializes individual statements on one physical connection. Everything ends up in the one outer transaction and is
- * discarded together, so interleaving between those threads is harmless for test isolation. Cypress runs requests
- * serially, so cross-request contention does not arise.</p>
+ * discarded together, so interleaving between those threads is harmless for test isolation. The same holds for
+ * requests running at the same time, which pages do send (e.g. several DataTables loading their data, or polling).</p>
+ *
+ * <p>Since the application cannot roll back the outer transaction, a failing SQL statement leaves it aborted in
+ * PostgreSQL: every later statement of the spec fails until the next {@link #beginPage()}.</p>
  *
  * <p>There are exactly two, reset-first nesting levels, matching the two Cypress boundaries:</p>
  * <ul>

@@ -41,8 +41,8 @@ class ErrorController {
 
     static allowedMethods = [
             index                      : allHttpMethods,
-            error403                   : "GET",
-            error404                   : "GET",
+            error403                   : allHttpMethods,
+            error404                   : allHttpMethods,
             error405                   : allHttpMethods,
             error500                   : allHttpMethods,
             noProject                  : "GET",

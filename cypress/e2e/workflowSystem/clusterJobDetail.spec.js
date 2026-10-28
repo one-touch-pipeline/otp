@@ -29,9 +29,16 @@ describe('Check cluster job detail page', () => {
     });
 
     it('should visit the cluster job detail page via the cluster job general page', () => {
+      cy.intercept('/clusterJobGeneral/findAllClusterJobsByDateBetween?*').as('dataTableSource');
       cy.visit('/clusterJobGeneral/index');
-      cy.get('input#dpFrom').type('2021-06-07');
-      cy.get('input#dpTo').type('2022-03-09');
+      cy.wait('@dataTableSource').its('response.statusCode').should('eq', 200);
+      // typing a date sends the change event only when the input is deselected, and every change reloads the table to
+      // the same time range as on the cluster job general page, which contains finished jobs
+      cy.get('input#dpFrom').type('2022-08-20').blur();
+      cy.wait('@dataTableSource').its('response.statusCode').should('eq', 200);
+      cy.get('input#dpTo').type('2022-09-10').blur();
+      cy.wait('@dataTableSource').its('response.statusCode').should('eq', 200);
+      cy.get('div#clusterJobGeneralTable_processing').should('not.be.visible');
 
       cy.get('table tbody').find('tr a').each((clusterJobDetailAnkerLink) => {
         cy.visit(clusterJobDetailAnkerLink.prop('href'));

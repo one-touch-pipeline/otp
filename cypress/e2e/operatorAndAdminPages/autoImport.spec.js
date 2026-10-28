@@ -128,7 +128,7 @@ const resetAutoImport = () => {
 const autoImport = (ilseNumbers, ticketNumber, failOnStatusCode) => {
   'use strict';
 
-  return cy.env(['otp.autoimport.secret']).then((env) => {
+  return cy.env(['otp.autoimport.secret'], { timeout: Cypress.config('defaultCommandTimeout') }).then((env) => {
     // An explicitly configured empty secret must not silently fall back to the dev default:
     // sending it makes the request fail loudly and expose the misconfiguration.
     const configuredSecret = env['otp.autoimport.secret'];

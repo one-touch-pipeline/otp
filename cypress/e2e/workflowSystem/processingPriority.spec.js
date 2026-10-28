@@ -80,12 +80,14 @@ describe('Check processing priority page', () => {
         .click();
       cy.get('button.btn-primary').contains('Save').should('exist');
       cy.get('button.btn-secondary').contains('Cancel').should('exist');
-      cy.get('input#pp-name').clear().type(`prio2 ${randomDate}`, { force: true });
-      cy.get('input#pp-priority').clear().type((randomNumber + 1).toString(), { force: true });
-      cy.get('input#pp-allowedParallelWorkflowRuns').clear().type('4', { force: true });
-      cy.get('input#pp-queue').clear().type(`queue2 ${randomDate}`, { force: true });
-      cy.get('input#pp-roddyConfigSuffix').clear().type(`suffix2 ${randomDate}`, { force: true });
-      cy.get('input#pp-errorMailPrefix').clear().type(`mail2 ${randomDate}`, { force: true });
+      // the modal will get focused on at the end of its fade-in, which can swallow typed characters, so the
+      // values are cleared and typed again until they are complete
+      cy.checkedTyping(() => cy.get('input#pp-name'), `prio2 ${randomDate}`);
+      cy.checkedTyping(() => cy.get('input#pp-priority'), (randomNumber + 1).toString());
+      cy.checkedTyping(() => cy.get('input#pp-allowedParallelWorkflowRuns'), '4');
+      cy.checkedTyping(() => cy.get('input#pp-queue'), `queue2 ${randomDate}`);
+      cy.checkedTyping(() => cy.get('input#pp-roddyConfigSuffix'), `suffix2 ${randomDate}`);
+      cy.checkedTyping(() => cy.get('input#pp-errorMailPrefix'), `mail2 ${randomDate}`);
       cy.get('button#bt-save').click();
 
       cy.get('.otpSuccessToast').should('exist')
@@ -103,12 +105,17 @@ describe('Check processing priority page', () => {
 
     it('should not be able to create a processing priority with invalid inputs', () => {
       cy.get('button.btn').contains('Create').click();
-      cy.get('input#pp-name').clear().type(`prio2 ${randomDate}`, { force: true });
-      cy.get('input#pp-priority').clear().type('55');
+      // the save button starts disabled, so it is enabled with valid inputs first
+      cy.get('input#pp-name').clear().type(`prio3 ${randomDate}`, { force: true });
+      cy.get('input#pp-priority').clear().type((randomNumber + 1000).toString());
       cy.get('input#pp-allowedParallelWorkflowRuns').clear().type('2', { force: true });
       cy.get('input#pp-queue').clear().type('queue', { force: true });
       cy.get('input#pp-roddyConfigSuffix').clear().type('suffix', { force: true });
       cy.get('input#pp-errorMailPrefix').clear().type('mail', { force: true });
+      cy.get('button#bt-save').should('not.be.disabled');
+
+      // the name of an existing processing priority is invalid
+      cy.checkedTyping(() => cy.get('input#pp-name'), `prio2 ${randomDate}`);
       cy.get('button#bt-save').should('be.disabled');
     });
 

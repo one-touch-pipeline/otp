@@ -42,6 +42,8 @@ describe('Check projectCreation page', () => {
       cy.get('#description').clear().type(`Sample description: ${randomString}`);
       cy.get('#sendProjectCreationNotification').uncheck();
       cy.get('input#save').click();
+      // the first submit comes back to the form, which asks about the users of the base objects
+      cy.wait('@saveProject').its('response.statusCode').should('eq', 302);
       cy.get('#ignoreUsersFromBaseObjects').check();
       cy.get('input#save').click();
 

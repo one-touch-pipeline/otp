@@ -43,10 +43,14 @@ describe('Check rawSequenceFile pages', () => {
         cy.wait('@dataTableSource').then((interception) => {
           expect(interception.response.statusCode).to.be.eq(200);
 
+          // the response arrives before DataTables has drawn the rows, until then the first cell is the loading
+          // message, so wait for the link to the individual
           cy.get('table#projectOverviewTable tbody tr').first()
             .find('td')
             .first()
+            .find('a')
             .click();
+          cy.checkPage('individual/show');
 
           cy.get('table tbody tr').find('a').eq(2)
             .click();
@@ -64,7 +68,9 @@ describe('Check rawSequenceFile pages', () => {
 
             cy.wait('@saveDataFileComment').then((intercept) => {
               expect(intercept.response.statusCode).to.be.eq(200);
-              cy.get('span#authorSpan').should('not.be.empty');
+              // the span shows the author of the previous comment already, so check for the one just saved
+              const { date, author } = intercept.response.body;
+              cy.get('span#authorSpan').should('have.text', `${date} ${author}`);
             });
           } else {
           // User can only view - verify page loads and comment section is visible but readonly

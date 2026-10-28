@@ -197,10 +197,13 @@ describe('Check workflow job error definition page', () => {
       cy.visit('/workflowJobErrorDefinition/index');
       cy.intercept('/workflowJobErrorDefinition/delete*').as('deleteWorkflowJobErrorDefinition');
 
-      cy.get('div.errorDefinitions tbody tr').eq(1).find('td.delete input#delete').click();
-      cy.wait('@deleteWorkflowJobErrorDefinition').then((interception) => {
-        expect(interception.response.statusCode).to.eq(302);
-        cy.get('div.errorDefinitions').find('tbody').should('have.length', 1);
+      cy.get('div.errorDefinitions tbody tr').its('length').then((rowsBefore) => {
+        cy.get('div.errorDefinitions tbody tr').eq(1).find('td.delete input#delete').click();
+        cy.wait('@deleteWorkflowJobErrorDefinition').then((interception) => {
+          expect(interception.response.statusCode).to.eq(302);
+          // the reloaded page shows one definition less
+          cy.get('div.errorDefinitions tbody tr').should('have.length', rowsBefore - 1);
+        });
       });
     });
   });

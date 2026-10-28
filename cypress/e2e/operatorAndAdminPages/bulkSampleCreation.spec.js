@@ -74,13 +74,19 @@ describe('Check bulk sample creation page', () => {
 
 
     it('cannot create samples without delimiter or with unknown project', () => {
+      cy.intercept('/bulkSampleCreation/submit*').as('bulkSampleCreation');
+
       cy.get('#sampleText').clear().type('PROJECT,PID,SAMPLE_TYPE,SAMPLE_IDENTIFIER\nUnknownProject,pid1,tumor1,identifier1');
 
       cy.get('.btn').contains('Submit').click();
+      // the delimiter has to be fixed on the reloaded page, which shows the error of the first try
+      cy.wait('@bulkSampleCreation').its('response.statusCode').should('eq', 302);
+      cy.get('#otpToastBox .otpErrorToast').should('exist');
 
       // Fixing the delimiter and trying again
       cy.get('select#delimiter').select(',', { force: true });
       cy.get('.btn').contains('Submit').click();
+      cy.wait('@bulkSampleCreation').its('response.statusCode').should('eq', 302);
 
       cy.get('#otpToastBox .otpErrorToast').should('exist')
         .and('contain.text', 'Creation failed')

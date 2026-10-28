@@ -38,7 +38,7 @@ describe('test for keyword page', () => {
 
       cy.wait('@createKeyword').its('response.statusCode').should('eq', 302);
 
-      cy.get('div#project-keywords').contains(keyword);
+      cy.get('div#project-keywords ul').contains(keyword);
     });
 
     it('should add an existing keyword', () => {
@@ -48,7 +48,8 @@ describe('test for keyword page', () => {
       cy.get('input#add-keyword2').click();
       cy.wait('@addKeyword').its('response.statusCode').should('eq', 302);
 
-      cy.get('div#project-keywords').contains('keyword2');
+      // the input field suggests all available keywords, only the list shows the keywords of the project
+      cy.get('div#project-keywords ul').contains('keyword2');
     });
 
     it('should add an existing keyword', () => {
@@ -61,7 +62,7 @@ describe('test for keyword page', () => {
 
       cy.wait('@addKeyword').its('response.statusCode').should('eq', 302);
 
-      cy.get('div#project-keywords').contains(keyword);
+      cy.get('div#project-keywords ul').contains(keyword);
     });
 
     it('should remove all keywords', () => {

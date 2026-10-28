@@ -88,14 +88,19 @@ describe('Check dataTransfer page', () => {
       cy.get('@dtaCard').find('.btn-link').click();
       cy.get('@dtaCard').find('.transfer-listing > li').first().as('transfer');
 
-      cy.get('@transfer').find('.alignment-add-files-btn').click();
-      cy.get('@transfer').find('input[type=file][name=files]')
-        .selectFile(`${fixturesFolder}/file-uploads/hello-world.txt`, { force: true });
-      cy.get('@transfer').find('button[onclick*="addFilesToTransfer"]').click();
+      // the transfer has documents from its creation already, so count them before adding the file
+      cy.get('@transfer').then(($transfer) => {
+        const documentsBefore = $transfer.find('[id^="transferDocuments-"] a').length;
 
-      cy.wait('@addFiles').its('response.statusCode').should('eq', 200);
-      cy.get(toastSuccess).should('be.visible').and('contain.text', 'Files are added');
-      cy.get('@transfer').find('[id^="transferDocuments-"] a').should('have.length.at.least', 1);
+        cy.get('@transfer').find('.alignment-add-files-btn').click();
+        cy.get('@transfer').find('input[type=file][name=files]')
+          .selectFile(`${fixturesFolder}/file-uploads/hello-world.txt`, { force: true });
+        cy.get('@transfer').find('button[onclick*="addFilesToTransfer"]').click();
+
+        cy.wait('@addFiles').its('response.statusCode').should('eq', 200);
+        cy.get(toastSuccess).should('be.visible').and('contain.text', 'Files are added');
+        cy.get('@transfer').find('[id^="transferDocuments-"] a').should('have.length', documentsBefore + 1);
+      });
     });
 
     it('should show error toast when uploading to a transfer without selecting a file', () => {

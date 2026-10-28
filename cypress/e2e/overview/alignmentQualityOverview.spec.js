@@ -29,10 +29,8 @@ describe('Check alignment quality overview page', () => {
     });
 
     it('should change warning status to accepted', () => {
-      cy.visit('/alignmentQualityOverview/index');
-
-      cy.get('#seqType')
-        .select('EXOME PAIRED bulk', { force: true });
+      // selecting the seqType reloads the page, the status has to be changed on the reloaded one
+      loadAlignmentPage('ExampleProject', 'EXOME PAIRED bulk');
 
       cy.get('table#overviewTableProcessedMergedBMF tbody')
         .find('tr')
@@ -57,7 +55,7 @@ describe('Check alignment quality overview page', () => {
 
     // Checks for download files
     it('should download and check the alignment quality control with EXOME', () => {
-      loadAlignmentPage('ExampleProject', 'EXOME PAIRED bulk');
+      loadAlignmentPage('ExampleProject', 'EXOME PAIRED bulk', 'alignmentQualityControlExome.json');
       cy.get('div#overviewTableProcessedMergedBMF_wrapper button')
         .contains('Download').click();
       cy.checkDownloadByContentOfFixture('alignmentQualityControlExome.json');
@@ -66,28 +64,28 @@ describe('Check alignment quality overview page', () => {
     // For the other Seq types the projectUsingFastQ was used
     // The ExampleProject doesn't have data for other Seq types
     it('should download and check the alignment quality control with 10x_scRNA', () => {
-      loadAlignmentPage('projectUsingFastq', '10x_scRNA PAIRED single cell');
+      loadAlignmentPage('projectUsingFastq', '10x_scRNA PAIRED single cell', 'alignmentQualityControl10xscRNA.json');
       cy.get('div#overviewTableProcessedMergedBMF_wrapper button')
         .contains('Download').click();
       cy.checkDownloadByContentOfFixture('alignmentQualityControl10xscRNA.json');
     });
 
     it('should download and check the alignment quality control with ChIP paired', () => {
-      loadAlignmentPage('projectUsingFastq', 'ChIP PAIRED bulk');
+      loadAlignmentPage('projectUsingFastq', 'ChIP PAIRED bulk', 'alignmentQualityControlChIP.json');
       cy.get('div#overviewTableProcessedMergedBMF_wrapper button')
         .contains('Download').click();
       cy.checkDownloadByContentOfFixture('alignmentQualityControlChIP.json');
     });
 
     it('should download and check the alignment quality control with RNA SINGLE bulk', () => {
-      loadAlignmentPage('projectUsingFastq', 'RNA SINGLE bulk');
+      loadAlignmentPage('projectUsingFastq', 'RNA SINGLE bulk', 'alignmentQualityControlRNA.json');
       cy.get('div#overviewTableProcessedMergedBMF_wrapper button')
         .contains('Download').click();
       cy.checkDownloadByContentOfFixture('alignmentQualityControlRNA.json');
     });
 
     it('should download and check the alignment quality control with WGS PAIRED bulk', () => {
-      loadAlignmentPage('projectUsingFastq', 'WGS PAIRED bulk');
+      loadAlignmentPage('projectUsingFastq', 'WGS PAIRED bulk', 'alignmentQualityControlWGS.json');
       cy.get('div#overviewTableProcessedMergedBMF_wrapper button')
         .contains('Download').click();
       cy.checkDownloadByContentOfFixture('alignmentQualityControlWGS.json');
@@ -102,7 +100,7 @@ describe('Check alignment quality overview page', () => {
     // Checks for download files
     // Normal User has access only to ExampleProject
     it('should download and check the alignment quality control with EXOME', () => {
-      loadAlignmentPage('ExampleProject', 'EXOME PAIRED bulk');
+      loadAlignmentPage('ExampleProject', 'EXOME PAIRED bulk', 'alignmentQualityControlExome.json');
       cy.get('div#overviewTableProcessedMergedBMF_wrapper button')
         .contains('Download').click();
       cy.checkDownloadByContentOfFixture('alignmentQualityControlExome.json');
@@ -110,15 +108,35 @@ describe('Check alignment quality overview page', () => {
   });
 });
 
-const loadAlignmentPage = (project, seqType) => {
+const loadAlignmentPage = (project, seqType, fixtureFileName) => {
   'use strict';
 
   cy.clearDownloadsFolder();
   cy.intercept('POST', '/alignmentQualityOverview/dataTableSource*').as('dataTable');
   cy.visitProjectPage('/alignmentQualityOverview/index', project);
-  cy.get('#seqType')
-    .select(seqType, { force: true });
   cy.wait('@dataTable').then((interception) => {
     expect(interception.response.statusCode).to.equal(200);
   });
+
+  // selecting another seqType reloads the page. Selecting the seqType that is
+  // already shown doesn't trigger a reload, so no new request would be sent.
+  cy.get('#seqType option:selected').then(($option) => {
+    if ($option.text().trim() !== seqType) {
+      cy.get('#seqType')
+        .select(seqType, { force: true });
+      cy.wait('@dataTable').then((interception) => {
+        expect(interception.response.statusCode).to.equal(200);
+      });
+    }
+  });
+  cy.get('#seqType option:selected').should(($option) => {
+    expect($option.text().trim(), 'seqType shown by the page').to.equal(seqType);
+  });
+
+  // the response arrives before DataTables has drawn the rows, and the CSV button exports only what is drawn
+  if (fixtureFileName) {
+    cy.fixture(`downloadChecks/${fixtureFileName}`).then((config) => {
+      cy.get('table#overviewTableProcessedMergedBMF tbody').should('contain', config.data[0][0]);
+    });
+  }
 };

@@ -41,60 +41,14 @@ describe('Check cluster job general page', () => {
       cy.visit('/clusterJobGeneral/index');
 
       //check all async loaded data
-      cy.wait('@dataTableSource').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-      });
-      cy.wait('@getAllStatesTimeDistribution').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-      });
-      cy.wait('@getAllExitCodes').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-      });
-      cy.wait('@getAllExitStatuses').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-      });
-      cy.wait('@getAllStates').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-      });
-      cy.wait('@getAllFailed').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-      });
-      cy.wait('@getAllAvgCoreUsage').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-      });
-      cy.wait('@getAllMemoryUsage').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-      });
+      waitForAllData();
 
-      //fixed time to have some data
-      cy.get('input#dpFrom').type('2022-08-20');
-      cy.get('input#dpTo').type('2022-09-10');
-
-      //check all async loaded data
-      cy.wait('@dataTableSource').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-      });
-      cy.wait('@getAllStatesTimeDistribution').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-      });
-      cy.wait('@getAllExitCodes').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-      });
-      cy.wait('@getAllExitStatuses').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-      });
-      cy.wait('@getAllStates').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-      });
-      cy.wait('@getAllFailed').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-      });
-      cy.wait('@getAllAvgCoreUsage').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-      });
-      cy.wait('@getAllMemoryUsage').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-      });
+      // Fixed time to await some data. Typing a date sends the change event only when the input is deselected, and
+      // every change loads all data again, so it should wait out each change before sending the next one
+      cy.get('input#dpFrom').type('2022-08-20').blur();
+      waitForAllData();
+      cy.get('input#dpTo').type('2022-09-10').blur();
+      waitForAllData();
 
       //go to page 2 checks
       cy.get('a.page-link').contains('2').click();
@@ -136,3 +90,13 @@ describe('Check cluster job general page', () => {
     });
   });
 });
+
+const waitForAllData = () => {
+  'use strict';
+
+  ['@dataTableSource', '@getAllStatesTimeDistribution', '@getAllExitCodes', '@getAllExitStatuses', '@getAllStates',
+    '@getAllFailed', '@getAllAvgCoreUsage', '@getAllMemoryUsage'].forEach((alias) => {
+    cy.wait(alias).its('response.statusCode').should('eq', 200);
+  });
+  cy.get('div#clusterJobGeneralTable_processing').should('not.be.visible');
+};

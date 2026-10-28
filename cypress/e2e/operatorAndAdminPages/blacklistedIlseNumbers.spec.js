@@ -115,7 +115,8 @@ describe('Check blacklisted ILSe Numbers page', () => {
       cy.get('@blacklistIlseRow').find('button.save').click();
 
       cy.wait('@updateBlacklistComment').its('response.statusCode').should('eq', 200);
-      cy.get('@blacklistIlseRow').should('contain.text', 'test delimiters');
+      // 'test delimiters' is part of the previous comment as well
+      cy.get('@blacklistIlseRow').should('contain.text', 'test delimiters').and('not.contain.text', 'edited');
     });
   });
 

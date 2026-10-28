@@ -75,7 +75,15 @@ $(() => {
     }
   });
 
+  // a later selection must not be overwritten by the slower response of an earlier one
+  let buildRequest = null;
+
   function build() {
+    if (buildRequest) {
+      buildRequest.abort();
+      buildRequest = null;
+    }
+
     const workflowId = $('#workflowSelector').val();
     const workflowVersionId = $('#workflowVersionSelector').val();
     const projectId = $('#projectSelector').val();
@@ -87,7 +95,7 @@ $(() => {
     const relatedSelectors = $('#relatedSelectors');
 
     if (workflowId || workflowVersionId || projectId || seqTypeId || refGenId || libPrepKitId) {
-      $.ajax({
+      buildRequest = $.ajax({
         url: $.otp.createLink({
           controller: 'workflowConfigViewer',
           action: 'build'
@@ -120,6 +128,9 @@ $(() => {
           filterBySelectorType();
         },
         error(error) {
+          if (error.statusText === 'abort') {
+            return;
+          }
           if (error && error.responseJSON && error.responseJSON.message) {
             $.otp.toaster.showErrorToast('Error while processing', error.responseJSON.message);
           } else {

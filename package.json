@@ -13,7 +13,7 @@
     "cyclonedx-npm": "cyclonedx-npm --output-file ./build/reports/softwareInventory/npm/bom-npm.json",
     "cy-run": "cypress run",
     "cy-open": "npx cypress open",
-    "cy-wait": "start-server-and-test './gradlew --build-cache bootRun' 'http-get://localhost:8080/health' './gradlew --build-cache runCypressTests' "
+    "cy-wait": "start-server-and-test 'mkdir -p logs && ./gradlew --build-cache bootRun > logs/bootRun.log 2>&1' 'http-get://localhost:8080/health' './gradlew --build-cache runCypressTests' "
   },
   "devDependencies": {
     "@cyclonedx/cyclonedx-npm": "6.0.1",

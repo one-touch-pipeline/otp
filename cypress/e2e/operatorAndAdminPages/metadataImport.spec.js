@@ -49,6 +49,11 @@ describe('Check metadata import page', () => {
       cy.intercept('/metadataImport/updateAutomaticNotificationFlag*').as('updateNotify');
       cy.intercept('/metadataImport/assignTicketToFastqImportInstance*').as('assignTicketNumber');
       const successMessageQuery = '#otpToastBox .otpSuccessToast';
+      // a toast stays visible for a while, closing it lets the next check verify the new toast
+      const closeSuccessToasts = () => {
+        cy.get(successMessageQuery).find('button.close').click({ multiple: true });
+        cy.get(successMessageQuery).should('not.exist');
+      };
 
       cy.fixture('metadataImport.json').then((fixture) => {
         const { ticket } = fixture;
@@ -60,6 +65,7 @@ describe('Check metadata import page', () => {
         cy.get('@numberRow').find('button.save').click();
         cy.wait('@assignTicketNumber', { timeout: 120000 }).its('response.statusCode').should('eq', 200);
         cy.get(successMessageQuery).should('exist').and('contain.text', 'Success');
+        closeSuccessToasts();
         cy.get('@numberRow').contains(ticket.number);
 
         cy.get('@ticketRows').filter(':contains("Notify automatically")').as('notifyRow');
@@ -68,7 +74,9 @@ describe('Check metadata import page', () => {
         cy.get('@notifyRow').find('button.save').click();
         cy.wait('@updateNotify').its('response.statusCode').should('eq', 200);
         cy.get(successMessageQuery).should('exist').and('contain.text', 'Success');
-        cy.get('@notifyRow').contains(ticket.notify);
+        closeSuccessToasts();
+        // the options of the editor contain every value, only the label shows the stored one
+        cy.get('@notifyRow').find('.edit-switch-label').should('contain', ticket.notify);
 
         cy.get('@ticketRows').filter(':contains("Final notification")').as('finalNotifyRow');
         cy.get('@finalNotifyRow').find('button.edit').click();
@@ -76,7 +84,8 @@ describe('Check metadata import page', () => {
         cy.get('@finalNotifyRow').find('button.save').click();
         cy.wait('@updateFinalNotify').its('response.statusCode').should('eq', 200);
         cy.get(successMessageQuery).should('exist').and('contain.text', 'Success');
-        cy.get('@finalNotifyRow').contains(ticket.finalNotify);
+        closeSuccessToasts();
+        cy.get('@finalNotifyRow').find('.edit-switch-label').should('contain', ticket.finalNotify);
 
         cy.get('@ticketRows').filter(':contains("comment")').as('commentRow');
         cy.get('@commentRow').find('button.js-edit').click();
@@ -196,7 +205,8 @@ describe('Check metadata import page', () => {
         cy.location('pathname').should('match', /\/\/?metadataImport\/index/);
       });
 
-      cy.get('#otpToastBox').should('exist');
+      // the toast box exists for every toast, so check for the error of the import
+      cy.get('#otpToastBox .otpErrorToast').should('exist').and('contain.text', 'Import failed');
       cy.get('#validate-btn').should('not.be.disabled');
       cy.get('#import-btn').should('be.disabled');
     });
@@ -204,7 +214,10 @@ describe('Check metadata import page', () => {
     it('should import data with path, when required values are set', () => {
       cy.visit('/metadataImport/index');
 
-      cy.intercept('/metadataImport/validatePathsOrFiles*').as('validate');
+      // the spinners are shown only while the validation runs, a short delay keeps them visible long enough to be seen
+      cy.intercept('/metadataImport/validatePathsOrFiles*', (req) => {
+        req.on('response', (res) => res.setDelay(1000));
+      }).as('validate');
       cy.intercept('/metadataImport/importByPathOrContent*').as('import');
       cy.intercept('/metadataImport/details/*').as('details');
 
@@ -236,7 +249,10 @@ describe('Check metadata import page', () => {
     it('should import data with file, when required values are set', () => {
       cy.visit('/metadataImport/index');
 
-      cy.intercept('/metadataImport/validatePathsOrFiles*').as('validate');
+      // the spinners are shown only while the validation runs, a short delay keeps them visible long enough to be seen
+      cy.intercept('/metadataImport/validatePathsOrFiles*', (req) => {
+        req.on('response', (res) => res.setDelay(1000));
+      }).as('validate');
       cy.intercept('/metadataImport/importByPathOrContent*').as('import');
       cy.intercept('/metadataImport/multiDetails*').as('multiDetails');
 

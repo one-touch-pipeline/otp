@@ -216,7 +216,7 @@ $.otp.workflowSelection = {
       currentAjaxCall.abort();
     }
     $.otp.workflowSelection.toggleSelectElements(workflowType, true);
-    $.otp.workflowSelection.currentAjaxCalls[workflowType] = $.ajax({
+    const ajaxCall = $.ajax({
       url: $.otp.createLink({
         controller: 'workflowSelection',
         action: $.otp.workflowSelection.optionsActions[workflowType]
@@ -235,8 +235,13 @@ $.otp.workflowSelection = {
           $.otp.toaster.showErrorToast('Workflow Configuration', 'Some error occurred.');
         }
       }
-    }).always(() => {
-      $.otp.workflowSelection.toggleSelectElements(workflowType, false);
+    });
+    $.otp.workflowSelection.currentAjaxCalls[workflowType] = ajaxCall;
+    ajaxCall.always(() => {
+      // the success of a call can start the next one, the selection stays disabled until the latest call is done
+      if ($.otp.workflowSelection.currentAjaxCalls[workflowType] === ajaxCall) {
+        $.otp.workflowSelection.toggleSelectElements(workflowType, false);
+      }
     });
   },
 

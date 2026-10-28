@@ -227,6 +227,9 @@ describe('Check reference genome overview page', () => {
 
     // Check if the legacy state toggling works
     it('should toggle legacy state when slider is checked or unchecked', () => {
+      // the slider submits a form and the page is reloaded, the next steps have to wait for it
+      cy.intercept('POST', '/referenceGenome/changeReferenceGenomeLegacyState*').as('changeLegacyState');
+
       cy.get('table#referenceGenome-datatable tbody tr').first().within(() => {
         cy.get('td').eq(4).find('input.slider').as('slider');
       });
@@ -236,6 +239,7 @@ describe('Check reference genome overview page', () => {
       cy.get(`button:contains("${BUTTON_TEXTS.SHOW_EDIT_SWITCH}")`).click();
       // Mark it as legacy by checking the slider
       cy.get('@slider').check({ force: true });
+      cy.wait('@changeLegacyState').its('response.statusCode').should('eq', 302);
       // This row will be hidden from the table, since it becomes legacy
       cy.get('@slider').should('not.be.visible');
 
@@ -252,6 +256,7 @@ describe('Check reference genome overview page', () => {
       // Enable the edit switch again so that we can uncheck it
       cy.get(`button:contains("${BUTTON_TEXTS.SHOW_EDIT_SWITCH}")`).click();
       cy.get('@slider').uncheck({ force: true });
+      cy.wait('@changeLegacyState').its('response.statusCode').should('eq', 302);
 
       // It is back to the first row and not checked
       cy.get('table#referenceGenome-datatable tbody tr').first().within(() => {
@@ -299,6 +304,8 @@ describe('Check reference genome overview page', () => {
 
       // Verify the name is back to the previous value
       cy.wait('@updateName').its('response.statusCode').should('eq', 200);
+      // the original name is found in other cells as well, so check that the label does not show the new one anymore
+      cy.get(`div.edit-switch>p.edit-switch-label>span:contains("${NAME_NEW}")`).should('not.exist');
       cy.contains(NAME_ORI).should('exist');
       cy.get('#otpToastBox .otpSuccessToast').should('exist')
         .and('contain.text', 'Data stored successfully');
@@ -427,6 +434,8 @@ describe('Check reference genome overview page', () => {
       cy.fixture('referenceGenomeOverview/content').then((config) => {
         // No legacy and without auxiliary columns
         cy.logDebug('No legacy and without auxiliary columns');
+        // the auxiliary columns are hidden only after the table is initialized, the download exports the visible ones
+        cy.get('#referenceGenome-datatable thead th').should('have.length', config.compact.header.length);
         cy.get('div#referenceGenome-datatable_wrapper button:has(span:contains("Download CSV"))').click();
         cy.checkDownloadByContent(
           config.filename,

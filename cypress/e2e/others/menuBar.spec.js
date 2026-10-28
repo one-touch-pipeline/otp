@@ -98,7 +98,9 @@ describe('Click all menu items in the menu bar', () => {
       cy.get('li.navigation').contains('Info ▽').parent().find('li')
         .should('have.length', 6);
       cy.get('.navigation li').contains('About').click({ force: true });
-      cy.checkPage('/');
+      cy.location('pathname').should('eq', '/');
+      cy.contains('About OTP');
+      cy.checkPage();
 
       cy.get('.navigation li').contains('In numbers').click({ force: true });
       cy.checkPage('/info/numbers');
@@ -129,6 +131,8 @@ describe('Click all menu items in the menu bar', () => {
           cy.checkPage('');
         });
       });
+      // the menu is only shown to a logged in user
+      cy.get('li.menuContainerItem').should('not.exist');
     });
   });
 
@@ -359,7 +363,9 @@ function checkCommonMenuItems() {
     cy.get('li.navigation').contains('Info ▽').parent().find('li')
       .should('have.length', 6);
     cy.get('.navigation li').contains('About').click({ force: true });
-    cy.checkPage('/');
+    cy.location('pathname').should('eq', '/');
+    cy.contains('About OTP');
+    cy.checkPage();
 
     cy.get('.navigation li').contains('In numbers').click({ force: true });
     cy.checkPage('/info/numbers');
@@ -390,5 +396,7 @@ function checkCommonMenuItems() {
         cy.checkPage('');
       });
     });
+    // the menu is only shown to a logged in user
+    cy.get('li.menuContainerItem').should('not.exist');
   });
 }

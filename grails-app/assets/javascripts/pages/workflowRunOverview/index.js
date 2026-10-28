@@ -61,39 +61,36 @@
       }
     });
 
-    // Preload workflows for edit reuse
-    let workflowCacheById = null;
-    fetch($.otp.createLink({
+    // Preload workflows for edit reuse, a click before the preload has finished waits for it
+    const workflowCacheById = fetch($.otp.createLink({
       controller: 'workflowSystemConfig',
       action: 'getWorkflows'
     }))
       .then((r) => r.json())
-      .then((list) => {
-        workflowCacheById = Object.fromEntries(list.map((w) => [w.id, w]));
-      })
-      .catch(() => $.otp.toaster.showErrorToast('Error', 'Failed to preload workflows'));
+      .then((list) => Object.fromEntries(list.map((w) => [w.id, w])));
+    workflowCacheById.catch(() => $.otp.toaster.showErrorToast('Error', 'Failed to preload workflows'));
 
     $(document).on('click', '.dot.small[data-workflow-id]', function () {
       const id = Number(this.dataset.workflowId);
-      if (!workflowCacheById) {
-        $.otp.toaster.showErrorToast('Error', 'Workflows not loaded yet');
-        return;
-      }
-      const wf = workflowCacheById[id];
-      if (!wf) {
-        $.otp.toaster.showErrorToast('Error', 'Workflow not found');
-        return;
-      }
-
       const dotEl = this;
-      WorkflowEdit.openModal(wf, {
-        onSuccess: (updated, original, modal, payload) => {
-          dotEl.classList.toggle('green', payload.enabled);
-          dotEl.classList.toggle('grey', !payload.enabled);
-          dotEl.setAttribute('title', payload.enabled ? 'Enabled' : 'Disabled');
-          workflowCacheById[updated.id] = updated;
+
+      workflowCacheById.then((cache) => {
+        const wf = cache[id];
+        if (!wf) {
+          $.otp.toaster.showErrorToast('Error', 'Workflow not found');
+          return;
         }
-      });
+
+        WorkflowEdit.openModal(wf, {
+          onSuccess: (updated, original, modal, payload) => {
+            dotEl.classList.toggle('green', payload.enabled);
+            dotEl.classList.toggle('grey', !payload.enabled);
+            dotEl.setAttribute('title', payload.enabled ? 'Enabled' : 'Disabled');
+            cache[updated.id] = updated;
+          }
+        });
+        // a failed preload has already been reported by its own toast, errors of the handler above are not caught here
+      }, () => {});
     });
   });
 }());

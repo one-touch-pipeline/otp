@@ -63,8 +63,8 @@ class WorkflowSystemConfigController implements CheckAndCall {
                 refGenomes       : referenceGenomeService.list().sort { ReferenceGenome a, ReferenceGenome b ->
                     (a.legacy <=> b.legacy) ?: a.name.compareToIgnoreCase(b.name)
                 },
-                seqTypes         : seqTypeService.list().sort {
-                    it.displayNameWithLibraryLayout
+                seqTypes         : seqTypeService.list().sort { SeqType a, SeqType b ->
+                    String.CASE_INSENSITIVE_ORDER.compare(a.displayNameWithLibraryLayout, b.displayNameWithLibraryLayout)
                 },
                 analysisWorkflows: workflowService.findAllAnalysisWorkflows().sort { it.displayName },
         ]
@@ -199,6 +199,10 @@ class WorkflowSystemConfigController implements CheckAndCall {
     }
 
     private List<Map> buildReferenceGenomesOutputObject(Set<ReferenceGenome> rgList) {
+        // an update without reference genomes sets the set to null
+        if (!rgList) {
+            return []
+        }
         return rgList.sort { ReferenceGenome a, ReferenceGenome b ->
             (a.legacy <=> b.legacy) ?: a.name.compareToIgnoreCase(b.name)
         }.collect { ReferenceGenome rg ->
@@ -215,7 +219,9 @@ class WorkflowSystemConfigController implements CheckAndCall {
                     id           : st.id,
                     displayName  : st.displayNameWithLibraryLayout,
             ]
-        }.sort { it.displayName } as List<Map>
+        }.sort { Map a, Map b ->
+            String.CASE_INSENSITIVE_ORDER.compare(a.displayName as String, b.displayName as String)
+        } as List<Map>
     }
 
     /**

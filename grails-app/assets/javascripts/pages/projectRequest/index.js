@@ -167,13 +167,20 @@ $(() => {
     }
   }).trigger('change');
 
+  // the request of the latest department, an earlier one is aborted so that its answer cannot add its PIs as well
+  let piRequest = null;
+
   // function to set the list of possible PIs information
   const setPossiblePIs = (department) => {
+    if (piRequest) {
+      piRequest.abort();
+      piRequest = null;
+    }
     const piSelectors = $('.pi-selector');
     piSelectors.empty();
     // fetch the data with ajax
     if (department) {
-      $.ajax({
+      piRequest = $.ajax({
         url: $.otp.createLink({
           controller: 'projectRequest',
           action: 'getPIs'
@@ -187,6 +194,8 @@ $(() => {
           if (!data) {
             return;
           }
+          // only the answer replaces the options, so the PIs of a department are never listed twice
+          piSelectors.empty();
           piSelectors.append($('<option disabled selected></option>').val('')
             .html('Please choose a PI from the list of department heads or deputies'));
 
@@ -221,6 +230,9 @@ $(() => {
           });
         },
         error(error) {
+          if (error.statusText === 'abort') {
+            return;
+          }
           if (error && error.responseJSON && error.responseJSON.message) {
             $.otp.toaster.showErrorToast('Fetching PIs failed', error.responseJSON.message);
           } else {

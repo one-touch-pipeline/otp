@@ -98,12 +98,70 @@ fi
 
 echo "===================================="
 date '+%Y-%m-%d'
-docker compose -f docker-compose.yml up --no-build --quiet-pull postgres > logs/postgres.log 2>&1 &
-(
-  sleep 10s
-  docker compose -f docker-compose.yml up --no-build --quiet-pull open-ldap > logs/open-ldap.log 2>&1 &
-  docker compose -f docker-compose.yml up --no-build --quiet-pull openssh-server > logs/openssh-server.log 2>&1 &
-)&
+# Pulls the image of a service and retries when it fails. The registry answers with '502 Bad Gateway' for a moment sometimes.
+# Without a retry, a single such answer would have ended the whole job. The output is written to the log of the service.
+pullImage() {
+    local service="$1"
+    local log="$2"
+    local attempt
+
+    for attempt in 1 2 3 4 5
+    do
+        if docker compose -f docker-compose.yml pull --quiet "${service}" >> "${log}" 2>&1
+        then
+            return 0
+        fi
+        echo "pulling the image of ${service} failed in attempt ${attempt}" >> "${log}"
+        sleep $((attempt * 10))
+    done
+    return 1
+}
+
+# Pulls the image of a service and starts it. Meant to run in the background: it ends after the pull with its result,
+# while the `up` keeps running on its own, so that the result of the pull can be awaited with `wait`.
+startService() {
+    local service="$1"
+    local log="$2"
+
+    sleep 10s
+    pullImage "${service}" "${log}" || return 1
+    docker compose -f docker-compose.yml up --no-build "${service}" >> "${log}" 2>&1 &
+}
+
+# Fails right away, when the image of a service could not be pulled or its container does not exist. Waiting for it
+# would only run into the timeout and hide the reason, which is in the log of the service. The pull may still be
+# retrying, so it is awaited first, and the container gets a moment to be created by the `up` command started after the pull.
+requireContainer() {
+    local pullPid="$1"
+    local container="$2"
+    local log="$3"
+
+    if ! wait "${pullPid}"
+    then
+        echo "the image for ${container} could not be pulled, the end of ${log}:"
+        tail -n 20 "${log}" || true
+        exit 1
+    fi
+    if ! timeout 30s bash -c "until docker inspect '${container}' > /dev/null 2>&1; do sleep 2; done"
+    then
+        echo "the container ${container} does not exist, the end of ${log}:"
+        tail -n 20 "${log}" || true
+        exit 1
+    fi
+}
+
+startService open-ldap logs/open-ldap.log &
+ldapPullPid=$!
+startService openssh-server logs/openssh-server.log &
+sshPullPid=$!
+
+if ! pullImage postgres logs/postgres.log
+then
+    echo "the image of postgres could not be pulled, check the end of logs/postgres.log:"
+    tail -n 20 logs/postgres.log || true
+    exit 1
+fi
+docker compose -f docker-compose.yml up --no-build postgres >> logs/postgres.log 2>&1 &
 
 # wait for database to be ready and apply all database changes before starting of OTP, since bootrun already responses to request before
 # the database migration has run through and if there are changes to tables used by 'http-get://localhost:8080' a lot of logs are created
@@ -161,22 +219,32 @@ echo "===================================="
 
 # slapd must listen on 389 and the bootstrap ldif must be applied. Anonymous reads are denied by the osixia ACLs,
 # so the data is queried via the local socket, where root is authorized without a password.
+requireContainer "${ldapPullPid}" otp-dev-ldap logs/open-ldap.log
 timeout 60s bash -c 'until docker exec otp-dev-ldap ldapwhoami -x -H ldap://localhost:389 > /dev/null 2>&1 \
         && docker exec otp-dev-ldap ldapsearch -Y EXTERNAL -Q -H ldapi:/// -LLL -s base -b "ou=users,dc=otpldap,dc=dev" dn > /dev/null 2>&1
-    do echo "waiting"; sleep 5 ; done'
+    do echo "waiting"; sleep 5 ; done' || { echo "open-ldap did not get ready, check the end of logs/open-ldap.log:"; tail -n 20 logs/open-ldap.log; exit 1; }
 logPhase "wait for open-ldap"
 
 # the openssh-server image starts sshd only after '/custom-cont-init.d' has extracted the test file system,
 # so an sshd answering on 2222 also means the tarballs are unpacked
+requireContainer "${sshPullPid}" otp-dev-ssh-server logs/openssh-server.log
 timeout 60s bash -c 'until docker exec otp-dev-ssh-server sh -c "nc -w 3 localhost 2222 < /dev/null | grep -q ^SSH-" 2> /dev/null
-    do echo "waiting"; sleep 5 ; done'
+    do echo "waiting"; sleep 5 ; done' || { echo "openssh-server did not get ready, check the end of logs/openssh-server.log:"; tail -n 20 logs/openssh-server.log; exit 1; }
 logPhase "wait for openssh-server"
 
 echo "===================================="
 # the exit code is kept instead of failing here, so that the timing of a failed run is reported as well
 cypressExitCode=0
+# OTP writes its console output to logs/bootRun.log instead of the job log. Both shared one pipe before, and when it
+# stalled, OTP and cypress were blocked on their output at the same time and tests timed out.
 ./gradlew --build-cache npm_run_cy-wait | tee cypressReport.txt || cypressExitCode=$?
 logPhase "run the cypress tests"
+
+if [[ ${cypressExitCode} -ne 0 ]]
+then
+    echo "==================================== check the last lines of logs/bootRun.log"
+    tail -n 100 logs/bootRun.log || true
+fi
 
 echo "===================================="
 printf '\ntotal: %ss\n' "${SECONDS}" >> "${TIMING_LOG}"

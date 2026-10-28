@@ -42,23 +42,23 @@ describe('Check workflow selection page', () => {
     it('should create alignment configuration and delete it', () => {
       cy.visit('/workflowSelection/index');
 
-      cy.intercept('/workflowSelection/possibleAlignmentOptions*').as('possibleOptions');
       cy.intercept('/workflowSelection/saveAlignmentConfiguration*').as('createConfig');
 
       cy.get('h2#headingAlignment').click();
 
       cy.fixture('workflowSelection.json').then((config) => {
         cy.get('#alignment-workflow-select').select(config.alignment.workflow, { force: true });
-        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
+        waitForPossibleOptions('#alignment-workflow-select');
         cy.get('#alignment-seq-type-select').select(config.alignment.seqType, { force: true });
-        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
+        waitForPossibleOptions('#alignment-workflow-select');
         cy.get('#alignment-version-select').select(config.alignment.version.id, { force: true });
-        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
+        waitForPossibleOptions('#alignment-workflow-select');
         cy.get('#alignment-ref-genome-select').select(config.alignment.refGenome, { force: true });
-        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
+        waitForPossibleOptions('#alignment-workflow-select');
         cy.get('#xenograft-checkbox').check();
+        waitForPossibleOptions('#alignment-workflow-select');
         cy.get('#alignment-species-select').select(config.alignment.species, { force: true });
-        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
+        waitForPossibleOptions('#alignment-workflow-select');
 
         cy.get('button#add-alignment-config-btn').click();
         cy.wait('@createConfig').then((interception) => {
@@ -93,10 +93,9 @@ describe('Check workflow selection page', () => {
     it('should show all species when xenograft checkbox is checked and filter again when unchecked', () => {
       cy.visit('/workflowSelection/index');
 
-      cy.intercept('/workflowSelection/possibleAlignmentOptions*').as('possibleOptions');
 
       cy.get('h2#headingAlignment').click();
-      cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
+      waitForPossibleOptions('#alignment-workflow-select');
 
       cy.get('#xenograft-checkbox').should('exist');
       cy.get('#xenograft-checkbox').should('not.be.checked');
@@ -106,14 +105,14 @@ describe('Check workflow selection page', () => {
 
       cy.get('#alignment-species-select option:not(:disabled)').its('length').then((enabledBefore) => {
         cy.get('#xenograft-checkbox').check();
-        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
+        waitForPossibleOptions('#alignment-workflow-select');
 
         cy.get('#alignment-species-select option:disabled').should('have.length', 0);
 
         cy.get('#alignment-species-select option:not(:disabled)').should('have.length.greaterThan', enabledBefore - 1);
 
         cy.get('#xenograft-checkbox').uncheck();
-        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
+        waitForPossibleOptions('#alignment-workflow-select');
 
         cy.get('#alignment-species-select option:disabled').should('have.length.greaterThan', 0);
       });
@@ -122,18 +121,17 @@ describe('Check workflow selection page', () => {
     it('should create two analysis configurations for same project and seq type and delete it', () => {
       cy.visit('/workflowSelection/index');
 
-      cy.intercept('/workflowSelection/possibleAnalysisOptions*').as('possibleOptions');
       cy.intercept('/workflowSelection/saveAnalysisConfiguration*').as('createConfig');
 
       cy.get('h2#headingAnalysis').click();
 
       cy.fixture('workflowSelection.json').then((config) => {
         cy.get('#analysis-workflow-select').select(config.analysis[0].workflow, { force: true });
-        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
+        waitForPossibleOptions('#analysis-workflow-select');
         cy.get('#analysis-seq-type-select').select(config.analysis[0].seqType, { force: true });
-        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
+        waitForPossibleOptions('#analysis-workflow-select');
         cy.get('#analysis-version-select').select(config.analysis[0].version.id, { force: true });
-        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
+        waitForPossibleOptions('#analysis-workflow-select');
 
         cy.get('button#add-analysis-config-btn').click();
         cy.wait('@createConfig').then((interception) => {
@@ -144,14 +142,16 @@ describe('Check workflow selection page', () => {
           cy.get('@removeBtn1').parent().parent().find('td')
             .as('createdCells1');
         });
+        // saving loads the possible options again
+        waitForPossibleOptions('#analysis-workflow-select');
 
         // Create a second workflowVersionSelector with the same project and seqType
         cy.get('#analysis-workflow-select').select(config.analysis[1].workflow, { force: true });
-        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
+        waitForPossibleOptions('#analysis-workflow-select');
         cy.get('#analysis-seq-type-select').select(config.analysis[1].seqType, { force: true });
-        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
+        waitForPossibleOptions('#analysis-workflow-select');
         cy.get('#analysis-version-select').select(config.analysis[1].version.id, { force: true });
-        cy.wait('@possibleOptions').its('response.statusCode').should('eq', 200);
+        waitForPossibleOptions('#analysis-workflow-select');
 
         cy.get('button#add-analysis-config-btn').click();
         cy.wait('@createConfig').then((interception2) => {
@@ -248,3 +248,13 @@ describe('Check workflow selection page', () => {
     });
   });
 });
+
+/**
+ * Every change of the selection loads the possible options, and the answer can start another request. The selection
+ * is disabled until the latest of them is done, so waiting for it to be enabled replaces counting the requests.
+ */
+const waitForPossibleOptions = (selectSelector) => {
+  'use strict';
+
+  cy.get(selectSelector).should('not.be.disabled');
+};

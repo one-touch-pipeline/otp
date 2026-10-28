@@ -171,6 +171,8 @@ describe('Check workflow run details page', () => {
 
       cy.get('input#name').type('example_2{enter}');
       cy.wait('@data').its('response.statusCode').should('eq', 200);
+      // the rows of the unfiltered list stay until DataTables has drawn the response
+      cy.get('div#runs_processing').should('not.be.visible');
 
       cy.get('table#runs tbody').should('not.be.empty');
       cy.get('table#runs tbody tr').first().find('a').click();
@@ -212,7 +214,7 @@ describe('Check workflow run details page', () => {
       // Restart step
       cy.intercept('/workflowRunDetails/restartStep*').as('restartWorkflowStep');
 
-      cy.get('form.restart-step-form button').not('disabled').first().click();
+      cy.get('form.restart-step-form button').not(':disabled').first().click();
       cy.wait('@restartWorkflowStep').then((interception) => {
         expect(interception.response.statusCode).to.eq(302);
         cy.location('pathname').should('contain', '/workflowRunDetails/index');
@@ -371,6 +373,8 @@ function setWorkflowToFailedWaiting() {
   cy.get('table#runs tbody tr').first().find('a').click();
   cy.location('pathname').should('contain', '/workflowRunDetails/index');
   cy.get('form button.failed-waiting-btn').click();
+  // the form is submitted, the tests using this helper visit the next page right away
+  cy.get('#statusDot').should('have.attr', 'data-status', 'FAILED_WAITING');
 }
 
 // This is a helper function to filter the run list down to PENDING runs, open the run with the

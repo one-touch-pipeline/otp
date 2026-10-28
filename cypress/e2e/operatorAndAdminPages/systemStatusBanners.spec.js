@@ -152,6 +152,8 @@ describe('Global system status banners', () => {
       cy.wait('@newsBanner').its('response.statusCode').should('eq', 200);
 
       cy.get(banner).should('have.length', 2);
+      // the news banner starts hidden, the text shows that the answer was handled and the banner still stays hidden
+      cy.get(`${newsBanner} .news-banner-body`).should('have.text', newsBannerText);
       cy.get(newsBanner).should('not.be.visible');
     });
 

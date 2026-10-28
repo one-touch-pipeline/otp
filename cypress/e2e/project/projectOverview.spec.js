@@ -47,28 +47,28 @@ describe('Check statistics page', () => {
       });
 
       it('should download and check the sample type name table', () => {
-        loadPageAndWaitForTables('projectOverviewSampleType.json');
+        loadPageAndWaitForTables('projectOverviewSampleType.json', 'sampleTypeNameCountBySample');
         cy.get('div#sampleTypeNameCountBySample_wrapper button')
           .contains('Download').click();
         cy.checkDownloadByContentOfFixture('projectOverviewSampleType.json');
       });
 
       it('should download and check the sequencing center table', () => {
-        loadPageAndWaitForTables('projectOverviewSequencingCenter.json');
+        loadPageAndWaitForTables('projectOverviewSequencingCenter.json', 'centerNameRunId');
         cy.get('div#centerNameRunId_wrapper button')
           .contains('Download').click();
         cy.checkDownloadByContentOfFixture('projectOverviewSequencingCenter.json');
       });
 
       it('should download and check the sequencing samples table', () => {
-        loadPageAndWaitForTables('projectOverviewSequences.json');
+        loadPageAndWaitForTables('projectOverviewSequences.json', 'projectOverviewTable');
         cy.get('div#projectOverviewTable_wrapper button')
           .contains('Download').click();
         cy.checkDownloadByContentOfFixture('projectOverviewSequences.json');
       });
 
       it('should download and check the sequencing type table', () => {
-        loadPageAndWaitForTables('projectOverviewSequencingTypes.json');
+        loadPageAndWaitForTables('projectOverviewSequencingTypes.json', 'patientsAndSamplesGBCountPerProject');
 
         cy.get('div#patientsAndSamplesGBCountPerProject_wrapper button')
           .contains('Download').click();
@@ -78,6 +78,11 @@ describe('Check statistics page', () => {
       it('should check the length of the tables', () => {
         cy.visit('/projectOverview/index');
 
+        // the loading message is a row as well, so wait until every table shows its data
+        ['sampleTypeNameCountBySample', 'centerNameRunId', 'projectOverviewTable', 'patientsAndSamplesGBCountPerProject']
+          .forEach((tableId) => {
+            cy.get(`table#${tableId} td.dataTables_empty`).should('not.exist');
+          });
         cy.get('table#sampleTypeNameCountBySample tbody').find('tr').should('have.length', 3);
         cy.get('table#centerNameRunId tbody').find('tr').should('have.length', 1);
         cy.get('table#projectOverviewTable tbody').find('tr').should('have.length', 31);
@@ -87,7 +92,7 @@ describe('Check statistics page', () => {
   });
 });
 
-const loadPageAndWaitForTables = (fixtureFileName) => {
+const loadPageAndWaitForTables = (fixtureFileName, tableId) => {
   'use strict';
 
   cy.clearDownloadsFolder();
@@ -109,5 +114,8 @@ const loadPageAndWaitForTables = (fixtureFileName) => {
       .then((interception) => {
         expect(interception.response.statusCode).to.equal(200);
       });
+
+    // the response arrives before DataTables has drawn the rows, and the CSV button exports only what is drawn
+    cy.get(`table#${tableId} tbody`).should('contain', config.data[0][0]);
   });
 };
