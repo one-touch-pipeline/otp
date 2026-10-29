@@ -42,6 +42,25 @@ window.workflowJobErrorDefinitionActionChangeSuccessHandler = function (containe
   updateCheckClusterLogOnSuccessEditability(row);
 };
 
+window.workflowJobErrorDefinitionActionChangeBeforeSaveHandler = function (container) {
+  'use strict';
+
+  const row = container.closest('tr');
+  const newAction = $('select option:selected', container).val();
+
+  const checkClusterLogOnSuccess = $('.checkClusterLogOnSuccess input[name="value"]', row).val() === 'true';
+
+  if (checkClusterLogOnSuccess && newAction !== 'RESTART_WORKFLOW') {
+    window.alert(row.closest('.errorDefinitions').attr('data-action-change-blocked-message'));
+    $('select', container).val('RESTART_WORKFLOW').trigger('change');
+    container.hide();
+    container.siblings('.edit-switch-label').show();
+    return false;
+  }
+
+  return true;
+};
+
 // checkClusterLogOnSuccess is only allowed while the row's action is RESTART_WORKFLOW
 // (see WorkflowJobErrorDefinition's checkClusterLogOnSuccess validator). Hide the toggle's
 // edit control for every other action so it can't be flipped to a value the server rejects.

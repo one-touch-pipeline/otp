@@ -38,7 +38,8 @@
 
     <h1><g:message code="workflowJobErrorDefinition.title.index"/></h1>
 
-    <div class="errorDefinitions">
+    <div class="errorDefinitions"
+         data-action-change-blocked-message="${g.message(code: 'workflowJobErrorDefinition.action.changeBlocked', encodeAs: 'HTML')}">
         <table class="otpDataTables">
             <tr>
                 <th>
@@ -133,6 +134,7 @@
                                 link="${g.createLink(controller: 'workflowJobErrorDefinition', action: 'updateActionField', params: [
                                         'workflowJobErrorDefinition.id': "${definition.id}"
                                 ])}"
+                                beforeSaveHandler="workflowJobErrorDefinitionActionChangeBeforeSaveHandler"
                                 sucessHandler="workflowJobErrorDefinitionActionChangeSuccessHandler"
                                 value="${definition.action}"/>
                     </td>

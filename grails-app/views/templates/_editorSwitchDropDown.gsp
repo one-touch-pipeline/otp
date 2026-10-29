@@ -31,7 +31,7 @@
                   value="${value}"
                   class="use-select-2"
                   autocomplete="off"/>
-        <button class="save" data-confirmation="${confirmation}" data-success-handler="${sucessHandler}"><g:message code="default.button.update.label"/></button>
+        <button class="save" data-confirmation="${confirmation}" data-before-save-handler="${beforeSaveHandler}" data-success-handler="${sucessHandler}"><g:message code="default.button.update.label"/></button>
         <button class="cancel"><g:message code="default.button.cancel.label"/></button>
     </p>
     <p class="edit-switch-label">

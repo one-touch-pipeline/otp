@@ -274,6 +274,14 @@ $(() => {
     const container = that.parent();
     const outerContainer = container.parent();
 
+    // Optional page hook (only supported by the single-select dropDown template): called with the editor container
+    // before saving; returning false cancels the save.
+    const beforeSaveCallback = $(that).attr('data-before-save-handler');
+
+    if (beforeSaveCallback && window[beforeSaveCallback](container) === false) {
+      return;
+    }
+
     const confirmationText = $('button[data-confirmation]', container).attr('data-confirmation');
     if (confirmationText) {
       const confirmed = window.confirm(confirmationText);

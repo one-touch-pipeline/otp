@@ -60,7 +60,6 @@ describe('Check workflow job error definition page', () => {
         cy.get('select#jobBeanName').select(errorDefinition[2].jobBeanName, { force: true });
         cy.get('select#sourceType').select(errorDefinition[2].sourceType, { force: true });
         cy.get('select#restartAction').select(errorDefinition[2].restartAction, { force: true });
-        cy.get('select#beanToRestart').select(errorDefinition[2].beanToRestart, { force: true });
         cy.get('input#errorExpression').type(errorDefinition[2].errorExpression);
         cy.get('input#allowRestartingCount').type(errorDefinition[2].allowRestartingCount);
         cy.get('textarea#mailText').type(errorDefinition[2].mailText);
@@ -190,6 +189,50 @@ describe('Check workflow job error definition page', () => {
             expect(interception.response.statusCode).to.eq(200);
           });
         });
+      });
+    });
+
+    it('should prevent changing the action when checkClusterLogOnSuccess is enabled', () => {
+      cy.visit('/workflowJobErrorDefinition/index');
+
+      cy.get('div.errorDefinitions').should(
+        'have.attr',
+        'data-action-change-blocked-message',
+        '"Action to do" cannot be changed while "Check On Success" is enabled.'
+      );
+
+      cy.fixture('workflowJobErrorDefinition.json').then((errorDefinition) => {
+        const definition = errorDefinition[2];
+
+        cy.contains('div.errorDefinitions tbody tr', definition.name).within(() => {
+          cy.get('td').eq(8)
+            .find('input[name="value"]')
+            .should('have.value', 'true');
+
+          cy.get('td').eq(3).find('select')
+            .should('have.value', 'RESTART_WORKFLOW');
+
+          cy.window().then((win) => {
+            cy.stub(win, 'alert').as('alert');
+          });
+
+          cy.get('td').eq(3).find('button.edit').click();
+          cy.get('td').eq(3).find('select')
+            .select('RESTART_JOB', { force: true });
+          cy.get('td').eq(3).find('button.save').click();
+
+          cy.get('@alert').should(
+            'have.been.calledOnceWith',
+            '"Action to do" cannot be changed while "Check On Success" is enabled.'
+          );
+        });
+
+        cy.reload();
+
+        cy.contains('div.errorDefinitions tbody tr', definition.name)
+          .find('td').eq(3)
+          .find('select')
+          .should('have.value', 'RESTART_WORKFLOW');
       });
     });
 
