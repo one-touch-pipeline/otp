@@ -107,3 +107,6 @@ CLAUDE.md
 .worklogs
 # team-shared Claude instructions (negation must stay after the bare CLAUDE.md rule above)
 !.claude/CLAUDE.md
+
+# local IntelliJ MCP server config (written by IDE auto-configure, machine-specific port)
+.mcp.json

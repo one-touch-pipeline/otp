@@ -26,9 +26,14 @@ import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 
 buildscript {
     repositories {
+        // keep in sync with the project repositories below
         mavenLocal()
-        mavenCentral()
+        if (System.getenv('MAVEN_CENTRAL_MIRROR_URL')) {
+            maven { url System.getenv('MAVEN_CENTRAL_MIRROR_URL') }
+        }
+        maven { url "https://maven-central.storage-download.googleapis.com/maven2" }
         maven { url "https://repo.grails.org/grails/core" }
+        mavenCentral()
     }
     dependencies {
         classpath "org.grails:grails-gradle-plugin:$grailsVersion"
@@ -91,11 +96,19 @@ sourceCompatibility = 17
 
 compileGroovy.groovyOptions.configurationScript = file('gradle/config/groovyc.groovy')
 
+// Maven Central is only the last fallback to avoid its rate limit (HTTP 429), see https://central.sonatype.org/faq/429-error/
+// Gradle uses the first repository containing a module, but fails if a repository is not reachable (no fallback)
 repositories {
     mavenLocal()
-    mavenCentral()
+    // optional Maven Central mirror; only set it (CI/CD variable) where the mirror is reachable
+    if (System.getenv('MAVEN_CENTRAL_MIRROR_URL')) {
+        maven { url System.getenv('MAVEN_CENTRAL_MIRROR_URL') }
+    }
+    // public Google mirror of Maven Central
+    maven { url "https://maven-central.storage-download.googleapis.com/maven2" }
     maven { url "https://repo.grails.org/grails/core" }
     maven { url "https://jitpack.io" }
+    mavenCentral()
 }
 
 sourceSets {
