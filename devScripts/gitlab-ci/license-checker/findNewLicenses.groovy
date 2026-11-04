@@ -28,6 +28,7 @@ class FindNewLicenses {
     static final String REPORT_FILE_NAME = "gl-license-scanning-report.json"
 
     static final List<String> allowedLicenses = [
+            "0BSD",
             "Apache License 1.1",
             "Apache License 2.0",
             "Apache-1.1",
@@ -38,6 +39,7 @@ class FindNewLicenses {
             "BSD 3-Clause \"New\" or \"Revised\" License",
             "BSD licence",
             "BSD License 3",
+            "BSD Zero Clause License",
             "BSD-2-Clause",
             "BSD-3-Clause",
             "CDDL+GPL License",
@@ -59,6 +61,7 @@ class FindNewLicenses {
             "GNU General Public License v2.0 w/Classpath exception",
             "GNU General Public License v3.0 only",
             "GNU Lesser General Public License",
+            "GNU Lesser General Public License, Version 2.1",
             "GNU General Public License, Version 2 with the Classpath Exception",
             "GNU Lesser General Public License v2.1 only",
             "GNU Lesser General Public License v2.1 or later",
