@@ -83,10 +83,14 @@ class SeqPlatform implements Entity, Legacy {
     }
 
     String getFullName() {
+        return formatFullName(name, seqPlatformModelLabel?.name, sequencingKitLabel?.name)
+    }
+
+    static String formatFullName(String name, String seqPlatformModelLabelName, String sequencingKitLabelName) {
         return [
                 name,
-                seqPlatformModelLabel?.name,
-                sequencingKitLabel?.name ?: 'unknown kit',
+                seqPlatformModelLabelName,
+                sequencingKitLabelName ?: 'unknown kit',
         ].findAll().join(' ')
     }
 

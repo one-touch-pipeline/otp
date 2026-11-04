@@ -61,12 +61,39 @@
                 <th><g:message code="triggerWorkflows.check.header.project"/></th>
                 <th><g:message code="triggerWorkflows.check.header.individual"/></th>
                 <th><g:message code="triggerWorkflows.check.header.sampleType"/></th>
+                <th><g:message code="triggerWorkflows.check.header.seqType"/></th>
                 <th><g:message code="triggerWorkflows.check.header.withdrawn"/></th>
                 <th><g:message code="triggerWorkflows.check.header.libPrepKit"/></th>
                 <th><g:message code="triggerWorkflows.check.header.species"/></th>
                 <th><g:message code="triggerWorkflows.check.header.mixedInSpecies"/></th>
                 <th><g:message code="triggerWorkflows.check.header.referenceGenome"/></th>
                 <th><g:message code="triggerWorkflows.check.header.seqPlatformGroup"/></th>
+                <th><g:message code="triggerWorkflows.check.header.analysisIds"/></th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <div class="card-header">
+        <i class="bi bi-list-check"></i> <g:message code="triggerWorkflows.check.header.analysisCheck"/>
+    </div>
+    <div class="card-body">
+        <p id="analysisTableText" class="card-text"><g:message code="triggerWorkflows.check.body.analysis"/></p>
+        <table id="analysisTable" class="table table-sm table-striped display table-hover table-bordered w-100">
+            <thead>
+            <tr>
+                <th><g:message code="triggerWorkflows.check.header.analysisType"/></th>
+                <th><g:message code="triggerWorkflows.check.header.analysisId"/></th>
+                <th><g:message code="triggerWorkflows.check.header.project"/></th>
+                <th><g:message code="triggerWorkflows.check.header.individual"/></th>
+                <th><g:message code="triggerWorkflows.check.header.sampleType"/></th>
+                <th><g:message code="triggerWorkflows.check.header.seqType"/></th>
+                <th><g:message code="triggerWorkflows.check.header.libPrepKits"/></th>
+                <th><g:message code="triggerWorkflows.check.header.species"/></th>
+                <th><g:message code="triggerWorkflows.check.header.referenceGenomes"/></th>
+                <th><g:message code="triggerWorkflows.check.header.diseaseBamId"/></th>
+                <th><g:message code="triggerWorkflows.check.header.controlBamId"/></th>
             </tr>
             </thead>
             <tbody>

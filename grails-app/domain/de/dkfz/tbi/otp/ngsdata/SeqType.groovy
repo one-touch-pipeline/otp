@@ -128,10 +128,18 @@ class SeqType implements Entity, MetadataField, ProjectFieldReferenceAble {
     }
 
     String getDisplayNameWithLibraryLayout() {
-        return "${displayName} ${libraryLayout} ${singleCellDisplayName}"
+        return formatDisplayNameWithLibraryLayout(displayName, libraryLayout, singleCell)
+    }
+
+    static String formatDisplayNameWithLibraryLayout(String displayName, SequencingReadType libraryLayout, boolean singleCell) {
+        return "${displayName} ${libraryLayout} ${formatSingleCellDisplayName(singleCell)}"
     }
 
     String getSingleCellDisplayName() {
+        return formatSingleCellDisplayName(singleCell)
+    }
+
+    static String formatSingleCellDisplayName(boolean singleCell) {
         return singleCell ? SINGLE_CELL_TRUE : SINGLE_CELL_FALSE
     }
 

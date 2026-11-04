@@ -29,6 +29,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
 import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
@@ -40,8 +44,11 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+import de.dkfz.tbi.otp.ngsdata.SequencingReadType
 import de.dkfz.tbi.otp.ngsdata.mergingCriteria.DefaultSeqPlatformGroupController
 import de.dkfz.tbi.otp.ngsdata.mergingCriteria.ProjectSeqPlatformGroupController
+import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
@@ -109,6 +116,261 @@ class TriggerWorkflowsService {
             FROM ExternallyProcessedBamFile bf
             WHERE bf.id IN (:bamFileIds)
         ''', [bamFileIds: bamFileIds]) as List<ExternallyProcessedBamFile>
+    }
+
+    /**
+     * Short labels of the analysis types shown in the analysis table, keyed by the analysis class name.
+     * Analyses of other types are not shown.
+     */
+    static final Map<String, String> ANALYSIS_TYPE_LABELS = [
+            (SnvCallingInstance.name)  : 'SNV',
+            (IndelCallingInstance.name): 'Indel',
+            (AceseqInstance.name)      : 'ACEseq',
+            (SophiaInstance.name)      : 'Sophia',
+    ].asImmutable()
+
+    private static final String SAMPLE_TYPE_SEPARATOR = ' \u2013 '
+    private static final String VALUE_SEPARATOR = ', '
+
+    /**
+     * Builds the rows of the BAM table and the analysis table for the given selected BAM files.
+     *
+     * The eligible analyses are determined once and shared by both tables: non-withdrawn SNV, Indel, ACEseq and Sophia
+     * analyses referencing at least one of the given BAM files as disease or control BAM file.
+     * All values are fetched by scalar batch queries, so neither BAM files nor analyses are loaded as entities,
+     * and the number of queries does not depend on the number of returned rows.
+     *
+     * BAM rows are returned in the order of the given (distinct) IDs, analysis rows ordered by their ID.
+     */
+    @Transactional(readOnly = true)
+    TriggerWorkflowsTableData getTableData(Collection<Long> bamFileIds) {
+        List<Long> selectedBamFileIds = bamFileIds ? bamFileIds.unique(false) as List<Long> : []
+        if (!selectedBamFileIds) {
+            return new TriggerWorkflowsTableData([], [])
+        }
+
+        List<TriggerWorkflowsEligibleAnalysis> analyses = fetchEligibleAnalyses(selectedBamFileIds)
+        Set<Long> analysisBamFileIds = analyses.collectMany { [it.diseaseBamFileId, it.controlBamFileId] } as Set<Long>
+        Set<Long> allBamFileIds = (selectedBamFileIds + analysisBamFileIds) as Set<Long>
+
+        Map<Long, TriggerWorkflowsBamFileMetadata> bamFileMetadata = fetchBamFileMetadata(allBamFileIds)
+        fetchMixedInSpecies(allBamFileIds).each { Long id, List<String> species ->
+            bamFileMetadata[id].mixedInSpecies = species
+        }
+        if (analyses) {
+            fetchSeqTrackLibraryPreparationKits(analysisBamFileIds).each { Long id, List<String> kits ->
+                bamFileMetadata[id].seqTrackLibraryPreparationKits = kits
+            }
+        }
+        Map<Long, String> seqPlatformGroups = fetchSeqPlatformGroups(selectedBamFileIds)
+
+        Map<Long, SortedSet<Long>> analysisIdsPerBamFile = [:]
+        analyses.each { TriggerWorkflowsEligibleAnalysis analysis ->
+            [analysis.diseaseBamFileId, analysis.controlBamFileId].each { Long bamFileId ->
+                analysisIdsPerBamFile.computeIfAbsent(bamFileId) { [] as SortedSet<Long> } << analysis.id
+            }
+        }
+
+        List<TriggerWorkflowsBamRow> bamRows = selectedBamFileIds.findAll { bamFileMetadata.containsKey(it) }.collect { Long id ->
+            createBamRow(bamFileMetadata[id], seqPlatformGroups[id], analysisIdsPerBamFile[id])
+        }
+        List<TriggerWorkflowsAnalysisRow> analysisRows = analyses.collect { TriggerWorkflowsEligibleAnalysis analysis ->
+            createAnalysisRow(analysis, bamFileMetadata[analysis.diseaseBamFileId], bamFileMetadata[analysis.controlBamFileId])
+        }
+        return new TriggerWorkflowsTableData(bamRows, analysisRows)
+    }
+
+    private static TriggerWorkflowsBamRow createBamRow(TriggerWorkflowsBamFileMetadata bam, String seqPlatformGroup, Set<Long> analysisIds) {
+        return new TriggerWorkflowsBamRow(
+                id: bam.id,
+                project: bam.project,
+                individual: bam.individual,
+                sampleType: bam.sampleType,
+                seqType: bam.seqType,
+                withdrawn: bam.withdrawn,
+                libPrepKit: bam.libraryPreparationKit ?: '',
+                species: bam.species ?: '',
+                mixedInSpecies: joinDistinctSorted(bam.mixedInSpecies),
+                referenceGenome: bam.referenceGenome,
+                seqPlatformGroup: seqPlatformGroup ?: '',
+                analysisIds: (analysisIds ?: []) as List<Long>,
+        )
+    }
+
+    private static TriggerWorkflowsAnalysisRow createAnalysisRow(TriggerWorkflowsEligibleAnalysis analysis,
+                                                                 TriggerWorkflowsBamFileMetadata disease, TriggerWorkflowsBamFileMetadata control) {
+        return new TriggerWorkflowsAnalysisRow(
+                analysisType: analysis.type,
+                id: analysis.id,
+                project: disease.project,
+                individual: disease.individual,
+                sampleType: "${disease.sampleType}${SAMPLE_TYPE_SEPARATOR}${control.sampleType}".toString(),
+                seqType: disease.seqType,
+                libraryPreparationKits: joinDistinctSorted(disease.analysisLibraryPreparationKits + control.analysisLibraryPreparationKits),
+                species: joinDistinctSorted([disease.species, control.species] + disease.mixedInSpecies + control.mixedInSpecies),
+                referenceGenomes: joinDistinctSorted([disease.referenceGenome, control.referenceGenome]),
+                diseaseBamId: disease.id,
+                controlBamId: control.id,
+        )
+    }
+
+    @SuppressWarnings("DuplicateNumberLiteral")
+    @CompileDynamic
+    private List<TriggerWorkflowsEligibleAnalysis> fetchEligibleAnalyses(Collection<Long> bamFileIds) {
+        String analysisClasses = ANALYSIS_TYPE_LABELS.keySet().join(', ')
+        return BamFilePairAnalysis.executeQuery("""
+                select analysis.id, analysis.class, analysis.sampleType1BamFile.id, analysis.sampleType2BamFile.id
+                from BamFilePairAnalysis analysis
+                where analysis.withdrawn = false
+                  and analysis.class in (${analysisClasses})
+                  and (analysis.sampleType1BamFile.id in (:bamFileIds) or analysis.sampleType2BamFile.id in (:bamFileIds))
+                order by analysis.id
+                """.toString(), [bamFileIds: bamFileIds]).collect { Object[] values ->
+            new TriggerWorkflowsEligibleAnalysis(
+                    values[0] as Long,
+                    ANALYSIS_TYPE_LABELS[values[1] as String],
+                    values[2] as Long,
+                    values[3] as Long,
+            )
+        }
+    }
+
+    @SuppressWarnings("DuplicateNumberLiteral")
+    @CompileDynamic
+    private Map<Long, TriggerWorkflowsBamFileMetadata> fetchBamFileMetadata(Collection<Long> bamFileIds) {
+        return AbstractBamFile.executeQuery('''
+                select bamFile.id, bamFile.withdrawn, project.name, project.state, individual.pid, sampleType.name,
+                       seqType.displayName, seqType.libraryLayout, seqType.singleCell,
+                       libraryPreparationKit.name, referenceGenome.name,
+                       speciesCommonName.name, species.scientificName, strain.name
+                from AbstractBamFile bamFile
+                join bamFile.workPackage workPackage
+                join workPackage.sample sample
+                join sample.individual individual
+                join individual.project project
+                join sample.sampleType sampleType
+                join workPackage.seqType seqType
+                join workPackage.referenceGenome referenceGenome
+                left join workPackage.libraryPreparationKit libraryPreparationKit
+                left join individual.species speciesWithStrain
+                left join speciesWithStrain.species species
+                left join species.speciesCommonName speciesCommonName
+                left join speciesWithStrain.strain strain
+                where bamFile.id in (:bamFileIds)
+                ''', [bamFileIds: bamFileIds]).collectEntries { Object[] values ->
+            Long id = values[0] as Long
+            [(id): new TriggerWorkflowsBamFileMetadata(
+                    id: id,
+                    withdrawn: values[1] as boolean,
+                    project: Project.formatDisplayName(values[2] as String, values[3] as Project.State),
+                    individual: values[4] as String,
+                    sampleType: values[5] as String,
+                    seqType: SeqType.formatDisplayNameWithLibraryLayout(values[6] as String, values[7] as SequencingReadType, values[8] as boolean),
+                    libraryPreparationKit: values[9] as String,
+                    referenceGenome: values[10] as String,
+                    species: speciesWithStrainDisplayName(values[11] as String, values[12] as String, values[13] as String),
+            )]
+        }
+    }
+
+    @SuppressWarnings("DuplicateNumberLiteral")
+    @CompileDynamic
+    private Map<Long, List<String>> fetchMixedInSpecies(Collection<Long> bamFileIds) {
+        return groupValues(AbstractBamFile.executeQuery('''
+                select bamFile.id, speciesCommonName.name, species.scientificName, strain.name
+                from AbstractBamFile bamFile
+                join bamFile.workPackage workPackage
+                join workPackage.sample sample
+                join sample.mixedInSpecies speciesWithStrain
+                join speciesWithStrain.species species
+                join species.speciesCommonName speciesCommonName
+                join speciesWithStrain.strain strain
+                where bamFile.id in (:bamFileIds)
+                ''', [bamFileIds: bamFileIds]).collect { Object[] values ->
+            [values[0], speciesWithStrainDisplayName(values[1] as String, values[2] as String, values[3] as String)] as Object[]
+        })
+    }
+
+    /**
+     * Library preparation kit names of the SeqTracks contained in the BAM files.
+     * Every BAM file with contained SeqTracks gets an entry, even if none of them has a kit.
+     */
+    @CompileDynamic
+    private Map<Long, List<String>> fetchSeqTrackLibraryPreparationKits(Collection<Long> bamFileIds) {
+        return groupValues(AbstractBamFile.executeQuery('''
+                select distinct bamFile.id, libraryPreparationKit.name
+                from AbstractBamFile bamFile
+                join bamFile.seqTracks seqTrack
+                left join seqTrack.libraryPreparationKit libraryPreparationKit
+                where bamFile.id in (:bamFileIds)
+                ''', [bamFileIds: bamFileIds]) as List<Object[]>)
+    }
+
+    /**
+     * Display strings of the seq platform groups of the work packages of the given BAM files,
+     * matching {@link SeqPlatformGroup#toString()}. BAM files without seq platform group (e.g. external BAM files) have no entry.
+     */
+    @SuppressWarnings("DuplicateNumberLiteral")
+    @CompileDynamic
+    private Map<Long, String> fetchSeqPlatformGroups(Collection<Long> bamFileIds) {
+        List<Object[]> groups = AbstractBamFile.executeQuery('''
+                select bamFile.id, seqPlatformGroup.id, project.name, seqType.displayName, seqType.libraryLayout, seqType.singleCell
+                from AbstractBamFile bamFile, MergingWorkPackage mergingWorkPackage
+                join mergingWorkPackage.seqPlatformGroup seqPlatformGroup
+                left join seqPlatformGroup.mergingCriteria mergingCriteria
+                left join mergingCriteria.project project
+                left join mergingCriteria.seqType seqType
+                where bamFile.workPackage.id = mergingWorkPackage.id
+                  and bamFile.id in (:bamFileIds)
+                ''', [bamFileIds: bamFileIds]) as List<Object[]>
+        if (!groups) {
+            return [:]
+        }
+        Map<Long, List<String>> seqPlatforms = groupValues(SeqPlatformGroup.executeQuery('''
+                select seqPlatformGroup.id, seqPlatform.name, seqPlatformModelLabel.name, sequencingKitLabel.name
+                from SeqPlatformGroup seqPlatformGroup
+                join seqPlatformGroup.seqPlatforms seqPlatform
+                left join seqPlatform.seqPlatformModelLabel seqPlatformModelLabel
+                left join seqPlatform.sequencingKitLabel sequencingKitLabel
+                where seqPlatformGroup.id in (:seqPlatformGroupIds)
+                ''', [seqPlatformGroupIds: groups.collect { it[1] }.unique()]).collect { Object[] values ->
+            [values[0], SeqPlatform.formatFullName(values[1] as String, values[2] as String, values[3] as String)] as Object[]
+        })
+        return groups.collectEntries { Object[] values ->
+            String mergingCriteriaProject = values[2] as String
+            String seqType = values[3] == null ? null :
+                    SeqType.formatDisplayNameWithLibraryLayout(values[3] as String, values[4] as SequencingReadType, values[5] as boolean)
+            [(values[0] as Long): SeqPlatformGroup.formatDisplayName(mergingCriteriaProject, seqType, seqPlatforms[values[1] as Long] ?: [])]
+        }
+    }
+
+    /**
+     * Groups the second column of the given rows by the first column. Null values are dropped, but the key is kept.
+     */
+    private static Map<Long, List<String>> groupValues(List<Object[]> rows) {
+        Map<Long, List<String>> result = [:]
+        for (Object[] values : rows) {
+            Long key = values[0] as Long
+            if (!result.containsKey(key)) {
+                result[key] = []
+            }
+            if (values[1] != null) {
+                result[key] << (values[1] as String)
+            }
+        }
+        return result
+    }
+
+    private static String joinDistinctSorted(Collection<String> values) {
+        return (values ?: []).findAll().unique().sort().join(VALUE_SEPARATOR)
+    }
+
+    /**
+     * Display name of a species with strain from projected values, see {@link SpeciesWithStrain#toString()}.
+     * Null if there is no species (left join without match).
+     */
+    private static String speciesWithStrainDisplayName(String commonName, String scientificName, String strainName) {
+        return commonName == null ? null : SpeciesWithStrain.formatDisplayName(Species.formatDisplayName(commonName, scientificName), strainName)
     }
 
     @CompileDynamic

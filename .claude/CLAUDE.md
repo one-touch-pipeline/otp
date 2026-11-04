@@ -92,6 +92,10 @@ for day-to-day coding — kept lean on purpose.
   associations where possible. In cases where dynamic finders are much simpler
   and more readable, annotate the method with `@CompileDynamic` (`@CompileDynamic`
   is only disallowed at the class level by CodeNarc).
+- Building display text from projected values (no entity loaded)? Don't copy a
+  domain getter's format into a service. Call the domain's static `format…` method
+  its getter delegates to (e.g. `SeqType.formatDisplayNameWithLibraryLayout`), or
+  extract one there if it doesn't exist yet.
 
 ## Testing expectations
 

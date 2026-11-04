@@ -320,10 +320,83 @@ describe('Check trigger Workflows page', () => {
       cy.checkDownloadByContentOfFixture('triggerWorkflowsCheckSeqTracks.json');
     });
 
+    it('should show the sequencing type and the eligible analysis IDs of each bam file', () => {
+      loadTriggerWorkflowsPage();
+
+      cy.fixture('downloadChecks/triggerWorkflowsCheckBamFiles.json').then((expected) => {
+        cy.get('div#bamTable_wrapper div.dataTables_scrollHead thead th').then((headers) => {
+          expect([...headers].map((header) => header.innerText.trim())).to.deep.equal(expected.header);
+        });
+
+        expected.data.forEach((expectedRow) => {
+          cy.get('table#bamTable tbody tr').contains('td:first-child', new RegExp(`^${expectedRow[0]}$`)).parent('tr')
+            .find('td').then((cells) => {
+              expect([...cells].map((cell) => cell.innerText.trim())).to.deep.equal(expectedRow);
+            });
+        });
+      });
+    });
+
     it('should download and check the bam files csv', () => {
       loadTriggerWorkflowsPage();
       cy.get('div#bamTable_wrapper button').contains('Download').click();
       cy.checkDownloadByContentOfFixture('triggerWorkflowsCheckBamFiles.json');
+    });
+
+    it('should show the eligible analyses of the found bam files in one analysis table', () => {
+      loadTriggerWorkflowsPage();
+
+      cy.fixture('downloadChecks/triggerWorkflowsCheckAnalyses.json').then((expected) => {
+        cy.get('div#analysisTable_wrapper div.dataTables_scrollHead thead th').then((headers) => {
+          expect([...headers].map((header) => header.innerText.trim())).to.deep.equal(expected.header);
+        });
+
+        cy.get('table#analysisTable tbody tr').should('have.length', expected.data.length);
+        expected.data.forEach((expectedRow) => {
+          cy.get('table#analysisTable tbody tr')
+            .contains('td:nth-child(2)', new RegExp(`^${expectedRow[1]}$`)).parent('tr')
+            .find('td').then((cells) => {
+              expect([...cells].map((cell) => cell.innerText.trim())).to.deep.equal(expectedRow);
+            });
+        });
+      });
+    });
+
+    it('should download and check the analyses csv', () => {
+      loadTriggerWorkflowsPage();
+      cy.get('div#analysisTable_wrapper button').contains('Download').click();
+      cy.checkDownloadByContentOfFixture('triggerWorkflowsCheckAnalyses.json');
+    });
+
+    it('should replace the analyses on a new search and clear them on an empty search', () => {
+      const WGS_ANALYSIS_IDS = [
+        '1248', '1250', '1254', '1257', '1260', '1261', '1264', '1266',
+        '1564', '1565', '1568', '1570', '1573', '1574', '1577', '1579'
+      ];
+      loadTriggerWorkflowsPage();
+      cy.get('table#analysisTable tbody tr').should('have.length', 16);
+
+      cy.get('select#seqTypeProject').select('WGS PAIRED bulk', { force: true });
+      clickSearchButtonAndWait();
+      // the workflows triggered by the tests above add analyses of their own, so only the persisted ones are fixed
+      cy.get('table#analysisTable tbody tr').should('have.length.at.least', WGS_ANALYSIS_IDS.length)
+        .each((row) => {
+          cy.wrap(row).find('td').eq(5).should('have.text', 'WGS PAIRED bulk');
+        });
+      cy.get('table#analysisTable tbody td:nth-child(2)').then((cells) => {
+        const ids = [...cells].map((cell) => cell.innerText.trim());
+        expect(ids).to.include.members(WGS_ANALYSIS_IDS);
+        ['1226', '1228', '1232', '1235'].forEach((exomeAnalysisId) => {
+          expect(ids).not.to.include(exomeAnalysisId);
+        });
+      });
+
+      cy.get('select#seqTypeProject').select('RNA PAIRED bulk', { force: true });
+      clickSearchButtonAndWait();
+      cy.get('table#analysisTable tbody td.dataTables_empty').should('exist');
+      cy.window().then((win) => {
+        expect(win.$('#analysisTable').DataTable().rows().count(), 'downloadable analysis rows').to.equal(0);
+      });
     });
 
     it('should download and check the configured workflows csv', () => {

@@ -7,12 +7,14 @@
     "Project",
     "Individual",
     "Sample Type",
+    "Seq. Type",
     "Withdrawn",
     "Library Prep. Kit",
     "Species",
     "Mixed In Species",
     "Reference genome",
-    "Seq. Platform Group"
+    "Seq. Platform Group",
+    "IDs of analyses"
   ],
   "data": [
     [
@@ -20,24 +22,84 @@
       "ExampleProject",
       "example_2",
       "tumor01",
+      "EXOME PAIRED bulk",
       "false",
       "Agilent SureSelect V5",
       "Human (Homo sapiens) [No strain available]",
       "",
       "1KGRef_PhiX",
-      "'OTP global' seq platform group with 'ExampleSeqPlatform ExampleModel ExampleKit'"
+      "'OTP global' seq platform group with 'ExampleSeqPlatform ExampleModel ExampleKit'",
+      "1226, 1228, 1232, 1235"
     ],
     [
       "1038",
       "ExampleProject",
       "example_2",
       "tumor02",
+      "EXOME PAIRED bulk",
       "false",
       "Agilent SureSelect V5",
       "Human (Homo sapiens) [No strain available]",
       "",
       "1KGRef_PhiX",
-      "'OTP global' seq platform group with 'ExampleSeqPlatform ExampleModel ExampleKit'"
+      "'OTP global' seq platform group with 'ExampleSeqPlatform ExampleModel ExampleKit'",
+      "1238, 1239, 1242, 1244"
+    ],
+    [
+      "1115",
+      "ExampleProject",
+      "example_2",
+      "control01",
+      "EXOME PAIRED bulk",
+      "false",
+      "Agilent SureSelect V5",
+      "Human (Homo sapiens) [No strain available]",
+      "",
+      "1KGRef_PhiX",
+      "'OTP global' seq platform group with 'ExampleSeqPlatform ExampleModel ExampleKit'",
+      "1226, 1228, 1232, 1235, 1238, 1239, 1242, 1244"
+    ],
+    [
+      "1284",
+      "ExampleProject",
+      "example_3",
+      "tumor01",
+      "EXOME PAIRED bulk",
+      "false",
+      "Agilent SureSelect V5",
+      "Human (Homo sapiens) [No strain available]",
+      "",
+      "1KGRef_PhiX",
+      "'OTP global' seq platform group with 'ExampleSeqPlatform ExampleModel ExampleKit'",
+      "1546, 1547, 1550, 1552"
+    ],
+    [
+      "1361",
+      "ExampleProject",
+      "example_3",
+      "tumor02",
+      "EXOME PAIRED bulk",
+      "false",
+      "Agilent SureSelect V5",
+      "Human (Homo sapiens) [No strain available]",
+      "",
+      "1KGRef_PhiX",
+      "'OTP global' seq platform group with 'ExampleSeqPlatform ExampleModel ExampleKit'",
+      "1555, 1556, 1559, 1561"
+    ],
+    [
+      "1438",
+      "ExampleProject",
+      "example_3",
+      "control01",
+      "EXOME PAIRED bulk",
+      "false",
+      "Agilent SureSelect V5",
+      "Human (Homo sapiens) [No strain available]",
+      "",
+      "1KGRef_PhiX",
+      "'OTP global' seq platform group with 'ExampleSeqPlatform ExampleModel ExampleKit'",
+      "1546, 1547, 1550, 1552, 1555, 1556, 1559, 1561"
     ]
   ]
 }

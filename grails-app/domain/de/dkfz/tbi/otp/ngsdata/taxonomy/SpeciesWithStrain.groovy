@@ -55,6 +55,10 @@ class SpeciesWithStrain implements Entity, Legacy {
 
     @Override
     String toString() {
-        return "${species} [${strain.name}]"
+        return formatDisplayName(species.toString(), strain.name)
+    }
+
+    static String formatDisplayName(String speciesDisplayName, String strainName) {
+        return "${speciesDisplayName} [${strainName}]"
     }
 }

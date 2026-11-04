@@ -86,15 +86,24 @@ class SeqPlatformGroup implements Entity, CommentableWithHistory {
 
     @Override
     String toString() {
+        return formatDisplayName(mergingCriteria?.project?.toString(), mergingCriteria?.seqType?.displayNameWithLibraryLayout,
+                seqPlatforms*.toString())
+    }
+
+    /**
+     * @param mergingCriteriaProjectName the project of the merging criteria, null for an OTP global group without merging criteria
+     */
+    static String formatDisplayName(String mergingCriteriaProjectName, String mergingCriteriaSeqTypeDisplayName,
+                                    Collection<String> seqPlatformFullNames) {
         StringBuilder sb = new StringBuilder()
-        if (mergingCriteria) {
-            sb << "'${mergingCriteria.project} ${mergingCriteria.seqType?.displayNameWithLibraryLayout}'"
+        if (mergingCriteriaProjectName != null) {
+            sb << "'${mergingCriteriaProjectName} ${mergingCriteriaSeqTypeDisplayName}'"
         } else {
             sb << "'OTP global'"
         }
         sb << " seq platform group with "
-        if (seqPlatforms) {
-            sb << seqPlatforms*.toString().sort().collect {
+        if (seqPlatformFullNames) {
+            sb << seqPlatformFullNames.sort(false).collect {
                 "'${it}'"
             }.join(", ")
         } else {

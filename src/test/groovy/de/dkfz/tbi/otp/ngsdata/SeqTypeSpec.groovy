@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -208,5 +209,36 @@ class SeqTypeSpec extends Specification implements DataTest, DomainFactoryCore {
         alignableSeqTypes.find {
             it.name == SeqTypeNames.WHOLE_GENOME.seqTypeName && it.libraryLayout == SequencingReadType.PAIRED && !it.singleCell
         }
+    }
+
+    @Unroll
+    void "formatDisplayNameWithLibraryLayout, returns '#expected', the same as getDisplayNameWithLibraryLayout"() {
+        given:
+        SeqType seqType = new SeqType(displayName: 'WGS', libraryLayout: libraryLayout, singleCell: singleCell)
+
+        expect:
+        SeqType.formatDisplayNameWithLibraryLayout('WGS', libraryLayout, singleCell) == expected
+        seqType.displayNameWithLibraryLayout == expected
+
+        where:
+        libraryLayout                | singleCell || expected
+        SequencingReadType.PAIRED    | false      || 'WGS PAIRED bulk'
+        SequencingReadType.SINGLE    | false      || 'WGS SINGLE bulk'
+        SequencingReadType.MATE_PAIR | true       || 'WGS MATE_PAIR single cell'
+    }
+
+    @Unroll
+    void "formatSingleCellDisplayName, returns '#expected', the same as getSingleCellDisplayName"() {
+        given:
+        SeqType seqType = new SeqType(singleCell: singleCell)
+
+        expect:
+        SeqType.formatSingleCellDisplayName(singleCell) == expected
+        seqType.singleCellDisplayName == expected
+
+        where:
+        singleCell || expected
+        false      || 'bulk'
+        true       || 'single cell'
     }
 }

@@ -142,7 +142,7 @@ class WorkflowNotificationContentService {
                     values[0] as String, // individual.pid
                     values[1] as String, // sampleType1.name
                     values[2] as String, // sampleType2.name
-                    seqTypeDisplayName(values[3] as String, values[4] as SequencingReadType, values[5] as boolean), // seqType
+                    SeqType.formatDisplayNameWithLibraryLayout(values[3] as String, values[4] as SequencingReadType, values[5] as boolean), // seqType
                     values[6] as Long,   // project.id
                     values[7] as String, // project.name
                     values[8] as Long,   // workflowArtefact.producedBy.id
@@ -374,7 +374,8 @@ class WorkflowNotificationContentService {
             new BamImportNotificationRow(
                     values[0] as String, // individual.pid
                     values[1] as String, // sampleType.name
-                    seqTypeDisplayName(values[2] as String, values[3] as SequencingReadType, values[4] as boolean), // seqTypeDisplayName
+                    // seqTypeDisplayName
+                    SeqType.formatDisplayNameWithLibraryLayout(values[2] as String, values[3] as SequencingReadType, values[4] as boolean),
                     values[5] as String, // seqType.dirName
                     values[6] as boolean, // seqType.hasAntibodyTarget
                     (values[3] as SequencingReadType).name().toLowerCase(), // libraryLayoutDirName
@@ -418,19 +419,11 @@ class WorkflowNotificationContentService {
         return new SampleNotificationRow(
                 values[0] as String, // individual.pid
                 values[1] as String, // sampleType.name
-                seqTypeDisplayName(values[2] as String, values[3] as SequencingReadType, values[4] as boolean), // seqType
+                SeqType.formatDisplayNameWithLibraryLayout(values[2] as String, values[3] as SequencingReadType, values[4] as boolean), // seqType
                 values[5] as String, // seqTrack.sampleIdentifier
                 values[6] as Long,   // project.id
                 values[7] as String, // project.name
                 values[8] as Long,   // workflow run id
         )
-    }
-
-    /**
-     * Rebuilds {@link SeqType#getDisplayNameWithLibraryLayout} from the projected scalar fields.
-     */
-    private static String seqTypeDisplayName(String displayName, SequencingReadType libraryLayout, boolean singleCell) {
-        String singleCellDisplayName = singleCell ? SeqType.SINGLE_CELL_TRUE : SeqType.SINGLE_CELL_FALSE
-        return "${displayName} ${libraryLayout} ${singleCellDisplayName}".toString()
     }
 }

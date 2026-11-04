@@ -41,6 +41,10 @@ class Species implements Entity {
 
     @Override
     String toString() {
-        return "${speciesCommonName.name} (${scientificName})"
+        return formatDisplayName(speciesCommonName.name, scientificName)
+    }
+
+    static String formatDisplayName(String commonName, String scientificName) {
+        return "${commonName} (${scientificName})"
     }
 }

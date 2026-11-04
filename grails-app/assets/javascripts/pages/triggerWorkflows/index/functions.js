@@ -308,6 +308,8 @@ $(() => {
 
     getBamTable: () => $('#bamTable').DataTable(),
 
+    getAnalysisTable: () => $('#analysisTable').DataTable(),
+
     getWorkflowTable: () => $('#workflowTable').DataTable(),
 
     getMissingLibraryPrepKitWarningsTable: () => $('#missingLibraryPrepKitWarnings').DataTable()
@@ -366,15 +368,35 @@ $(() => {
                 o.project,
                 o.individual,
                 o.sampleType,
+                o.seqType,
                 o.withdrawn,
                 o.libPrepKit,
                 o.species,
                 o.mixedInSpecies,
                 o.referenceGenome,
-                o.seqPlatformGroup
+                o.seqPlatformGroup,
+                o.analysisIds
               ])).draw();
             } else {
               $.otp.triggerWorkflows.getBamTable().clear().draw();
+            }
+
+            if (outputdata.data.analysisData && outputdata.data.analysisData.length) {
+              $.otp.triggerWorkflows.getAnalysisTable().clear().rows.add(outputdata.data.analysisData.map((o) => [
+                o.analysisType,
+                o.id,
+                o.project,
+                o.individual,
+                o.sampleType,
+                o.seqType,
+                o.libraryPreparationKits,
+                o.species,
+                o.referenceGenomes,
+                o.diseaseBamId,
+                o.controlBamId
+              ])).draw();
+            } else {
+              $.otp.triggerWorkflows.getAnalysisTable().clear().draw();
             }
 
             if (outputdata.data.info && outputdata.data.info.workflows && outputdata.data.info.workflows.length) {
@@ -614,6 +636,15 @@ $(() => {
     $('#bamTable').DataTable({
       dom: 'B<"toolbar"><"top"i>frtp',
       buttons: $.otp.getDownloadButton(),
+      columnDefs: [{ targets: '_all', render: $.fn.dataTable.render.text() }],
+      scrollCollapse: true,
+      paging: false,
+      scrollY: '500px'
+    });
+    $('#analysisTable').DataTable({
+      dom: 'B<"toolbar"><"top"i>frtp',
+      buttons: $.otp.getDownloadButton(),
+      columnDefs: [{ targets: '_all', render: $.fn.dataTable.render.text() }],
       scrollCollapse: true,
       paging: false,
       scrollY: '500px'

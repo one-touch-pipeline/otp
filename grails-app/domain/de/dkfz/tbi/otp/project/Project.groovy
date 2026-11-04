@@ -191,6 +191,10 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
     }
 
     String getDisplayName() {
+        return formatDisplayName(name, state)
+    }
+
+    static String formatDisplayName(String name, State state) {
         return "${name}${state == State.OPEN ? "" : " (${state.toString().toLowerCase()})"}"
     }
 

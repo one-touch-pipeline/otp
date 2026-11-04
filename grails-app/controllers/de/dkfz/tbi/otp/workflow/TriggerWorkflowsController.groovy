@@ -88,11 +88,16 @@ class TriggerWorkflowsController {
 
         if (!seqTracks && !extBamFiles || !seqTracks.size() && !extBamFiles.size()) {
             return render([
-                    data    : [],
-                    warnings: EMPTY_WARNINGS,
-                    message : message,
+                    data        : [],
+                    bamData     : [],
+                    analysisData: [],
+                    warnings    : EMPTY_WARNINGS,
+                    message     : message,
             ] as JSON)
         }
+
+        List<Long> bamFileIds = triggerWorkflowsService.getBamFiles(seqTracks*.id)*.id + extBamFiles*.id
+        TriggerWorkflowsTableData tableData = triggerWorkflowsService.getTableData(bamFileIds)
 
         List<Map<String, String>> warningsForMissingLibPrepKits = triggerWorkflowsService.createWarningsForMissingLibPrepKits(seqTracks)
         List<Map<String, String>> warningsForWithdrawnSeqTracks = triggerWorkflowsService.createWarningsForWithdrawnSeqTracks(seqTracks)
@@ -108,18 +113,21 @@ class TriggerWorkflowsController {
                 triggerWorkflowsService.createWarningsForMissingSampleTypePerProject(seqTracks)
 
         return render([
-                data    : seqTracks.collect { SeqTrack seqTrack ->
+                data        : seqTracks.collect { SeqTrack seqTrack ->
                     searchSeqTrackService.projectSeqTrack(seqTrack)
                 },
-                bamData : (triggerWorkflowsService.getBamFiles(seqTracks*.id) + extBamFiles).collect { AbstractBamFile bamFile ->
-                    getBamValue(bamFile)
+                bamData     : tableData.bamRows.collect { TriggerWorkflowsBamRow bamRow ->
+                    getBamValue(bamRow)
                 },
-                info    : [
+                analysisData: tableData.analysisRows.collect { TriggerWorkflowsAnalysisRow analysisRow ->
+                    getAnalysisValue(analysisRow)
+                },
+                info        : [
                         workflows: triggerWorkflowsService.getInfo(seqTracks).collect {
                             getWorkflowsValue(it)
                         }
                 ],
-                warnings: [
+                warnings    : [
                         withdrawnSeqTracks         : warningsForWithdrawnSeqTracks,
                         missingWorkflowConfigs     : warningsForMissingWorkflowConfig,
                         missingLibPrepKits         : warningsForMissingLibPrepKits,
@@ -129,7 +137,7 @@ class TriggerWorkflowsController {
                         libraryPreparationKits     : warningsForSamplesHavingMultipleLibPrepKits,
                         missingSampleTypePerProject: warningsForMissingSampleTypePerProject,
                 ],
-                message : message,
+                message     : message,
         ] as JSON)
     }
 
@@ -179,19 +187,36 @@ class TriggerWorkflowsController {
         ] as JSON)
     }
 
-    private Map<String, Object> getBamValue(AbstractBamFile bamFile) {
+    private Map<String, Object> getBamValue(TriggerWorkflowsBamRow bamRow) {
         return [
-                id              : bamFile.id,
-                project         : bamFile.project.displayName,
-                individual      : bamFile.individual.displayName,
-                sampleType      : bamFile.sampleType.displayName,
-                withdrawn       : bamFile.withdrawn,
-                libPrepKit      : bamFile.workPackage.libraryPreparationKit?.name ?: '',
-                species         : bamFile.individual.species.displayName,
-                mixedInSpecies  : bamFile.sample.mixedInSpecies*.displayName.join(', '),
-                referenceGenome : bamFile.referenceGenome.name,
-                seqPlatformGroup: (bamFile.workPackage instanceof MergingWorkPackage) ?
-                        (bamFile.workPackage as MergingWorkPackage).seqPlatformGroup?.toString() : '',
+                id              : bamRow.id,
+                project         : bamRow.project,
+                individual      : bamRow.individual,
+                sampleType      : bamRow.sampleType,
+                seqType         : bamRow.seqType,
+                withdrawn       : bamRow.withdrawn,
+                libPrepKit      : bamRow.libPrepKit,
+                species         : bamRow.species,
+                mixedInSpecies  : bamRow.mixedInSpecies,
+                referenceGenome : bamRow.referenceGenome,
+                seqPlatformGroup: bamRow.seqPlatformGroup,
+                analysisIds     : bamRow.analysisIds.join(', '),
+        ]
+    }
+
+    private Map<String, Object> getAnalysisValue(TriggerWorkflowsAnalysisRow analysisRow) {
+        return [
+                analysisType          : analysisRow.analysisType,
+                id                    : analysisRow.id,
+                project               : analysisRow.project,
+                individual            : analysisRow.individual,
+                sampleType            : analysisRow.sampleType,
+                seqType               : analysisRow.seqType,
+                libraryPreparationKits: analysisRow.libraryPreparationKits,
+                species               : analysisRow.species,
+                referenceGenomes      : analysisRow.referenceGenomes,
+                diseaseBamId          : analysisRow.diseaseBamId,
+                controlBamId          : analysisRow.controlBamId,
         ]
     }
 
