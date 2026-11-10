@@ -346,6 +346,53 @@ class ProjectRequestService {
     }
 
     @CompileDynamic
+    void sendDataManagerReminders(LocalDate today) {
+        assert today: "today must not be null"
+
+        int reminderDays = processingOptionService.findOptionAsInteger(
+                ProcessingOption.OptionName.PROJECT_REQUEST_DATA_MANAGER_REMINDER_DAYS)
+        assert reminderDays > 0: "Reminder period must be greater than zero"
+
+        LocalDate cutoff = today.minusDays(reminderDays)
+
+        List<ProjectRequest> requests = ProjectRequest.withCriteria {
+            state {
+                eq("beanName", ProjectRequestStateProvider.getStateBeanName(Check))
+                or {
+                    and {
+                        isNull("lastDataManagerReminderAt")
+                        le("checkStartedAt", cutoff)
+                    }
+                    le("lastDataManagerReminderAt", cutoff)
+                }
+            }
+            order("id", "asc")
+        } as List<ProjectRequest>
+
+        String ticketSystemEmail = processingOptionService.findOptionAsString(
+                ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM)
+
+        requests.each { ProjectRequest request ->
+            Map<String, Object> parameters = [
+                    projectRequestId  : request.id,
+                    projectRequestName: request.name,
+                    checkStartedAt    : request.state.checkStartedAt,
+                    link              : getProjectRequestLinkWithoutParams(request),
+            ]
+
+            String subject = messageSourceService.createMessage(
+                    "notification.projectRequest.dataManagerReminder.subject", parameters)
+            String body = messageSourceService.createMessage(
+                    "notification.projectRequest.dataManagerReminder.body", parameters)
+
+            mailHelperService.saveMail(subject, body, [ticketSystemEmail])
+
+            request.state.lastDataManagerReminderAt = today
+            projectRequestPersistentStateService.saveProjectRequestPersistentState(request.state)
+        }
+    }
+
+    @CompileDynamic
     @SuppressWarnings('CatchException')
     void sendReminderEmailsForPendingApprovals(LocalDate today) {
         assert today: "today must not be null"

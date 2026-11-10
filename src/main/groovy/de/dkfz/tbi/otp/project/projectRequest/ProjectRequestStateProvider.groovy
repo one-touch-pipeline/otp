@@ -67,6 +67,10 @@ class ProjectRequestStateProvider {
         if (stateClass == Approval) {
             projectRequest.state.approvalRoundStartedAt = LocalDate.now()
         }
+        if (stateClass == Check) {
+            projectRequest.state.checkStartedAt = LocalDate.now()
+            projectRequest.state.lastDataManagerReminderAt = null
+        }
         projectRequestService.saveProjectRequest(projectRequest)
     }
 

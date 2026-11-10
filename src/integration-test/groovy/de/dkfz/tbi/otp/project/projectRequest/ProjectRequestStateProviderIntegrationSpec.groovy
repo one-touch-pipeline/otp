@@ -151,4 +151,31 @@ class ProjectRequestStateProviderIntegrationSpec extends Specification implement
         expect:
         ProjectRequestStateProvider.getStateBeanName(check) == "check"
     }
+
+    @Unroll
+    void "entering Check resets reminder tracking from #previousState"() {
+        given:
+        LocalDate oldDate = LocalDate.of(2020, 1, 1)
+        ProjectRequest request = createProjectRequest([:], [
+                beanName                 : previousState,
+                checkStartedAt           : oldDate,
+                lastDataManagerReminderAt: oldDate,
+        ])
+        LocalDate before = LocalDate.now()
+
+        when:
+        projectRequestStateProvider.setState(request, Check)
+        LocalDate after = LocalDate.now()
+
+        then:
+        request.state.refresh()
+        request.state.beanName == "check"
+        request.state.checkStartedAt != null
+        !request.state.checkStartedAt.isBefore(before)
+        !request.state.checkStartedAt.isAfter(after)
+        request.state.lastDataManagerReminderAt == null
+
+        where:
+        previousState << ["draft", "requesterEdit"]
+    }
 }

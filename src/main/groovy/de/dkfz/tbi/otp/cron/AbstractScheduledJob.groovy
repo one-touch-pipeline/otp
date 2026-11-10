@@ -53,6 +53,7 @@ abstract class AbstractScheduledJob {
             ProjectRequestReminderJob,
             ScheduleUsersForDeactivationJob,
             UnknownLdapUsersJob,
+            ProjectRequestDataManagerReminderJob,
     ]
 
     @Autowired

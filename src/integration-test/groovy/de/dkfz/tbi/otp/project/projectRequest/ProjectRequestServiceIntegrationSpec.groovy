@@ -1249,4 +1249,68 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         ""    | true
         "not" | false
     }
+
+    @Unroll
+    void "sendDataManagerReminders: #scenario"() {
+        given:
+        LocalDate today = LocalDate.of(2026, 10, 21)
+        String ticketEmail = "tickets@example.org"
+
+        LocalDate lastReminder = remindedDaysAgo == null ?
+                null : today.minusDays(remindedDaysAgo)
+
+        ProjectRequest request = createProjectRequest([:], [
+                beanName                 : stateName,
+                checkStartedAt           : today.minusDays(enteredDaysAgo),
+                lastDataManagerReminderAt: lastReminder,
+        ])
+
+        projectRequestService.processingOptionService.findOptionAsInteger(
+                ProcessingOption.OptionName.PROJECT_REQUEST_DATA_MANAGER_REMINDER_DAYS) >> period
+
+        projectRequestService.processingOptionService.findOptionAsString(
+                ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM) >> ticketEmail
+
+        projectRequestService.linkGenerator.link(_) >> link
+
+        Map<String, Object> parameters = [
+                projectRequestId  : request.id,
+                projectRequestName: request.name,
+                checkStartedAt    : request.state.checkStartedAt,
+                link              : link,
+        ]
+
+        when:
+        projectRequestService.sendDataManagerReminders(today)
+
+        then:
+        expectedMails * projectRequestService.messageSourceService.createMessage(
+                "notification.projectRequest.dataManagerReminder.subject",
+                parameters) >> subject
+
+        expectedMails * projectRequestService.messageSourceService.createMessage(
+                "notification.projectRequest.dataManagerReminder.body",
+                parameters) >> body
+
+        expectedMails * projectRequestService.mailHelperService.saveMail(
+                subject, body, [ticketEmail])
+
+        0 * projectRequestService.mailHelperService._
+
+        and:
+        request.state.refresh()
+        request.state.lastDataManagerReminderAt ==
+                (expectedMails ? today : lastReminder)
+
+        where:
+        scenario                      | stateName  | period | enteredDaysAgo | remindedDaysAgo | expectedMails
+        "first reminder on deadline"  | "check"    | 7      | 7              | null            | 1
+        "first reminder overdue"      | "check"    | 7      | 10             | null            | 1
+        "first reminder not due"      | "check"    | 7      | 6              | null            | 0
+        "repeat reminder on deadline" | "check"    | 7      | 20             | 7               | 1
+        "repeat reminder not due"     | "check"    | 7      | 20             | 6               | 0
+        "already reminded today"      | "check"    | 7      | 20             | 0               | 0
+        "PI approval excluded"        | "approval" | 7      | 20             | null            | 0
+        "configured period respected" | "check"    | 14     | 10             | null            | 0
+    }
 }

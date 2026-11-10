@@ -686,6 +686,10 @@ class ProcessingOption implements Entity {
                 "Boolean flag to  turn on/off checking cluster job logs for error patterns on the success path",
                 Necessity.OPTIONAL, "false", TypeValidators.BOOLEAN,
         ),
+        PROJECT_REQUEST_DATA_MANAGER_REMINDER_DAYS(
+                "Days before the first reminder and between subsequent reminders for pending project requests",
+                Necessity.OPTIONAL, "7", TypeValidators.POSITIVE_NUMBER
+        ),
 
         private final String description
         private final Necessity necessity

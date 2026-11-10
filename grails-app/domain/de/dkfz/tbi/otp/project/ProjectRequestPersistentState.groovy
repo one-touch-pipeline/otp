@@ -37,6 +37,9 @@ class ProjectRequestPersistentState implements Entity {
     /** Set to the current date each time this request enters the Approval state; used to compute reminder cutoffs. */
     LocalDate approvalRoundStartedAt
 
+    LocalDate checkStartedAt
+    LocalDate lastDataManagerReminderAt
+
     static hasMany = [
             usersThatNeedToApprove: User,
             usersThatAlreadyApproved: User,
@@ -56,5 +59,7 @@ class ProjectRequestPersistentState implements Entity {
         beanName blank: false
         currentOwner nullable: true
         approvalRoundStartedAt nullable: true
+        checkStartedAt nullable: true
+        lastDataManagerReminderAt nullable: true
     }
 }
