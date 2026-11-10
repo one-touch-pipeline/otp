@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.validation.Validateable
+import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 
 @PreAuthorize('isFullyAuthenticated()')
@@ -33,6 +35,10 @@ class SeqTrackController {
     ]
 
     def seqTrackSet(SeqTrackSelectionCommand cmd) {
+        if (cmd.hasErrors()) {
+            return response.sendError(HttpStatus.NOT_FOUND.value())
+        }
+
         List<SeqTrack> seqTracks = seqTrackService.getSeqTrackSet(cmd.individual, cmd.sampleType, cmd.seqType)
 
         return [
@@ -45,7 +51,7 @@ class SeqTrackController {
     }
 }
 
-class SeqTrackSelectionCommand {
+class SeqTrackSelectionCommand implements Validateable {
     Individual individual
     SeqType seqType
     SampleType sampleType
