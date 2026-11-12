@@ -874,6 +874,21 @@ class FileServiceSpec extends Specification implements DataTest {
         }
     }
 
+    void "findExistingFileInPath, returns matching file without waiting"() {
+        given:
+        Path expected = CreateFileHelper.createFile(tempDir.resolve("report-test.html"))
+        CreateFileHelper.createFile(tempDir.resolve("other.html"))
+
+        expect:
+        fileService.findExistingFileInPath(tempDir, /report.*\.html/) == expected
+    }
+
+    void "findExistingFileInPath, returns null for missing file or directory"() {
+        expect:
+        fileService.findExistingFileInPath(tempDir, /report.*\.html/) == null
+        fileService.findExistingFileInPath(tempDir.resolve("missing"), /report.*\.html/) == null
+    }
+
     void "findFileInPath, file can be found with regular expression"() {
         given:
         Path expected = CreateFileHelper.createFile(tempDir.resolve("Test1_XYZ.csv"))

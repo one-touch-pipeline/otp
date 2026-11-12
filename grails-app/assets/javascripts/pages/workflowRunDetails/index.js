@@ -155,6 +155,20 @@ $(() => {
     action: 'showNextflowLog',
     id: wesRun.id
   }) : ''}
+                         ${wesRun.hasStdout ? $.otp.createLinkMarkup({
+    text: 'stdout.log',
+    controller: 'wesRun',
+    action: 'showStdout',
+    id: wesRun.id,
+    parameters: createLinkParametersForNavigation()
+  }) : ''}
+                         ${wesRun.hasStderr ? $.otp.createLinkMarkup({
+    text: 'stderr.log',
+    controller: 'wesRun',
+    action: 'showStderr',
+    id: wesRun.id,
+    parameters: createLinkParametersForNavigation()
+  }) : ''}
                        </td>
                        <td>${wesRun.exitCode}</td>
                      </tr>`;

@@ -26,6 +26,8 @@ import org.grails.web.json.JSONObject
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.filestore.FilestoreService
+import de.dkfz.tbi.otp.infrastructure.LoginFailedRemoteFileSystemException
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.DataTablesCommand
 import de.dkfz.tbi.otp.utils.TimeFormats
@@ -36,6 +38,7 @@ import javax.servlet.http.HttpServletResponse
 class WorkflowRunDetailsController extends AbstractWorkflowRunController {
 
     CommentService commentService
+    FilestoreService filestoreService
     WorkflowLogService workflowLogService
     WorkflowRunService workflowRunService
 
@@ -58,8 +61,18 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
         String unFormattedJson = cmd.id.combinedConfig ?: '{}'
         JSONObject jsonObject = JSON.parse(unFormattedJson) as JSONObject
         String formattedJson = jsonObject.toString(4)
+        String workFolderPath = "-"
+        if (cmd.id.workFolder) {
+            try {
+                workFolderPath = filestoreService.getWorkFolderPath(cmd.id.workFolder).toString()
+            } catch (LoginFailedRemoteFileSystemException e) {
+                log.warn("Could not resolve work folder path for workflow run ${cmd.id.id}", e)
+                workFolderPath = g.message(code: "workflowRun.details.workFolder.unavailable") as String
+            }
+        }
 
         return [
+                workFolderPath: workFolderPath,
                 workflowRun   : cmd.id,
                 restartedAs   : restartedAs,
                 cmd           : cmd,

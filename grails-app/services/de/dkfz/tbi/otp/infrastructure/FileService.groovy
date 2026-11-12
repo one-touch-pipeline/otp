@@ -244,6 +244,25 @@ class FileService {
     }
 
     /**
+     * Finds the first matching file without waiting for it to appear.
+     */
+    Path findExistingFileInPath(final Path dir, final String fileRegex) {
+        Stream<Path> stream = null
+        Path match = null
+        try {
+            stream = Files.list(dir)
+            match = stream.find { Path path ->
+                path.fileName =~ fileRegex
+            } as Path
+        } catch (NoSuchFileException ignored) {
+            log.debug("Directory does not exist: ${dir}")
+        } finally {
+            stream?.close()
+        }
+        return match
+    }
+
+    /**
      * Finds and returns all available files with filenames matching the given regex
      */
     List<Path> findAllFilesInPath(final Path dir, final String fileRegex = ".*") {

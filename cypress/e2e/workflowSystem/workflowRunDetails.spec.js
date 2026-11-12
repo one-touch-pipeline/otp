@@ -28,6 +28,12 @@ describe('Check workflow run details page', () => {
       cy.loginAs('operator');
     });
 
+    it('should show a dash when no work folder is attached', () => {
+      cy.visit('/workflowRunList/index?state=PENDING');
+      cy.contains('table#runs tbody a', 'run 45: PENDING').click();
+      cy.get('#work-folder-path').should('have.text', 'Work folder: -');
+    });
+
     it('should kill a pending workflow run without any workflow step and restart it', () => {
       killPendingWorkflowRun('run 45: PENDING');
 
@@ -109,6 +115,66 @@ describe('Check workflow run details page', () => {
             });
           });
       });
+    });
+
+    it('should show the work folder and all four WES report and log links', () => {
+      overrideWesRunDetails({
+        hasReport: true,
+        hasNextflowLog: true,
+        hasStdout: true,
+        hasStderr: true
+      });
+      cy.visit('/workflowRunList/index?state=FAILED');
+      cy.contains('table#runs tbody a', 'WES Restart Scenario (OTP-2980)').click();
+      cy.wait('@stepsData').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+        const step = interception.response.body.data.find((s) => !s.obsolete && s.wesRuns.length > 0);
+        const wesRun = step.wesRuns[0];
+
+        cy.contains('table#steps a', `WorkflowExecutionSystem run: ${wesRun.wesIdentifier}`)
+          .closest('tr').within(() => {
+            [
+              ['NextFlow Report', 'showReport'],
+              ['Nextflow Log', 'showNextflowLog'],
+              ['stdout.log', 'showStdout'],
+              ['stderr.log', 'showStderr']
+            ].forEach(([label, action]) => {
+              cy.contains('a', label).should('have.attr', 'href')
+                .and('contain', `/wesRun/${action}/${wesRun.id}`);
+            });
+          });
+      });
+
+      cy.get('#work-folder-path').should(
+        'contain.text',
+        '/home/otp/filesystem/otp_data/c0/ff/ee00-2980-4000-b000-000000002980'
+      );
+    });
+
+    it('should not show WES report and log links when unavailable', () => {
+      overrideWesRunDetails({
+        hasReport: false,
+        hasNextflowLog: false,
+        hasStdout: false,
+        hasStderr: false
+      });
+      cy.visit('/workflowRunList/index?state=FAILED');
+      cy.contains('table#runs tbody a', 'WES Restart Scenario (OTP-2980)').click();
+      cy.wait('@stepsData').its('response.statusCode').should('eq', 200);
+
+      cy.contains('table#steps a', 'WorkflowExecutionSystem run: wes-restart-new-run').should('be.visible');
+      ['NextFlow Report', 'Nextflow Log', 'stdout.log', 'stderr.log'].forEach((label) => {
+        cy.contains('table#steps a', label).should('not.exist');
+      });
+    });
+
+    it('should show the external running icon for an undefined WES state', () => {
+      overrideWesRunDetails({ state: 'UNDEFINED' });
+      cy.visit('/workflowRunList/index?state=FAILED');
+      cy.contains('table#runs tbody a', 'WES Restart Scenario (OTP-2980)').click();
+      cy.wait('@stepsData').its('response.statusCode').should('eq', 200);
+      cy.contains('table#steps td', /^UNDEFINED$/).closest('tr')
+        .find('.sm-loader.darkgreen').should('be.visible');
     });
 
     it('should show a link to the WES run output', () => {
@@ -397,4 +463,17 @@ function killPendingWorkflowRun(runName) {
     cy.location('pathname').should('contain', '/workflowRunDetails/index');
     cy.get('#statusDot').should('have.attr', 'data-status', 'KILLED');
   });
+}
+
+// Override only the fields needed by the test while preserving the real response.
+function overrideWesRunDetails(overrides) {
+  cy.intercept('GET', '/workflowRunDetails/data*', (request) => {
+    request.continue((response) => {
+      response.body.data.forEach((step) => {
+        step.wesRuns.forEach((wesRun) => {
+          Object.assign(wesRun, overrides);
+        });
+      });
+    });
+  }).as('stepsData');
 }

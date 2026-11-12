@@ -35,6 +35,7 @@ const statusToClassName = function (status) {
     case 'QUEUED':
     case 'INITIALIZING':
       return 'dot grey';
+    case 'UNDEFINED':
     case 'RUNNING_WES':
       return 'sm-loader darkgreen';
     case 'PLANNED_OR_RUNNING':

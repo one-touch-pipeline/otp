@@ -110,7 +110,7 @@ class WesRunServiceSpec extends Specification implements ServiceUnitTest<WesRunS
             getWorkFolderPath(_) >> mockWorkFolder
         }
         service.fileService = Mock(FileService) {
-            findFileInPath(mockSubPath, WesRunService.MATCHER_REPORT_FILE) >> reportFilePath
+            findExistingFileInPath(mockSubPath, WesRunService.MATCHER_REPORT_FILE) >> reportFilePath
         }
 
         when:
@@ -140,7 +140,7 @@ class WesRunServiceSpec extends Specification implements ServiceUnitTest<WesRunS
             1 * getWorkFolderPath(_) >> mockWorkFolder
         }
         service.fileService = Mock(FileService) {
-            findFileInPath(mockSubPath, WesRunService.MATCHER_REPORT_FILE) >> reportFilePath
+            findExistingFileInPath(mockSubPath, WesRunService.MATCHER_REPORT_FILE) >> reportFilePath
             fileIsReadable(reportFilePath) >> true
         }
 
@@ -173,7 +173,7 @@ class WesRunServiceSpec extends Specification implements ServiceUnitTest<WesRunS
             1 * getWorkFolderPath(_) >> mockWorkFolder
         }
         service.fileService = Mock(FileService) {
-            1 * findFileInPath(_ as Path, WesRunService.MATCHER_REPORT_FILE) >> reportFileClosure()
+            1 * findExistingFileInPath(_ as Path, WesRunService.MATCHER_REPORT_FILE) >> reportFileClosure()
             (0..1) * fileIsReadable(reportFilePath as Path) >> readable
         }
 

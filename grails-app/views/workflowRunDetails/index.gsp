@@ -52,7 +52,7 @@
     <div class="row">
         <div class="col">
             ${raw(workflowRun.displayName.replace("\n", "<br>"))}
-            <p></p>
+            <p id="work-folder-path" class="mt-2">${g.message(code: "workflowRun.details.workFolder")}: ${workFolderPath}</p>
             <g:form method="POST">
                 <input type="hidden" name="run" value="${workflowRun.id}">
                 <input type="hidden" name="step" value="${workflowRun.workflowSteps ? workflowRun.workflowSteps.last().id : null}">

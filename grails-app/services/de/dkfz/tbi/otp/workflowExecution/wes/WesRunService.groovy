@@ -102,7 +102,7 @@ class WesRunService {
 
         log.debug("Searching for report file in path ${subPath} with matcher ${MATCHER_REPORT_FILE}")
 
-        return fileService.findFileInPath(subPath, MATCHER_REPORT_FILE)
+        return fileService.findExistingFileInPath(subPath, MATCHER_REPORT_FILE)
     }
 
     /**
@@ -132,7 +132,7 @@ class WesRunService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     byte[] getReportFileContent(WesRun wesRun) throws NoSuchFileException, AccessDeniedException {
         Path reportPath = getReportPath(wesRun)
-        log.debug("Reading report file at path ${reportPath} for WesRun ${wesRun}")
+        log.debug("Reading report file at path ${reportPath} for WesRun ${wesRun.id}")
         if (!reportPath || !Files.exists(reportPath)) {
             log.error("Report file for ${wesRun.id} not found: ${reportPath ?: wesRun.subPath}")
             throw new NoSuchFileException("Report file for ${wesRun.id} not found: ${reportPath ?: wesRun.subPath}")
