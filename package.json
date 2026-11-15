@@ -23,7 +23,7 @@
     "ajv-formats-draft2019": "^1.6.1",
     "cypress": "~15.21.1",
     "cypress-multi-reporters": "~2.1.0",
-    "eslint": "^10.14.0",
+    "eslint": "^10.15.0",
     "globals": "^17.14.0",
     "mocha-junit-reporter": "~2.2.1",
     "mochawesome": "~8.1.1",
