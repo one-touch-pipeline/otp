@@ -903,6 +903,9 @@ class DeletionService {
             seqTrackService.throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
         }
 
+        // collected before anything is deleted, since the lookup needs the workflow graph of the seqTrack
+        Set<Path> uuidWorkFolders = findUuidWorkFoldersOwnedOnlyBySeqTrack(seqTrack)
+
         // keep ilse reference for later deletion
         IlseSubmission ilseSubmission = seqTrack.ilseSubmission
 
@@ -915,6 +918,7 @@ class DeletionService {
         RawSequenceFile.findAllBySeqTrack(seqTrack).each { RawSequenceFile df ->
             dirsToDelete.addAll(deleteRawSequenceFile(df))
         }
+        dirsToDelete.addAll(uuidWorkFolders.collect { fileService.toFile(it) })
 
         Sample sample1 = seqTrack.sample
         SeqType seqType = seqTrack.seqType
@@ -991,6 +995,47 @@ class DeletionService {
         }
 
         return dirsToDelete
+    }
+
+    /**
+     * Returns the UUID work folders of the runs that produced the FASTQ files and the FastQC reports of the seqTrack,
+     * restricted to those that may be deleted together with the seqTrack (see {@link #findWorkFolderOwnedOnlyBySeqTrack}).
+     * R1 and R2 share their folders, so each folder is contained only once.
+     */
+    @CompileDynamic
+    private Set<Path> findUuidWorkFoldersOwnedOnlyBySeqTrack(SeqTrack seqTrack) {
+        List<WorkflowRun> producingRuns = [seqTrack.workflowArtefact?.producedBy]
+        producingRuns.addAll(FastqcProcessedFile.withCriteria {
+            sequenceFile {
+                eq('seqTrack', seqTrack)
+            }
+        }*.workflowArtefact*.producedBy)
+        return producingRuns.findAll().unique { it.id }.collect { WorkflowRun run ->
+            findWorkFolderOwnedOnlyBySeqTrack(run, seqTrack)
+        }.findAll() as Set<Path>
+    }
+
+    /**
+     * Returns the UUID work folder of the given run, if it may be deleted together with the seqTrack: the run has a
+     * work folder, every artefact produced by the run belongs only to this seqTrack, and the folder exists.
+     * Otherwise null, so that legacy (non-UUID) data or a folder shared with other data is never deleted.
+     */
+    @CompileDynamic
+    private Path findWorkFolderOwnedOnlyBySeqTrack(WorkflowRun run, SeqTrack seqTrack) {
+        if (!run?.workFolder) {
+            return null
+        }
+        Path workFolder = filestoreService.getWorkFolderPath(run)
+        boolean ownedOnlyBySeqTrack = findOutputArtefactsOf([run]).every { WorkflowArtefact workflowArtefact ->
+            // a metadata-only artefact has no concrete object, so its owner is unknown and the folder is kept
+            Set<SeqTrack> containedSeqTracks = workflowArtefact.artefact.map { it.containedSeqTracks }.orElse([] as Set<SeqTrack>)
+            return containedSeqTracks && containedSeqTracks.every { it.id == seqTrack.id }
+        }
+        if (!ownedOnlyBySeqTrack) {
+            log.warn("The UUID work folder ${workFolder} of ${run} is not deleted, since not all data produced by the run can be attributed to ${seqTrack}")
+            return null
+        }
+        return Files.exists(workFolder) ? workFolder : null
     }
 
     @CompileDynamic

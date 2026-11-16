@@ -43,6 +43,8 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryIns
 import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.egaSubmission.EgaSubmission
+import de.dkfz.tbi.otp.filestore.BaseFolder
+import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.infrastructure.alignment.*
 import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcLinkFileService
@@ -76,6 +78,7 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
     PanCancerWorkFileService panCancerWorkFileService
     PanCancerLinkFileService panCancerLinkFileService
     ExternalAlignmentLinkFileService externalAlignmentLinkFileService
+    FilestoreService filestoreService
 
     String seqDir = "/seq-dir"
 
@@ -765,6 +768,22 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         ClusterJob.count() == 0
     }
 
+    void "deleteIndividual, when seqTrack is in UUID structure, script contains rm -rf of both UUID folders"() {
+        given:
+        setupDataForProcessingFiles()
+        WorkflowRun run = createWorkflowRunWithWorkFolder()
+        SeqTrack seqTrack = createSeqTrackWithFastqFileProducedBy(run)
+        Path uuidFolder = Files.createDirectories(filestoreService.getWorkFolderPath(run))
+        Path fastqcUuidFolder = Files.createDirectories(filestoreService.getWorkFolderPath(createFastqcRunFor(seqTrack)))
+
+        when:
+        String deletionScript = deletionService.deleteIndividual(seqTrack.individual)
+
+        then:
+        deletionScript.readLines().count { it == "rm -rf ${uuidFolder}" } == 1
+        deletionScript.readLines().count { it == "rm -rf ${fastqcUuidFolder}" } == 1
+    }
+
     void "deleteProjectsExternalWorkflowConfigSelector, should remove project from ExternalWorkflowConfigSelector or delete selector completely"() {
         given:
         setupData()
@@ -1366,6 +1385,177 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         then:
         !SeqTrack.get(seqTrack.id)
         !RawSequenceFile.get(rawSequenceFile.id)
+    }
+
+    void "deleteSeqTrack, when FASTQ run has existing UUID work folder owned by seqTrack, returns FASTQ UUID folder"() {
+        given:
+        setupDataForProcessingFiles()
+        WorkflowRun run = createWorkflowRunWithWorkFolder()
+        SeqTrack seqTrack = createSeqTrackWithFastqFileProducedBy(run)
+        Path uuidFolder = Files.createDirectories(filestoreService.getWorkFolderPath(run))
+        Path fastqFile = uuidFolder.resolve(seqTrack.sequenceFiles.first().fileName)
+
+        when:
+        List<File> files = deletionService.deleteSeqTrack(seqTrack)
+
+        then:
+        files*.toPath().contains(uuidFolder)
+        files*.toPath().contains(fastqFile)
+    }
+
+    void "deleteSeqTrack, when R1 and R2 share UUID folders, returns each folder once"() {
+        given:
+        setupDataForProcessingFiles()
+        WorkflowRun run = createWorkflowRunWithWorkFolder()
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile(workflowArtefact: createWorkflowArtefact(producedBy: run))
+        Path uuidFolder = Files.createDirectories(filestoreService.getWorkFolderPath(run))
+        Path fastqcUuidFolder = Files.createDirectories(filestoreService.getWorkFolderPath(createFastqcRunFor(seqTrack)))
+
+        when:
+        List<File> files = deletionService.deleteSeqTrack(seqTrack)
+
+        then:
+        files*.toPath().count { it == uuidFolder } == 1
+        files*.toPath().count { it == fastqcUuidFolder } == 1
+    }
+
+    void "deleteSeqTrack, when FastQC run has existing UUID work folder owned by seqTrack, returns FastQC UUID folder"() {
+        given:
+        setupDataForProcessingFiles()
+        SeqTrack seqTrack = createSeqTrackWithFastqFileProducedBy(createWorkflowRunWithWorkFolder())
+        Path fastqcUuidFolder = Files.createDirectories(filestoreService.getWorkFolderPath(createFastqcRunFor(seqTrack)))
+
+        when:
+        List<File> files = deletionService.deleteSeqTrack(seqTrack)
+
+        then:
+        files*.toPath().contains(fastqcUuidFolder)
+    }
+
+    void "deleteSeqTrack, when FastQC is not in UUID structure, returns no FastQC UUID folder (#name)"() {
+        given:
+        setupDataForProcessingFiles()
+        Path baseFolder = tempDir.resolve('baseFolder')
+        SeqTrack seqTrack = createSeqTrack()
+        RawSequenceFile rawSequenceFile = createFastqFile(seqTrack: seqTrack)
+        WorkflowArtefact workflowArtefact = createArtefact ? createWorkflowArtefact(producedBy: createRun ? createWorkflowRun() : null) : null
+        createFastqcProcessedFile(sequenceFile: rawSequenceFile, workflowArtefact: workflowArtefact)
+
+        when:
+        List<File> files = deletionService.deleteSeqTrack(seqTrack)
+
+        then:
+        files
+        files.every { !it.toPath().startsWith(baseFolder) }
+
+        where:
+        name                           | createArtefact | createRun
+        'no workflow artefact'         | false          | false
+        'no producing run'             | true           | false
+        'producing run without folder' | true           | true
+    }
+
+    void "deleteSeqTrack, when FastQC run also produced artefacts of another seqTrack, does not return its UUID folder"() {
+        given:
+        setupDataForProcessingFiles()
+        SeqTrack seqTrack = createSeqTrackWithFastqFileProducedBy(createWorkflowRunWithWorkFolder())
+        WorkflowRun fastqcRun = createFastqcRunFor(seqTrack)
+        SeqTrack otherSeqTrack = createSeqTrackWithFastqFileProducedBy(createWorkflowRun())
+        createFastqcProcessedFile(sequenceFile: otherSeqTrack.sequenceFiles.first(), workflowArtefact: createWorkflowArtefact(producedBy: fastqcRun))
+        Path fastqcUuidFolder = Files.createDirectories(filestoreService.getWorkFolderPath(fastqcRun))
+
+        when:
+        List<File> files = deletionService.deleteSeqTrack(seqTrack)
+
+        then:
+        !files*.toPath().contains(fastqcUuidFolder)
+    }
+
+    void "deleteSeqTrack, when FASTQ data is not in UUID structure, returns no additional folder (#name)"() {
+        given:
+        setupDataForProcessingFiles()
+        Path baseFolder = tempDir.resolve('baseFolder')
+        WorkflowArtefact workflowArtefact = createArtefact ? createWorkflowArtefact(producedBy: createRun ? createWorkflowRun() : null) : null
+        SeqTrack seqTrack = createSeqTrack(workflowArtefact: workflowArtefact)
+        createFastqFile(seqTrack: seqTrack)
+
+        when:
+        List<File> files = deletionService.deleteSeqTrack(seqTrack)
+
+        then:
+        files
+        files.every { !it.toPath().startsWith(baseFolder) }
+
+        where:
+        name                           | createArtefact | createRun
+        'no workflow artefact'         | false          | false
+        'no producing run'             | true           | false
+        'producing run without folder' | true           | true
+    }
+
+    void "deleteSeqTrack, when producing run also produced artefacts of another seqTrack, does not return its UUID folder (#name)"() {
+        given:
+        setupDataForProcessingFiles()
+        WorkflowRun run = createWorkflowRunWithWorkFolder()
+        SeqTrack seqTrack = createSeqTrackWithFastqFileProducedBy(run)
+        if (otherSeqTrack) {
+            createSeqTrackWithFastqFileProducedBy(run)
+        } else {
+            // metadata-only artefact: no concrete object, so it is unknown which data it belongs to
+            createWorkflowArtefact(producedBy: run)
+        }
+        Path uuidFolder = Files.createDirectories(filestoreService.getWorkFolderPath(run))
+
+        when:
+        List<File> files = deletionService.deleteSeqTrack(seqTrack)
+
+        then:
+        !files*.toPath().contains(uuidFolder)
+
+        where:
+        name                               | otherSeqTrack
+        'artefact of another seqTrack'     | true
+        'artefact without concrete object' | false
+    }
+
+    void "deleteSeqTrack, when UUID work folder does not exist, does not return it"() {
+        given:
+        setupDataForProcessingFiles()
+        WorkflowRun run = createWorkflowRunWithWorkFolder()
+        SeqTrack seqTrack = createSeqTrackWithFastqFileProducedBy(run)
+        Path uuidFolder = filestoreService.getWorkFolderPath(run)
+        Path fastqcUuidFolder = filestoreService.getWorkFolderPath(createFastqcRunFor(seqTrack))
+
+        when:
+        List<File> files = deletionService.deleteSeqTrack(seqTrack)
+
+        then:
+        !Files.exists(uuidFolder)
+        !Files.exists(fastqcUuidFolder)
+        !files*.toPath().contains(uuidFolder)
+        !files*.toPath().contains(fastqcUuidFolder)
+    }
+
+    private WorkflowRun createWorkflowRunWithWorkFolder() {
+        String path = tempDir.resolve('baseFolder')
+        BaseFolder baseFolder = BaseFolder.findByPath(path) ?: createBaseFolder(path: path)
+        return createWorkflowRun(workFolder: createWorkFolder(baseFolder: baseFolder))
+    }
+
+    /** Creates a FastQC run with a UUID work folder that produced one FastQC result per raw sequence file of the seqTrack */
+    private WorkflowRun createFastqcRunFor(SeqTrack seqTrack) {
+        WorkflowRun fastqcRun = createWorkflowRunWithWorkFolder()
+        seqTrack.sequenceFiles.each { RawSequenceFile rawSequenceFile ->
+            createFastqcProcessedFile(sequenceFile: rawSequenceFile, workflowArtefact: createWorkflowArtefact(producedBy: fastqcRun),
+                    workDirectoryName: "fastqc_${fastqcRun.id}")
+        }
+        return fastqcRun
+    }
+
+    private SeqTrack createSeqTrackWithFastqFileProducedBy(WorkflowRun run) {
+        SeqTrack seqTrack = createSeqTrack(workflowArtefact: createWorkflowArtefact(producedBy: run))
+        createFastqFile(seqTrack: seqTrack)
+        return seqTrack
     }
 
     void "testDeleteSeqTrack_seqTrackIsOnlyLinked"() {
