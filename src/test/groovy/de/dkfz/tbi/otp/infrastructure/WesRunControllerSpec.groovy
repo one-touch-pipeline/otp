@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowRunService
 import de.dkfz.tbi.otp.workflowExecution.wes.*
 
 import javax.servlet.http.HttpServletResponse
+import java.nio.charset.StandardCharsets
 import java.nio.file.AccessDeniedException
 import java.nio.file.NoSuchFileException
 
@@ -146,6 +147,34 @@ class WesRunControllerSpec extends Specification implements ControllerUnitTest<W
         model.content == "stderr content"
         model.title != null
         model.nav != null
+    }
+
+    void "showNextflowLog, when called, returns Nextflow log data"() {
+        given:
+        setupData()
+
+        WesRun wesRun = createWesRun()
+        Path logPath = Paths.get("/path/to/.nextflow.log")
+        String content = "Nextflow log content\nSecond line"
+        NavigationCommand navigationCommand = new NavigationCommand()
+
+        controller.wesRunService.getById(wesRun.id) >> wesRun
+        controller.wesRunService.getNextflowLogPath(wesRun) >> logPath
+        controller.wesRunService.getNextflowLogFileContent(wesRun) >>
+                content.getBytes(StandardCharsets.UTF_8)
+
+        WesRunReportCommand command = new WesRunReportCommand(id: wesRun.id)
+
+        when:
+        controller.showNextflowLog(command, navigationCommand)
+
+        then:
+        view == '/wesRun/showLog'
+        model.wesRun == wesRun
+        model.filePath == logPath
+        model.content == content
+        model.title != null
+        model.nav == navigationCommand
     }
 
     void "showWeskitLog, when called, returns WESkit log data"() {

@@ -113,7 +113,7 @@ class WesRunController {
      * @param reportCommand the command object containing the WES run ID
      * @return the content of the Nextflow log file
      */
-    def showNextflowLog(WesRunReportCommand reportCommand) {
+    def showNextflowLog(WesRunReportCommand reportCommand, NavigationCommand navigationCommand) {
         WesRun wesRun = wesRunService.getById(reportCommand.id)
         if (!wesRun) {
             log.error("WesRun with id ${reportCommand.id} not found")
@@ -123,7 +123,13 @@ class WesRunController {
 
         try {
             byte[] content = wesRunService.getNextflowLogFileContent(wesRun)
-            render(file: content, contentType: ContentType.TEXT_PLAIN.mimeType, encoding: Consts.UTF_8)
+            render view: 'showLog', model: [
+                    wesRun  : wesRun,
+                    nav     : navigationCommand,
+                    filePath: wesRunService.getNextflowLogPath(wesRun),
+                    content : new String(content, Consts.UTF_8),
+                    title   : message(code: 'wesRun.nextflowLog'),
+            ]
         } catch (NoSuchFileException e) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "Nextflow log file not found")
         } catch (AccessDeniedException e) {

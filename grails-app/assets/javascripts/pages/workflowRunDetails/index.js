@@ -153,7 +153,8 @@ $(() => {
     text: 'Nextflow Log',
     controller: 'wesRun',
     action: 'showNextflowLog',
-    id: wesRun.id
+    id: wesRun.id,
+    parameters: createLinkParametersForNavigation()
   }) : ''}
                          ${wesRun.hasStdout ? $.otp.createLinkMarkup({
     text: 'stdout.log',
