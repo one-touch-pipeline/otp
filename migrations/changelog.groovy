@@ -257,4 +257,6 @@ databaseChangeLog = {
     include file: 'changelogs/2026/otp-2649.groovy'
 
     include file: 'changelogs/2026/otp-2613-cronJob-for-missing-projectRequest-approval.groovy'
+
+    include file: 'changelogs/2026/otp-3133.groovy'
 }

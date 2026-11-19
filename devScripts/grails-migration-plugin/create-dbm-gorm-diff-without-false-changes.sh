@@ -56,6 +56,7 @@ joinTables="\
 (antibody_target_import_alias)|\
 (bam_import_instance_externally_processed_bam_file)|\
 (cluster_job_cluster_job)|\
+(data_type_version_data_type_key)|\
 (date_field_definition_allowed_date_values)|\
 (decimal_number_field_definition_allowed_decimal_number_values)|\
 (ega_library_selection_library_preparation_kit)|\
@@ -80,6 +81,7 @@ joinTables="\
 (project_request_seq_type)|\
 (project_request_project_request_user)|\
 (project_request_user_project_role)|\
+(register_data_set_project)|\
 (roddy_bam_file_roddy_execution_directory_names)|\
 (snv_calling_instance_roddy_execution_directory_names)|\
 (seq_center_import_dirs_allow_linking)|\
